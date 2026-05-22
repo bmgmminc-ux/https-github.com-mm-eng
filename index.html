@@ -17489,8 +17489,35 @@ CREATE TABLE system_map_activity (
   var KEY = 'mm-vendors';
   function num(v){ return Number(String(v||'0').replace(/[^0-9.-]/g,'')) || 0 }
   function fmt(n){ return (n||0).toLocaleString() }
-  function load(){ try{var a=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(a)?a:[]}catch(e){return[]} }
-  function save(a){ localStorage.setItem(KEY, JSON.stringify(a)) }
+  // 거래처 키 분산 통합 [#137] — mm-vendors / -v2 / -v23 3키 병합 읽기
+  function readKey(k){
+    try { var a=JSON.parse(localStorage.getItem(k)||'[]'); return Array.isArray(a)?a:[] }
+    catch(e){ return [] }
+  }
+  function load(){
+    var merged = [], seen = {};
+    ['mm-vendors','mm-vendors-v2','mm-vendors-v23'].forEach(function(k){
+      readKey(k).forEach(function(v){
+        var nm = (v.name||'').trim();
+        if (!nm || seen[nm]) return;
+        seen[nm] = 1;
+        merged.push({
+          id: v.id || ('V'+Math.random().toString(36).slice(2,10)),
+          name: nm,
+          bizNo: v.bizNo || v.businessNo || v.bizno || v.biz_no || '',
+          ceo: v.ceo || v.representative || v.rep || '',
+          phone: v.phone || v.tel || '',
+          category: v.category || v.type || '외주비',
+          createdAt: v.createdAt || ''
+        });
+      });
+    });
+    return merged;
+  }
+  function save(a){
+    try { localStorage.setItem(KEY, JSON.stringify(a)); }
+    catch(e){ alert('거래처 저장 실패 — 브라우저 저장 공간 확인: ' + e.message); }
+  }
 
   // 매입 데이터에서 거래처별 거래 집계 (있으면)
   function vendorStats(name){
@@ -17593,9 +17620,9 @@ CREATE TABLE system_map_activity (
   function num(v){ return Number(String(v||'0').replace(/[^0-9.-]/g,'')) || 0 }
   function fmt(n){ return (n||0).toLocaleString() }
   function loadAt(){ try{var a=JSON.parse(localStorage.getItem(AT_KEY)||'[]');return Array.isArray(a)?a:[]}catch(e){return[]} }
-  function saveAt(a){ localStorage.setItem(AT_KEY, JSON.stringify(a)) }
+  function saveAt(a){ try{ localStorage.setItem(AT_KEY, JSON.stringify(a)); }catch(e){ alert('출역 저장 실패 — 저장 공간 확인: '+e.message); } }
   function loadWk(){ try{var a=JSON.parse(localStorage.getItem(WK_KEY)||'[]');return Array.isArray(a)?a:[]}catch(e){return[]} }
-  function saveWk(a){ localStorage.setItem(WK_KEY, JSON.stringify(a)) }
+  function saveWk(a){ try{ localStorage.setItem(WK_KEY, JSON.stringify(a)); }catch(e){ alert('일용직 저장 실패 — 저장 공간 확인: '+e.message); } }
   function todayStr(){
     var d = new Date();
     return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
@@ -17756,7 +17783,7 @@ CREATE TABLE system_map_activity (
     try { var a = JSON.parse(localStorage.getItem(KEY)||'[]'); return Array.isArray(a)?a:[] }
     catch(e){ return [] }
   }
-  function save(arr){ localStorage.setItem(KEY, JSON.stringify(arr)) }
+  function save(arr){ try{ localStorage.setItem(KEY, JSON.stringify(arr)); }catch(e){ alert('일용직 저장 실패 — 저장 공간 확인: '+e.message); } }
   function maskJumin(j){
     j = String(j||'').replace(/[^0-9]/g,'');
     if (j.length < 7) return j || '—';
