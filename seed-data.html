@@ -109,8 +109,8 @@
   </div>
 
   <div class="actions">
-    <button class="btn btn-primary" id="btn-start-empty">🚀 빈 상태로 시작 (실제 운영)</button>
-    <button class="btn btn-ghost" id="btn-seed">💾 데모 시드 주입 (3개 현장)</button>
+    <button class="btn btn-primary" id="btn-seed">💾 데모 데이터로 시작 (3개 현장 + 자동 로그인)</button>
+    <button class="btn btn-ghost" id="btn-start-empty">🚀 빈 상태로 시작 (실제 운영)</button>
     <button class="btn btn-ghost" id="btn-open">📂 메인 페이지 열기</button>
     <button class="btn btn-danger" id="btn-clear">🗑 데이터 삭제</button>
   </div>
@@ -118,9 +118,9 @@
   <div class="status" id="status"></div>
 
   <div class="meta">
-    🚀 <b>빈 상태로 시작</b>: 실제 운영용 — localStorage 초기화 후 메인 페이지로 이동. 모든 데이터를 직접 입력.<br>
-    💾 <b>데모 시드 주입</b>: 시연·검토용 — 3개 가상 현장 데이터를 주입.<br>
-    저장 위치: <b>localStorage</b> · 키 <b>mm-dash-v4</b> · 선택 PID <b>sessionStorage / mm-selected-pid</b>
+    💾 <b>데모 데이터로 시작</b>: 시연·검토용 — 3개 가상 현장 주입 + 데모 로그인 → 대시보드 자동 진입.<br>
+    🚀 <b>빈 상태로 시작</b>: 실제 운영용 — localStorage 초기화 후 로그인 화면으로 이동.<br>
+    저장 위치: <b>localStorage</b> · 키 <b>mm-dash-v4</b> / <b>mm-auth</b> · 선택 PID <b>sessionStorage / mm-selected-pid</b>
   </div>
 </div>
 
@@ -245,7 +245,12 @@
     try {
       localStorage.setItem('mm-dash-v4', JSON.stringify(PROJECTS));
       sessionStorage.setItem('mm-selected-pid', PROJECTS[0].id);
-      showStatus('ok', '✓ 3개 데모 현장 주입 완료 — 메인 페이지 열기 버튼을 누르세요');
+      // 데모 로그인 세션 자동 생성 → 로그인 화면 건너뛰고 바로 대시보드 진입
+      localStorage.setItem('mm-auth', JSON.stringify({
+        email: 'ceo@mm-eng.demo', name: '대표 (데모)', role: 'ceo', demoMode: true, supabase: false
+      }));
+      showStatus('ok', '✓ 3개 데모 현장 + 자동 로그인 완료 — 메인 페이지로 이동합니다…');
+      setTimeout(function(){ location.href = 'index.html#overview'; }, 800);
     } catch(e) {
       showStatus('err', '✗ 주입 실패: ' + e.message);
     }
