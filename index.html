@@ -563,7 +563,7 @@ body::before {
 }
 
 /* === Presence stack === */
-.presence-stack { display: flex; align-items: center; padding: 0 var(--s-1); }
+.presence-stack { display: none !important; align-items: center; padding: 0 var(--s-1); } /* [#152] 가짜 데모 사용자 아바타(김/이/박/최/+8) 숨김 — 실제 다중사용자 presence 도입 시 재활성화 */
 .avatar {
   width: 30px; height: 30px; border-radius: 50%;
   display: grid; place-items: center;
@@ -3973,8 +3973,8 @@ table.data-table {
       <div class="mm-login-msg info" id="mm-login-info" style="display:none"></div>
       <label for="mm-login-name" id="mm-login-name-label" style="display:none">이름</label>
       <input type="text" id="mm-login-name" placeholder="홍길동" style="display:none" />
-      <label for="mm-login-email">이메일</label>
-      <input type="email" id="mm-login-email" placeholder="example@mm-eng.co.kr" required />
+      <label for="mm-login-email">아이디</label>
+      <input type="text" id="mm-login-email" placeholder="아이디 입력 (예: bmg)" autocomplete="username" required />
       <label for="mm-login-pw">비밀번호</label>
       <input type="password" id="mm-login-pw" placeholder="••••••••" required />
       <div class="mm-login-error" id="mm-login-error"></div>
@@ -3996,10 +3996,30 @@ table.data-table {
         </div>
       </div>
     </form>
-    <div class="mm-login-footer">
+    <div class="mm-login-footer" id="mm-login-footer">
       <span id="mm-login-mode" style="display:block;font-weight:800;margin-bottom:6px">💻 로컬 데모 모드</span>
       세션 키: <code>localStorage / mm-auth</code>
     </div>
+    <script>
+      // 운영 환경(netlify·도메인)에서는 데모 버튼 + 디버그 정보 숨김 [#147]
+      (function(){
+        var isLocal = location.protocol === 'file:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname === '';
+        if (!isLocal) {
+          var hide = function() {
+            var demo = document.getElementById('mm-login-demo');
+            if (demo) demo.style.display = 'none';
+            var roles = document.getElementById('mm-login-roles');
+            if (roles) { roles.style.display = 'none'; roles.classList.remove('show'); }
+            var footer = document.getElementById('mm-login-footer');
+            if (footer) footer.style.display = 'none';
+            var switchTxt = document.getElementById('mm-login-switch-text');
+            // "계정이 없으신가요?" 회원가입은 운영에서도 유지
+          };
+          if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', hide);
+          else hide();
+        }
+      })();
+    </script>
   </div>
 </div>
 
@@ -4055,7 +4075,7 @@ table.data-table {
       <button class="nav-item" data-nav="alerts">
         <span class="icon-wrap"><svg class="icon"><use href="#i-alerts"/></svg></span>
         <span class="nav-text">경보 관리</span>
-        <span class="badge-count">3</span>
+        <span class="badge-count" id="nav-alert-badge" style="display:none">0</span>
       </button>
       <button class="nav-item" data-nav="activity">
         <span class="icon-wrap"><svg class="icon"><use href="#i-activity"/></svg></span>
@@ -4099,6 +4119,14 @@ table.data-table {
           <div class="mm-user-role" id="mm-user-role">로그인 필요</div>
         </div>
       </div>
+      <button class="nav-item perm-admin" data-nav="tools">
+        <span class="icon-wrap"><svg class="icon"><use href="#i-settings"/></svg></span>
+        <span class="nav-text">운영 도구</span>
+      </button>
+      <button class="nav-item perm-ceo" data-nav="cloud">
+        <span class="icon-wrap"><svg class="icon"><use href="#i-settings"/></svg></span>
+        <span class="nav-text">클라우드 연동</span>
+      </button>
       <button class="nav-item perm-admin" data-nav="settings">
         <span class="icon-wrap"><svg class="icon"><use href="#i-settings"/></svg></span>
         <span class="nav-text">설정</span>
@@ -4158,7 +4186,7 @@ table.data-table {
             <div class="hero-title">㈜명문이엔지<br/>프로젝트 수익성 통합 관리</div>
             <div class="hero-meta">
               <span>📅 2026년 5월 3일 일요일</span>
-              <span><span class="dot-status live"></span>24명 활성 사용자</span>
+              <span><span class="dot-status live"></span>실시간 운영 모드</span>
               <span>⚡ 마지막 동기화: 방금 전</span>
             </div>
           </div>
@@ -5427,7 +5455,7 @@ table.data-table {
           <div style="font-size:14px;color:rgba(255,255,255,0.7);max-width:680px;
                       margin:0 auto 20px;line-height:1.6">
             Stripe + Linear 하이브리드 톤 · 라이트/다크 듀얼 모드<br>
-            24명 동시 사용 · 모바일 반응형 · WCAG AAA 대비 검증
+            다중 사용자 동시 접속 · 모바일 반응형 · WCAG AAA 대비 검증
           </div>
 
           <!-- 핵심 기능 배지 -->
@@ -6315,30 +6343,10 @@ table.data-table {
             <span style="font-size:16px">📌</span>
             <span>직불금 내역 (발주처 직접지급)</span>
           </div>
-          <div class="dpb-amount">66,000,000 원</div>
+          <div class="dpb-amount" id="pjd-direct-total">0 원</div>
         </div>
-        <div class="dpb-items">
-          <div class="dpb-item">
-            <div>
-              <span class="dpb-item-vendor">한국용접공사</span>
-              <span class="dpb-item-desc">— 외주 용접 직불 (인건비)</span>
-            </div>
-            <span class="dpb-item-amt">40,000,000</span>
-          </div>
-          <div class="dpb-item">
-            <div>
-              <span class="dpb-item-vendor">동성덕트</span>
-              <span class="dpb-item-desc">— 자재 직불</span>
-            </div>
-            <span class="dpb-item-amt">22,000,000</span>
-          </div>
-          <div class="dpb-item">
-            <div>
-              <span class="dpb-item-vendor">박○○ (일용직)</span>
-              <span class="dpb-item-desc">— 인건비 직불금 (세액 0)</span>
-            </div>
-            <span class="dpb-item-amt">4,000,000</span>
-          </div>
+        <div class="dpb-items" id="pjd-direct-items">
+          <div style="padding:14px;text-align:center;color:#94a3b8;font-size:12px;font-weight:600">직불금 내역 없음 — 매입 등록 시 직불/인건직불 항목이 자동 집계됩니다</div>
         </div>
         <div class="dpb-note">
           ℹ️ 직불금은 투입원가·이익 계산에 포함되며, 명문이엔지의 지급관리·캐시플로우에서는 제외됩니다. 기성 신청 시 직불금만큼 자동 공제되어 이중공제를 방지합니다.
@@ -7040,6 +7048,170 @@ table.data-table {
 })();
 </script>
 
+<script id="pjpur-script">
+// 매입·지급 + 현금 수지 카드 + 매입 세부내역 표 — 실데이터 하이드레이션 [#149]
+(function() {
+  'use strict';
+  function num(v){ return Number(String(v||'0').replace(/[^0-9.-]/g,'')) || 0; }
+  function fmt(n){ return (n||0).toLocaleString(); }
+  var CAT = {
+    outsource:{name:'외주비',c:'#2563EB'}, material:{name:'자재비',c:'#7C3AED'},
+    product:{name:'상품비',c:'#0E7490'}, indirect:{name:'간접비',c:'#D97706'},
+    cashexp:{name:'비증빙경비',c:'#DC2626'}, labor:{name:'인건비',c:'#059669'},
+    safety:{name:'안전관리비',c:'#F59E0B'}, direct:{name:'직불금',c:'#6B7280'},
+    labordirect:{name:'인건비직불금',c:'#9CA3AF'}
+  };
+  var ORDER = ['outsource','material','product','indirect','cashexp','labor','safety','direct','labordirect'];
+
+  function loadProject() {
+    var ps; try { ps = JSON.parse(localStorage.getItem('mm-dash-v4')||'[]'); } catch(e){ ps=[]; }
+    if (!Array.isArray(ps) || !ps.length) return null;
+    var pid = sessionStorage.getItem('mm-selected-pid');
+    return (pid ? ps.find(function(x){return x.id===pid;}) : ps[0]) || ps[0];
+  }
+  function setT(id, txt){ var e=document.getElementById(id); if(e) e.textContent = txt; }
+
+  function render() {
+    var p = loadProject();
+    var tbody = document.getElementById('pjpur-tbody');
+    if (!tbody) return;
+
+    // 매입 항목 추출 — costItems 우선, 없으면 costs 9분류 actual을 1줄씩
+    var items = [];
+    var directRows = [];
+    if (p && Array.isArray(p.costItems) && p.costItems.length) {
+      items = p.costItems.map(function(it){
+        var supply = num(it.supplyAmt||it.supply||it.amount);
+        var isDirect = (it.type==='direct'||it.type==='labordirect');
+        var tax = (it.type==='labordirect'||it.type==='labor'||it.type==='cashexp') ? 0 : (it.tax!=null?num(it.tax):Math.round(supply*0.1));
+        if (isDirect) directRows.push({ vendor:it.vendor||'—', type:it.type, supply:supply, tax:tax, detail:it.detail||'' });
+        return { type:it.type||'outsource', vendor:it.vendor||'—', detail:it.detail||it.memo||'', supply:supply, tax:tax, paid:num(it.paid), direct:isDirect };
+      });
+    } else if (p && p.costs) {
+      ORDER.forEach(function(k){
+        var actual = num(p.costs[k] && p.costs[k].actual);
+        if (actual <= 0) return;
+        var isDirect = (k==='direct'||k==='labordirect');
+        var tax = (k==='labordirect'||k==='labor'||k==='cashexp') ? 0 : Math.round(actual*0.1);
+        if (isDirect) directRows.push({ vendor:'(집계)', type:k, supply:actual, tax:tax, detail:CAT[k].name });
+        items.push({ type:k, vendor:'(집계)', detail:CAT[k].name+' 합계', supply:actual, tax:tax, paid:isDirect?0:actual, direct:isDirect });
+      });
+    }
+
+    // ── 직불금 내역 배너 ──
+    var dpTotal = directRows.reduce(function(s,r){ return s + r.supply + r.tax; }, 0);
+    var dpTotalEl = document.getElementById('pjd-direct-total');
+    if (dpTotalEl) dpTotalEl.textContent = fmt(dpTotal) + ' 원';
+    var dpItems = document.getElementById('pjd-direct-items');
+    if (dpItems) {
+      if (!directRows.length) {
+        dpItems.innerHTML = '<div style="padding:14px;text-align:center;color:#94a3b8;font-size:12px;font-weight:600">직불금 내역 없음 — 매입 등록 시 직불/인건직불 항목이 자동 집계됩니다</div>';
+      } else {
+        dpItems.innerHTML = directRows.map(function(r){
+          var lbl = r.type==='labordirect' ? '— 인건비 직불금 (세액 0)' : '— 발주처 직불';
+          return '<div class="dpb-item"><div><span class="dpb-item-vendor">'+r.vendor+'</span>'+
+            '<span class="dpb-item-desc">'+(r.detail?('— '+r.detail):lbl)+'</span></div>'+
+            '<span class="dpb-item-amt">'+fmt(r.supply+r.tax)+'</span></div>';
+        }).join('');
+      }
+    }
+
+    // 합계
+    var purTotal=0, paidTotal=0, unpaidTotal=0, taxTotal=0, supplyTotal=0, directTotal=0;
+    items.forEach(function(it){
+      var total = it.supply + it.tax;
+      supplyTotal += it.supply; taxTotal += it.tax;
+      if (it.direct) { directTotal += total; }
+      else { purTotal += total; paidTotal += it.paid; unpaidTotal += Math.max(0, total - it.paid); }
+    });
+
+    // ── 매입 세부내역 표 ──
+    if (!items.length) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:#94a3b8;font-size:14px">등록된 매입 항목이 없습니다 — "➕ 항목 추가" 또는 "📋 붙여넣기"로 시작</td></tr>';
+    } else {
+      var rows = items.map(function(it){
+        var cat = CAT[it.type] || CAT.outsource;
+        var total = it.supply + it.tax;
+        var dot = '<span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:'+cat.c+';margin-right:6px;vertical-align:middle"></span>';
+        if (it.direct) {
+          return '<tr style="background:#f5f3ff"><td>'+dot+cat.name+'</td><td><strong>'+it.vendor+'</strong></td>'+
+            '<td style="color:#7C3AED;font-style:italic">'+(it.detail||'발주처 직접지급')+'</td>'+
+            '<td class="right tnum">'+fmt(it.supply)+'</td>'+
+            '<td class="right tnum" style="color:var(--text-tertiary)">'+fmt(it.tax)+'</td>'+
+            '<td class="right tnum" style="color:#7C3AED"><strong>'+fmt(total)+'</strong></td>'+
+            '<td class="right tnum" style="color:var(--text-muted)">—</td>'+
+            '<td class="right tnum" style="color:var(--text-muted)">— (지급 제외)</td></tr>';
+        }
+        var unpaid = Math.max(0, total - it.paid);
+        return '<tr><td>'+dot+cat.name+'</td><td><strong>'+it.vendor+'</strong></td>'+
+          '<td>'+(it.detail||'')+'</td>'+
+          '<td class="right tnum">'+fmt(it.supply)+'</td>'+
+          '<td class="right tnum" style="color:var(--text-tertiary)">'+fmt(it.tax)+'</td>'+
+          '<td class="right tnum"><strong>'+fmt(total)+'</strong></td>'+
+          '<td class="right tnum" style="color:var(--success-700)"><strong>'+fmt(it.paid)+'</strong></td>'+
+          '<td class="right tnum" style="color:'+(unpaid>0?'var(--danger-700)':'var(--success-700)')+'"><strong>'+fmt(unpaid)+'</strong></td></tr>';
+      }).join('');
+      // 합계행
+      rows += '<tr class="row-subtotal" style="font-weight:900;background:var(--bg-subtle)">'+
+        '<td colspan="3" style="border-top:2px solid var(--border-strong);padding:14px 16px;font-weight:900">합계 ('+items.length+'건)</td>'+
+        '<td class="right tnum" style="border-top:2px solid var(--border-strong)">'+fmt(supplyTotal)+'</td>'+
+        '<td class="right tnum" style="border-top:2px solid var(--border-strong);color:var(--text-tertiary)">'+fmt(taxTotal)+'</td>'+
+        '<td class="right tnum" style="border-top:2px solid var(--border-strong)">'+fmt(supplyTotal+taxTotal)+'</td>'+
+        '<td class="right tnum" style="border-top:2px solid var(--border-strong);color:var(--success-700)">'+fmt(paidTotal)+'</td>'+
+        '<td class="right tnum" style="border-top:2px solid var(--border-strong);color:var(--danger-700)">'+fmt(unpaidTotal)+'</td></tr>';
+      tbody.innerHTML = rows;
+    }
+
+    // ── 매입 세부내역 메타 ──
+    var purVAT = purTotal + directTotal;
+    setT('pjpur-meta', '총 '+items.length+'건 · 매입 '+fmt(purVAT)+' (VAT포함) · 지급 '+fmt(paidTotal)+' · 미지급 '+fmt(unpaidTotal));
+
+    // ── 매입·지급 카드 ──
+    setT('pjpur-total', fmt(purTotal));
+    setT('pjpur-paid', fmt(paidTotal));
+    setT('pjpur-unpaid', fmt(unpaidTotal));
+    var payRate = purTotal>0 ? Math.round(paidTotal/purTotal*100) : 0;
+    setT('pjpur-rate', payRate+'%');
+    var bar = document.getElementById('pjpur-rate-bar'); if (bar) bar.style.width = Math.min(100,payRate)+'%';
+
+    // ── 현금 수지 카드 ──
+    var billApplied=0, billReceived=0;
+    if (p) (p.billingItems||[]).forEach(function(b){ billApplied += num(b.applyTotal); billReceived += num(b.billingAmount); });
+    var uncollected = Math.max(0, billApplied - billReceived);
+    var netCash = billReceived - paidTotal;
+    setT('pjcash-in', fmt(billReceived));
+    setT('pjcash-out', fmt(paidTotal));
+    setT('pjcash-net', (netCash<0?'−':'')+fmt(Math.abs(netCash)));
+    setT('pjcash-uncollect', fmt(uncollected));
+    setT('pjcash-unpaid', fmt(unpaidTotal));
+    setT('pjcash-after', (netCash+uncollected-unpaidTotal<0?'−':'')+fmt(Math.abs(netCash+uncollected-unpaidTotal)));
+    // 순현금 박스 색상 + 배지
+    var box = document.getElementById('pjcash-net-box');
+    var badge = document.getElementById('pjcash-net-badge');
+    var netEl = document.getElementById('pjcash-net');
+    if (box && badge && netEl) {
+      if (netCash < 0) {
+        box.style.background='#FEE2E2'; box.style.borderColor='rgba(220,38,38,0.3)';
+        netEl.style.color='var(--danger-700)'; badge.style.color='var(--danger-700)'; badge.textContent='🔴 주의';
+      } else {
+        box.style.background='var(--success-50)'; box.style.borderColor='rgba(5,150,105,0.3)';
+        netEl.style.color='var(--success-700)'; badge.style.color='var(--success-700)'; badge.textContent='🟢 양호';
+      }
+    }
+  }
+
+  function maybeRender() {
+    var pd = document.querySelector('[data-screen="project-detail"]');
+    if (pd && pd.classList.contains('active')) render();
+  }
+  window.addEventListener('hashchange', function(){ setTimeout(maybeRender, 120); });
+  window.addEventListener('storage', function(e){ if (e.key==='mm-dash-v4') setTimeout(maybeRender, 120); });
+  document.addEventListener('DOMContentLoaded', function(){ setTimeout(maybeRender, 320); });
+  setTimeout(maybeRender, 120);
+  window.pjPurchase = { render: render };
+})();
+</script>
+
 
 
 
@@ -7058,17 +7230,17 @@ table.data-table {
 
           <div class="payment-row-total">
             <span style="font-size:13px;font-weight:700;color:var(--text-secondary)">매입 총계</span>
-            <span style="font-size:16px;font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:-0.02em">400,000,000</span>
+            <span id="pjpur-total" style="font-size:16px;font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:-0.02em">0</span>
           </div>
 
           <div class="payment-grid-2">
             <div class="payment-stat stat-paid">
               <div class="payment-stat-label">지급 완료</div>
-              <div class="payment-stat-value">300,000,000</div>
+              <div class="payment-stat-value" id="pjpur-paid">0</div>
             </div>
             <div class="payment-stat stat-unpaid">
               <div class="payment-stat-label">미지급</div>
-              <div class="payment-stat-value">100,000,000</div>
+              <div class="payment-stat-value" id="pjpur-unpaid">0</div>
             </div>
           </div>
 
@@ -7076,9 +7248,9 @@ table.data-table {
             <span style="font-size:13px;font-weight:800;color:var(--success-700)">지급률</span>
             <div style="display:flex;align-items:center;gap:8px">
               <div style="width:80px;height:10px;border-radius:5px;background:rgba(0,0,0,0.06);overflow:hidden">
-                <div style="height:100%;border-radius:5px;background:var(--success-700);width:75%"></div>
+                <div id="pjpur-rate-bar" style="height:100%;border-radius:5px;background:var(--success-700);width:0%"></div>
               </div>
-              <span style="font-size:15px;font-weight:900;color:var(--success-700);font-variant-numeric:tabular-nums">75%</span>
+              <span id="pjpur-rate" style="font-size:15px;font-weight:900;color:var(--success-700);font-variant-numeric:tabular-nums">0%</span>
             </div>
           </div>
         </div>
@@ -7090,34 +7262,34 @@ table.data-table {
           <div class="payment-grid-2">
             <div class="payment-stat stat-paid">
               <div class="payment-stat-label">📥 수금 (입금액)</div>
-              <div class="payment-stat-value">232,000,000</div>
+              <div class="payment-stat-value" id="pjcash-in">0</div>
             </div>
             <div class="payment-stat stat-unpaid">
               <div class="payment-stat-label">📤 지급 (출금액)</div>
-              <div class="payment-stat-value">300,000,000</div>
+              <div class="payment-stat-value" id="pjcash-out">0</div>
             </div>
           </div>
 
-          <div style="padding:14px 16px;border-radius:8px;background:#FEE2E2;border:2px solid rgba(220,38,38,0.3);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">
+          <div id="pjcash-net-box" style="padding:14px 16px;border-radius:8px;background:#FEE2E2;border:2px solid rgba(220,38,38,0.3);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">
             <div>
               <div style="font-size:12px;color:var(--danger-700);font-weight:700">💰 순 현금</div>
-              <div style="font-size:20px;font-weight:900;color:var(--danger-700);font-variant-numeric:tabular-nums">−68,000,000</div>
+              <div id="pjcash-net" style="font-size:20px;font-weight:900;color:var(--danger-700);font-variant-numeric:tabular-nums">0</div>
             </div>
-            <span style="padding:5px 12px;border-radius:8px;background:#fff;font-size:13px;font-weight:800;color:var(--danger-700)">🔴 위기</span>
+            <span id="pjcash-net-badge" style="padding:5px 12px;border-radius:8px;background:#fff;font-size:13px;font-weight:800;color:var(--danger-700)">—</span>
           </div>
 
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
             <div style="padding:10px 12px;border-radius:6px;background:var(--bg-subtle);border-left:3px solid #0891B2">
               <div style="font-size:10px;color:var(--text-tertiary);font-weight:700">미수금</div>
-              <div style="font-size:14px;font-weight:900;color:#0891B2;font-variant-numeric:tabular-nums">65,000,000</div>
+              <div id="pjcash-uncollect" style="font-size:14px;font-weight:900;color:#0891B2;font-variant-numeric:tabular-nums">0</div>
             </div>
             <div style="padding:10px 12px;border-radius:6px;background:var(--bg-subtle);border-left:3px solid #D97706">
               <div style="font-size:10px;color:var(--text-tertiary);font-weight:700">미지급</div>
-              <div style="font-size:14px;font-weight:900;color:#D97706;font-variant-numeric:tabular-nums">100,000,000</div>
+              <div id="pjcash-unpaid" style="font-size:14px;font-weight:900;color:#D97706;font-variant-numeric:tabular-nums">0</div>
             </div>
             <div style="padding:10px 12px;border-radius:6px;background:var(--success-50);border-left:3px solid var(--success-700)">
               <div style="font-size:10px;color:var(--success-700);font-weight:700">정산 후 예상</div>
-              <div style="font-size:14px;font-weight:900;color:var(--success-700);font-variant-numeric:tabular-nums">−33,000,000</div>
+              <div id="pjcash-after" style="font-size:14px;font-weight:900;color:var(--success-700);font-variant-numeric:tabular-nums">0</div>
             </div>
           </div>
         </div>
@@ -7146,7 +7318,7 @@ table.data-table {
         <div class="card-base-header">
           <div>
             <h3 class="t-h4">📦 매입 세부내역</h3>
-            <div class="section-desc" style="margin-top:2px">총 18건 · 매입 4.0억 (VAT포함) · 지급 3.0억 · 미지급 1.0억</div>
+            <div class="section-desc" id="pjpur-meta" style="margin-top:2px">총 0건 · 매입 0 · 지급 0 · 미지급 0</div>
           </div>
           <div style="display:flex;gap:8px">
             <button class="action-btn" onclick="openModal('global-paste')">📋 붙여넣기</button>
@@ -7179,115 +7351,8 @@ table.data-table {
             <th class="right">지급액</th>
             <th class="right">미지급</th>
           </tr></thead>
-          <tbody>
-            <tr>
-              <td><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#2563EB;margin-right:6px;vertical-align:middle"></span>외주비</td>
-              <td><strong>(주)대성덕트</strong></td>
-              <td>지하 1F~지상 5F 덕트 시공</td>
-              <td class="right tnum">80,000,000</td>
-              <td class="right tnum" style="color:var(--text-tertiary)">8,000,000</td>
-              <td class="right tnum"><strong>88,000,000</strong></td>
-              <td class="right tnum" style="color:var(--success-700)"><strong>88,000,000</strong></td>
-              <td class="right tnum" style="color:var(--success-700)"><strong>0</strong></td>
-            </tr>
-            <tr>
-              <td><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#2563EB;margin-right:6px;vertical-align:middle"></span>외주비</td>
-              <td><strong>한국용접공사</strong></td>
-              <td>배관 용접 시공</td>
-              <td class="right tnum">45,000,000</td>
-              <td class="right tnum" style="color:var(--text-tertiary)">4,500,000</td>
-              <td class="right tnum"><strong>49,500,000</strong></td>
-              <td class="right tnum" style="color:var(--success-700)"><strong>49,500,000</strong></td>
-              <td class="right tnum" style="color:var(--success-700)"><strong>0</strong></td>
-            </tr>
-            <tr>
-              <td><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#7C3AED;margin-right:6px;vertical-align:middle"></span>자재비</td>
-              <td><strong>동성배관</strong></td>
-              <td>배관 자재 (Sch40 외)</td>
-              <td class="right tnum">62,000,000</td>
-              <td class="right tnum" style="color:var(--text-tertiary)">6,200,000</td>
-              <td class="right tnum"><strong>68,200,000</strong></td>
-              <td class="right tnum" style="color:var(--success-700)"><strong>50,000,000</strong></td>
-              <td class="right tnum" style="color:var(--danger-700)"><strong>18,200,000</strong></td>
-            </tr>
-            <tr>
-              <td><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#7C3AED;margin-right:6px;vertical-align:middle"></span>자재비</td>
-              <td><strong>한국밸브</strong></td>
-              <td>밸브 일체 (게이트·체크·버터플라이)</td>
-              <td class="right tnum">38,000,000</td>
-              <td class="right tnum" style="color:var(--text-tertiary)">3,800,000</td>
-              <td class="right tnum"><strong>41,800,000</strong></td>
-              <td class="right tnum" style="color:var(--success-700)"><strong>41,800,000</strong></td>
-              <td class="right tnum" style="color:var(--success-700)"><strong>0</strong></td>
-            </tr>
-            <tr>
-              <td><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#059669;margin-right:6px;vertical-align:middle"></span>인건비</td>
-              <td><strong>김○○ (외 12명)</strong></td>
-              <td>현장 일용직 노무비 (4월분)</td>
-              <td class="right tnum">22,000,000</td>
-              <td class="right tnum" style="color:var(--text-muted)">0</td>
-              <td class="right tnum"><strong>22,000,000</strong></td>
-              <td class="right tnum" style="color:var(--success-700)"><strong>22,000,000</strong></td>
-              <td class="right tnum" style="color:var(--success-700)"><strong>0</strong></td>
-            </tr>
-            <tr>
-              <td><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#D97706;margin-right:6px;vertical-align:middle"></span>간접비</td>
-              <td><strong>대구공조 보험</strong></td>
-              <td>건설공사 보험료</td>
-              <td class="right tnum">8,000,000</td>
-              <td class="right tnum" style="color:var(--text-tertiary)">800,000</td>
-              <td class="right tnum"><strong>8,800,000</strong></td>
-              <td class="right tnum" style="color:var(--success-700)"><strong>8,800,000</strong></td>
-              <td class="right tnum" style="color:var(--success-700)"><strong>0</strong></td>
-            </tr>
-            <tr>
-              <td><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#DC2626;margin-right:6px;vertical-align:middle"></span>비증빙경비</td>
-              <td><strong>현장 식대·교통</strong></td>
-              <td>현장 운영비 (4월분)</td>
-              <td class="right tnum">3,500,000</td>
-              <td class="right tnum" style="color:var(--text-muted)">0</td>
-              <td class="right tnum"><strong>3,500,000</strong></td>
-              <td class="right tnum" style="color:var(--success-700)"><strong>3,500,000</strong></td>
-              <td class="right tnum" style="color:var(--success-700)"><strong>0</strong></td>
-            </tr>
-            <tr>
-              <td><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#F59E0B;margin-right:6px;vertical-align:middle"></span>안전관리비</td>
-              <td><strong>안전제일</strong></td>
-              <td>안전모·안전화·산업안전</td>
-              <td class="right tnum">2,200,000</td>
-              <td class="right tnum" style="color:var(--text-tertiary)">220,000</td>
-              <td class="right tnum"><strong>2,420,000</strong></td>
-              <td class="right tnum" style="color:var(--danger-700)"><strong>0</strong></td>
-              <td class="right tnum" style="color:var(--danger-700)"><strong>2,420,000</strong></td>
-            </tr>
-            <tr style="background:#f5f3ff">
-              <td><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#6B7280;margin-right:6px;vertical-align:middle"></span>직불금</td>
-              <td><strong>한국용접공사</strong></td>
-              <td style="color:#7C3AED;font-style:italic">발주처 직접지급 (외주 직불)</td>
-              <td class="right tnum">40,000,000</td>
-              <td class="right tnum" style="color:var(--text-tertiary)">4,000,000</td>
-              <td class="right tnum" style="color:#7C3AED"><strong>44,000,000</strong></td>
-              <td class="right tnum" style="color:var(--text-muted)">—</td>
-              <td class="right tnum" style="color:var(--text-muted)">— (지급 제외)</td>
-            </tr>
-            <tr style="background:#f5f3ff">
-              <td><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#9CA3AF;margin-right:6px;vertical-align:middle"></span>인건비직불금</td>
-              <td><strong>박○○ (일용직)</strong></td>
-              <td style="color:#7C3AED;font-style:italic">발주처 직접지급 (인건비 직불, 세액 0)</td>
-              <td class="right tnum">4,000,000</td>
-              <td class="right tnum" style="color:var(--text-muted)">0</td>
-              <td class="right tnum" style="color:#7C3AED"><strong>4,000,000</strong></td>
-              <td class="right tnum" style="color:var(--text-muted)">—</td>
-              <td class="right tnum" style="color:var(--text-muted)">— (지급 제외)</td>
-            </tr>
-            <tr class="row-subtotal" style="font-weight:900;background:var(--bg-subtle)">
-              <td colspan="3" style="border-top:2px solid var(--border-strong);padding:14px 16px;font-weight:900">합계 (10건 · 외 8건 더 있음)</td>
-              <td class="right tnum" style="border-top:2px solid var(--border-strong)">304,700,000</td>
-              <td class="right tnum" style="border-top:2px solid var(--border-strong);color:var(--text-tertiary)">27,520,000</td>
-              <td class="right tnum" style="border-top:2px solid var(--border-strong)">332,220,000</td>
-              <td class="right tnum" style="border-top:2px solid var(--border-strong);color:var(--success-700)">263,600,000</td>
-              <td class="right tnum" style="border-top:2px solid var(--border-strong);color:var(--danger-700)">20,620,000</td>
-            </tr>
+          <tbody id="pjpur-tbody">
+            <tr><td colspan="8" style="text-align:center;padding:40px;color:#94a3b8;font-size:14px">등록된 매입 항목이 없습니다 — "➕ 항목 추가" 또는 "📋 붙여넣기"로 시작</td></tr>
           </tbody>
         </table>
 </div>
@@ -7659,8 +7724,8 @@ table.data-table {
               <div style="font-size:11px;color:var(--text-muted)">원가율 90%+ PJ</div>
             </div>
           </div>
-          <div style="font-size:28px;font-weight:900;color:#DC2626" class="t-num">3건</div>
-          <div class="t-xs" style="color:var(--text-secondary);margin-top:4px">손익분기 임박 — 즉시 검토 필요</div>
+          <div style="font-size:28px;font-weight:900;color:#DC2626" class="t-num" data-alert-cnt="cost">0건</div>
+          <div class="t-xs" style="color:var(--text-secondary);margin-top:4px">원가율 90% 초과 프로젝트</div>
         </div>
 
         <div class="card-base" style="border-top:3px solid #7C3AED;padding:14px 16px">
@@ -7671,8 +7736,8 @@ table.data-table {
               <div style="font-size:11px;color:var(--text-muted)">60일+ 미수</div>
             </div>
           </div>
-          <div style="font-size:28px;font-weight:900;color:#7C3AED" class="t-num">4건</div>
-          <div class="t-xs" style="color:var(--text-secondary);margin-top:4px">위험금 2.4억 — 발주처 독촉 필요</div>
+          <div style="font-size:28px;font-weight:900;color:#7C3AED" class="t-num" data-alert-cnt="uncollect">0건</div>
+          <div class="t-xs" style="color:var(--text-secondary);margin-top:4px">미수금 임계 초과</div>
         </div>
 
         <div class="card-base" style="border-top:3px solid var(--primary-500);padding:14px 16px">
@@ -7683,8 +7748,8 @@ table.data-table {
               <div style="font-size:11px;color:var(--text-muted)">30일+ 미지급</div>
             </div>
           </div>
-          <div style="font-size:28px;font-weight:900;color:var(--primary-700)" class="t-num">5건</div>
-          <div class="t-xs" style="color:var(--text-secondary);margin-top:4px">총 9,962만 — 신뢰도 유지 정산</div>
+          <div style="font-size:28px;font-weight:900;color:var(--primary-700)" class="t-num" data-alert-cnt="unpaid">0건</div>
+          <div class="t-xs" style="color:var(--text-secondary);margin-top:4px">매입 미지급 임계 초과</div>
         </div>
 
         <div class="card-base" style="border-top:3px solid #B91C1C;padding:14px 16px;background:linear-gradient(135deg,#FEF2F2 0%,#fff 100%)">
@@ -7695,8 +7760,8 @@ table.data-table {
               <div style="font-size:11px;color:var(--text-muted)">자금 부족 임박</div>
             </div>
           </div>
-          <div style="font-size:28px;font-weight:900;color:#B91C1C" class="t-num">1건</div>
-          <div class="t-xs" style="color:var(--text-secondary);margin-top:4px">7월 자금 부족 예상</div>
+          <div style="font-size:28px;font-weight:900;color:#B91C1C" class="t-num" data-alert-cnt="cash">0건</div>
+          <div class="t-xs" style="color:var(--text-secondary);margin-top:4px">현금흐름 위험</div>
         </div>
 
         <div class="card-base" style="border-top:3px solid #D97706;padding:14px 16px">
@@ -7707,8 +7772,8 @@ table.data-table {
               <div style="font-size:11px;color:var(--text-muted)">기성 신청률 60% 미만</div>
             </div>
           </div>
-          <div style="font-size:28px;font-weight:900;color:#D97706" class="t-num">2건</div>
-          <div class="t-xs" style="color:var(--text-secondary);margin-top:4px">PJ 진행 대비 신청 지연</div>
+          <div style="font-size:28px;font-weight:900;color:#D97706" class="t-num" data-alert-cnt="billing">0건</div>
+          <div class="t-xs" style="color:var(--text-secondary);margin-top:4px">기성 신청 지연</div>
         </div>
       </div>
 
@@ -7716,7 +7781,7 @@ table.data-table {
       <div class="table-wrap mb-7">
         <div class="table-header">
           <div>
-            <div class="table-title">📋 활성 경보 상세 (15건)</div>
+            <div class="table-title">📋 활성 경보 상세 <span id="alerts-detail-count">(0건)</span></div>
             <div class="t-xs">발생일 기준 정렬 · 중요도 순 정렬 가능 · 행 클릭 시 해당 PJ/업체 상세로 이동</div>
           </div>
           <div class="row gap-2 flex-wrap">
@@ -7966,7 +8031,7 @@ table.data-table {
         <div class="hero-grid">
           <div>
             <div class="hero-eyebrow">대시보드 · 시스템 활동 통합 추적</div>
-            <div class="hero-title">활동 로그<br/>24명 사용자 통합 타임라인</div>
+            <div class="hero-title">활동 로그<br/><span id="act-hero-users">0명</span> 사용자 통합 타임라인</div>
             <div class="hero-meta">
               <span>📅 2026년 5월 3일 일요일</span>
               <span><span class="dot-status live"></span>실시간 스트리밍</span>
@@ -7994,7 +8059,7 @@ table.data-table {
       </div>
 
       <!-- KPI -->
-      <div class="section-title">📊 활동 KPI — 24명 사용자</div>
+      <div class="section-title">📊 활동 KPI — <span id="act-kpi-users">0명</span> 사용자</div>
       <div class="section-desc">CEO 1명, 회계 1명, 관리자 2명, 현장·영업 20명. 활동 로그는 Supabase activity_log 테이블에 영구 보존.</div>
 
       <div class="kpi-grid mb-7">
@@ -8107,26 +8172,25 @@ table.data-table {
             <option>사용자 지정...</option>
           </select>
           <select class="form-input" style="width:160px">
-            <option>전체 사용자 (24명)</option>
-            <option>👑 배문기 대표 (CEO)</option>
-            <option>📊 회계 (1명)</option>
-            <option>🛠️ 관리자 (2명)</option>
-            <option>👷 현장·영업 (20명)</option>
+            <option>전체 사용자</option>
+            <option>👑 CEO</option>
+            <option>📊 회계</option>
+            <option>🛠️ 관리자</option>
+            <option>👷 현장·영업</option>
           </select>
         </div>
 
-        <!-- 액션 타입 필터 칩 -->
-        <div class="row gap-2 flex-wrap">
-          <button class="btn btn-primary btn-sm">전체 (1,847)</button>
-          <button class="btn btn-secondary btn-sm" style="background:#DBEAFE;color:#1E40AF;border-color:#93C5FD">📂 프로젝트 (218)</button>
-          <button class="btn btn-secondary btn-sm" style="background:#EDE9FE;color:#5B21B6;border-color:#C4B5FD">🛒 매입 등록 (487)</button>
-          <button class="btn btn-secondary btn-sm" style="background:#FEF3C7;color:#92400E;border-color:#FCD34D">📋 기성 신청 (124)</button>
-          <button class="btn btn-secondary btn-sm" style="background:#D1FAE5;color:#065F46;border-color:#86EFAC">💰 수금 입력 (89)</button>
-          <button class="btn btn-secondary btn-sm" style="background:#FED7AA;color:#9A3412;border-color:#FDBA74">⏰ 출역 등록 (542)</button>
-          <button class="btn btn-secondary btn-sm" style="background:#FEE2E2;color:#991B1B;border-color:#FCA5A5">🛡️ 4대보험 (38)</button>
-          <button class="btn btn-secondary btn-sm" style="background:#E0E7FF;color:#3730A3;border-color:#A5B4FC">🏢 거래처 (96)</button>
-          <button class="btn btn-secondary btn-sm" style="background:#CFFAFE;color:#155E75;border-color:#67E8F9">⚙️ 설정 (24)</button>
-          <button class="btn btn-secondary btn-sm" style="background:#F1F5F9;color:#475569;border-color:#CBD5E1">기타 (229)</button>
+        <!-- 액션 타입 필터 칩 (카운트는 실데이터 집계) -->
+        <div class="row gap-2 flex-wrap" id="act-filter-chips">
+          <button class="btn btn-primary btn-sm" data-act-filter="전체">전체 (0)</button>
+          <button class="btn btn-secondary btn-sm" data-act-filter="프로젝트" style="background:#DBEAFE;color:#1E40AF;border-color:#93C5FD">📂 프로젝트 (0)</button>
+          <button class="btn btn-secondary btn-sm" data-act-filter="매입" style="background:#EDE9FE;color:#5B21B6;border-color:#C4B5FD">🛒 매입 (0)</button>
+          <button class="btn btn-secondary btn-sm" data-act-filter="기성" style="background:#FEF3C7;color:#92400E;border-color:#FCD34D">📋 기성 (0)</button>
+          <button class="btn btn-secondary btn-sm" data-act-filter="수금" style="background:#D1FAE5;color:#065F46;border-color:#86EFAC">💰 수금 (0)</button>
+          <button class="btn btn-secondary btn-sm" data-act-filter="출역" style="background:#FED7AA;color:#9A3412;border-color:#FDBA74">⏰ 출역 (0)</button>
+          <button class="btn btn-secondary btn-sm" data-act-filter="4대보험" style="background:#FEE2E2;color:#991B1B;border-color:#FCA5A5">🛡️ 4대보험 (0)</button>
+          <button class="btn btn-secondary btn-sm" data-act-filter="거래처" style="background:#E0E7FF;color:#3730A3;border-color:#A5B4FC">🏢 거래처 (0)</button>
+          <button class="btn btn-secondary btn-sm" data-act-filter="설정" style="background:#CFFAFE;color:#155E75;border-color:#67E8F9">⚙️ 설정 (0)</button>
         </div>
       </div>
 
@@ -8135,7 +8199,7 @@ table.data-table {
         <div class="card-base">
           <div class="card-base-header">
             <div>
-              <h3 class="t-h4">📜 활동 타임라인 (오늘 42건 중 표시 12건)</h3>
+              <h3 class="t-h4">📜 활동 타임라인 <span id="act-timeline-count">(기록 없음)</span></h3>
               <div class="t-xs">시간순 정렬 (최신 우선) · 클릭 시 해당 PJ/업체/매입 상세로 이동</div>
             </div>
             <div class="row gap-2">
@@ -8156,20 +8220,9 @@ table.data-table {
             </div>
           </div>
 
-          <!-- 페이지네이션 -->
-          <div class="row" style="justify-content:space-between;align-items:center;padding:16px 0 0 0;border-top:1px solid var(--border-default);margin-top:8px">
-            <div class="t-xs">
-              <strong>1-12</strong> / 1,847건 표시 (이번 달)
-            </div>
-            <div class="row gap-2">
-              <button class="btn btn-secondary btn-sm">◀ 이전</button>
-              <button class="btn btn-primary btn-sm">1</button>
-              <button class="btn btn-secondary btn-sm">2</button>
-              <button class="btn btn-secondary btn-sm">3</button>
-              <span style="padding:0 6px;color:var(--text-tertiary)">...</span>
-              <button class="btn btn-secondary btn-sm">154</button>
-              <button class="btn btn-secondary btn-sm">다음 ▶</button>
-            </div>
+          <!-- 페이지네이션 (실데이터 누적 시 표시) -->
+          <div class="row" id="act-pagination" style="justify-content:space-between;align-items:center;padding:16px 0 0 0;border-top:1px solid var(--border-default);margin-top:8px;display:none">
+            <div class="t-xs"><strong id="act-page-info">0건</strong></div>
           </div>
         </div>
 
@@ -9518,12 +9571,12 @@ table.data-table {
 
       <!-- 전체 현장 합산 안내 -->
       <div style="padding:14px 18px;background:linear-gradient(135deg,#EFF6FF 0%,#fff 100%);border-radius:10px;border-left:4px solid var(--primary-500);margin-bottom:24px">
-        <div style="font-size:13px;font-weight:800;color:var(--text-primary);margin-bottom:6px">📊 전체 현장 합산 (4개 PJ)</div>
-        <div class="t-xs" style="line-height:1.7;color:var(--text-secondary)">
-          · 작업자: <strong>23명</strong> (명문-988 9명 + 985 6명 + 981 5명 + 991 3명)<br/>
-          · 누적 출역: <strong>210인-일</strong> · 평균 일당 <strong>223,429원</strong><br/>
-          · 인건비 합계: <strong>46,920,000원</strong> (공급가 기준 / VAT 0)<br/>
-          · 4대보험 가입: <strong>12명 / 23명</strong> (52%) — 8일 미만 11명은 산재법 §2 대상 외
+        <div style="font-size:13px;font-weight:800;color:var(--text-primary);margin-bottom:6px">📊 전체 현장 합산</div>
+        <div class="t-xs" id="at-summary-box" style="line-height:1.7;color:var(--text-secondary)">
+          · 작업자: <strong>0명</strong><br/>
+          · 누적 출역: <strong>0인-일</strong><br/>
+          · 인건비 합계: <strong>0원</strong> (공급가 기준 / VAT 0)<br/>
+          · 4대보험 가입 대상: <strong>0명</strong> (8일 이상 출역)
         </div>
       </div>
 
@@ -9595,47 +9648,9 @@ table.data-table {
             </div>
           </div>
 
-          <div class="col gap-3">
-            <div style="padding:14px 16px;background:#fff;border-radius:10px;border:1px solid #FCD34D">
-              <div class="row" style="justify-content:space-between;align-items:flex-start;margin-bottom:8px">
-                <div>
-                  <div style="font-size:14px;font-weight:800">강○○ <span class="badge" style="background:#FEE2E2;color:#991B1B;font-weight:800">⚠ 미가입 7일</span></div>
-                  <div class="t-xs">5월 출역 11일 · 입사 5월 1일 (4일 전)</div>
-                </div>
-                <div style="text-align:right">
-                  <div style="font-size:13px;font-weight:800;color:#D97706" class="t-num">2,420,000</div>
-                  <div class="t-xs">누적 인건비</div>
-                </div>
-              </div>
-              <button class="btn btn-primary btn-sm" style="width:100%">📋 4대보험 자동 가입 처리</button>
-            </div>
-
-            <div style="padding:14px 16px;background:#fff;border-radius:10px;border:1px solid #FCD34D">
-              <div class="row" style="justify-content:space-between;align-items:flex-start;margin-bottom:8px">
-                <div>
-                  <div style="font-size:14px;font-weight:800">한○○ <span class="badge" style="background:#FEE2E2;color:#991B1B;font-weight:800">⚠ 미가입 5일</span></div>
-                  <div class="t-xs">5월 출역 10일 · 입사 4월 28일</div>
-                </div>
-                <div style="text-align:right">
-                  <div style="font-size:13px;font-weight:800;color:#D97706" class="t-num">2,200,000</div>
-                  <div class="t-xs">누적 인건비</div>
-                </div>
-              </div>
-              <button class="btn btn-primary btn-sm" style="width:100%">📋 4대보험 자동 가입 처리</button>
-            </div>
-
-            <div style="padding:14px 16px;background:#fff;border-radius:10px;border:1px solid #FCD34D">
-              <div class="row" style="justify-content:space-between;align-items:flex-start;margin-bottom:8px">
-                <div>
-                  <div style="font-size:14px;font-weight:800">윤○○ <span class="badge" style="background:#FEF3C7;color:#92400E;font-weight:700">⏳ 대기 4일</span></div>
-                  <div class="t-xs">5월 출역 9일 · 입사 5월 1일</div>
-                </div>
-                <div style="text-align:right">
-                  <div style="font-size:13px;font-weight:800;color:#D97706" class="t-num">1,980,000</div>
-                  <div class="t-xs">누적 인건비</div>
-                </div>
-              </div>
-              <button class="btn btn-primary btn-sm" style="width:100%">📋 4대보험 자동 가입 처리</button>
+          <div class="col gap-3" id="at-insurance-list">
+            <div style="padding:30px 20px;text-align:center;color:#94a3b8;font-size:13px;font-weight:600">
+              <div style="font-size:26px;margin-bottom:6px">🛡️</div>8일 이상 출역자가 없습니다 — 출역 누적 시 자동 검출
             </div>
           </div>
         </div>
@@ -9934,7 +9949,7 @@ table.data-table {
       </div>
 
       <!-- ═════ 보험 요율 안내 카드 (5종) ═════ -->
-      <div class="section-title">📋 4대보험 요율 (2026년 기준)</div>
+      <div class="section-title">📋 4대보험 요율 (<span id="ins-rate-year">2026</span>년 기준)</div>
       <div class="section-desc">국민연금/건강/고용은 노사 반반 부담, 산재는 회사 100% 부담. 장기요양은 건강보험료의 12.95%.</div>
 
       <div class="grid-3col mb-7" style="grid-template-columns:repeat(5,1fr)">
@@ -10424,14 +10439,12 @@ table.data-table {
 
       <!-- 전체 현장 합산 안내 -->
       <div style="padding:14px 18px;background:linear-gradient(135deg,#FAF5FF 0%,#fff 100%);border-radius:10px;border-left:4px solid #7C3AED;margin-bottom:24px">
-        <div style="font-size:13px;font-weight:800;color:var(--text-primary);margin-bottom:6px">📊 전체 현장 4대보험 합산 (4개 PJ · 12명)</div>
-        <div class="t-xs" style="line-height:1.7;color:var(--text-secondary)">
-          · 가입자: <strong>12명</strong> (명문-988 5명 + 985 3명 + 981 3명 + 991 1명)<br/>
-          · 신규 가입처리 대기: <strong>3명</strong> (강○○ / 한○○ / 윤○○ — 산재법 §2 자동 검출 후 가입처리 필요)<br/>
-          · 과세표준 합계: <strong>32,780,000원</strong> · 평균 1인당 2,731,667원<br/>
-          · 회사 부담 합계: <strong>4,295,074원</strong> (CFO 검토 필요)<br/>
-          · 근로자 공제 합계: <strong>3,082,623원</strong> (인건비에서 자동 차감)<br/>
-          · 신고 마감: <strong>2026-06-10</strong> · EDI 신고 자동화로 4개 보험 동시 처리 가능
+        <div style="font-size:13px;font-weight:800;color:var(--text-primary);margin-bottom:6px">📊 전체 현장 4대보험 합산</div>
+        <div class="t-xs" id="ins-summary-box" style="line-height:1.7;color:var(--text-secondary)">
+          · 가입 대상: <strong>0명</strong> (8일 이상 출역)<br/>
+          · 과세표준 합계: <strong>0원</strong><br/>
+          · 회사 부담 합계: <strong>0원</strong><br/>
+          · 근로자 공제 합계: <strong>0원</strong>
         </div>
       </div>
 
@@ -10457,37 +10470,8 @@ table.data-table {
               <th class="right">과세표준</th>
               <th class="right">보험료 합계</th>
             </tr></thead>
-            <tbody>
-              <tr>
-                <td><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#2563EB;margin-right:6px;vertical-align:middle"></span>배관공</td>
-                <td class="right tnum"><strong>5명</strong></td>
-                <td class="right tnum">14,300,000</td>
-                <td class="right tnum"><strong>2,506,000</strong></td>
-              </tr>
-              <tr>
-                <td><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#7C3AED;margin-right:6px;vertical-align:middle"></span>덕트공</td>
-                <td class="right tnum"><strong>3명</strong></td>
-                <td class="right tnum">8,140,000</td>
-                <td class="right tnum"><strong>1,427,000</strong></td>
-              </tr>
-              <tr>
-                <td><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#10B981;margin-right:6px;vertical-align:middle"></span>보온공</td>
-                <td class="right tnum"><strong>2명</strong></td>
-                <td class="right tnum">5,060,000</td>
-                <td class="right tnum"><strong>887,000</strong></td>
-              </tr>
-              <tr>
-                <td><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#F59E0B;margin-right:6px;vertical-align:middle"></span>용접공</td>
-                <td class="right tnum"><strong>2명</strong></td>
-                <td class="right tnum">5,280,000</td>
-                <td class="right tnum"><strong>925,000</strong></td>
-              </tr>
-              <tr class="row-subtotal" style="font-weight:800;background:var(--bg-subtle)">
-                <td style="border-top:2px solid var(--border-strong)">합계</td>
-                <td class="right tnum" style="border-top:2px solid var(--border-strong)">12명</td>
-                <td class="right tnum" style="border-top:2px solid var(--border-strong)">32,780,000</td>
-                <td class="right tnum" style="border-top:2px solid var(--border-strong)">7,377,697</td>
-              </tr>
+            <tbody id="ins-job-tbody">
+              <tr><td colspan="4" style="text-align:center;padding:30px;color:#94a3b8;font-size:13px">직종별 집계 데이터 없음 — 출역 8일 이상 누적 시 자동 산출</td></tr>
             </tbody>
           </table>
 
@@ -12181,8 +12165,8 @@ table.data-table {
         </div>
       </div>
 
-      <!-- ☁️ Supabase 연동 설정 카드 [#121] — CEO 전용 -->
-      <div class="perm-ceo">
+      <!-- ☁️ Supabase 연동 설정 카드 [#121] — CEO 전용 (JS가 cloud 페이지로 이동 [#152]) -->
+      <div class="perm-ceo" id="sb-setup-wrap">
       <style id="sb-setup-style">
         .sb-setup { padding:18px 20px; background:linear-gradient(135deg,#EFF6FF,#DBEAFE);
           border:1px solid #93C5FD; border-radius:14px; margin-bottom:18px; }
@@ -12298,7 +12282,7 @@ table.data-table {
         <nav class="settings-toc">
           <div class="settings-toc-label">설정 카테고리</div>
           <a href="#sec-company" class="active">🏢 회사 정보</a>
-          <a href="#sec-users">👥 사용자 권한 (24)</a>
+          <a href="#sec-users">👥 사용자 권한</a>
           <a href="#sec-auth">🔐 인증·보안</a>
           <a href="#sec-api">⚡ API 연동</a>
           <a href="#sec-notify">📢 알림 채널</a>
@@ -12387,8 +12371,8 @@ table.data-table {
           <div class="card-base mb-4" id="sec-users" style="scroll-margin-top:80px;border-left:4px solid #7C3AED">
             <div class="card-base-header">
               <div>
-                <h3 class="t-h4">👥 사용자 권한 — 24명</h3>
-                <div class="t-xs">4역할 RLS 권한 (CEO·회계·관리자·현장·영업). Supabase Auth 기반 자동 동기화.</div>
+                <h3 class="t-h4">👥 사용자 권한 (역할별)</h3>
+                <div class="t-xs">5역할 RLS 권한 (CEO·회계·관리자·현장·영업). CEO 외 그룹별 인원 제한 없음 — 무제한 추가 가능.</div>
               </div>
               <div class="row gap-2">
                 <button class="btn btn-secondary btn-sm">📊 엑셀</button>
@@ -12404,11 +12388,11 @@ table.data-table {
                 </colgroup>
                 <thead><tr>
                   <th>기능 / 역할</th>
-                  <th class="center">👑 CEO (1)</th>
-                  <th class="center">📊 회계 (1)</th>
-                  <th class="center">🛠️ 관리자 (2)</th>
-                  <th class="center">👷 현장 (15)</th>
-                  <th class="center">💼 영업 (5)</th>
+                  <th class="center">👑 CEO</th>
+                  <th class="center">📊 회계</th>
+                  <th class="center">🛠️ 관리자</th>
+                  <th class="center">👷 현장</th>
+                  <th class="center">💼 영업</th>
                 </tr></thead>
                 <tbody>
                   <tr><td><strong>전체 현황 조회</strong></td>
@@ -12446,7 +12430,7 @@ table.data-table {
 
             <!-- 사용자 리스트 (요약) -->
             <div class="modal-info-banner">
-              💡 <strong>활성 사용자 24명:</strong> 배문기 대표(CEO) · 정회계 · 박관리·이공장(관리자) · 김현장 외 14명(현장팀) · 영업 5명. 전체 명세는 "+사용자 추가" 옆 메뉴에서 관리.
+              💡 <strong>역할별 권한 체계:</strong> 👑 CEO · 📊 회계 · 🛠️ 관리자 · 👷 현장 · 💼 영업. CEO 외 그룹은 인원 제한 없이 "+사용자 추가"로 등록하며, 권한은 역할에 따라 자동 적용됩니다.
             </div>
           </div>
 
@@ -12685,23 +12669,31 @@ table.data-table {
               </select>
             </div>
 
-            <div style="margin:16px 0;padding-top:16px;border-top:1px solid var(--border-subtle)">
-              <div style="font-size:13px;font-weight:800;margin-bottom:10px">📋 4대보험 요율 (2026년 기준)</div>
+            <div style="margin:16px 0;padding-top:16px;border-top:1px solid var(--border-subtle)" id="mm-rate-editor">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+                <div style="font-size:13px;font-weight:800">📋 4대보험 요율 — 연도별 편집</div>
+                <div style="display:flex;align-items:center;gap:6px">
+                  <span class="t-xs">적용 연도</span>
+                  <select id="rate-year" class="form-input" style="width:90px;margin:0;padding:5px 8px;font-size:13px">
+                    <option>2024</option><option>2025</option><option selected>2026</option><option>2027</option><option>2028</option>
+                  </select>
+                </div>
+              </div>
+              <div class="t-xs" style="color:#64748b;margin-bottom:10px">연도 선택 → 값 수정 → 💾 저장. 연도별로 따로 보관됩니다. (각 칸은 % 숫자만 입력: 회사+근로자 합산)</div>
               <div class="form-grid">
-                <label class="form-label">국민연금 (회사+근로자)</label>
-                <input type="text" class="form-input" value="9.0% (각 4.5%)" />
-
-                <label class="form-label">건강보험 (회사+근로자)</label>
-                <input type="text" class="form-input" value="7.09% (각 3.545%)" />
-
-                <label class="form-label">장기요양 (건강보험의)</label>
-                <input type="text" class="form-input" value="12.81%" />
-
-                <label class="form-label">고용보험 (회사+근로자)</label>
-                <input type="text" class="form-input" value="1.8% (회사 0.9 + 근로자 0.9)" />
-
-                <label class="form-label">산재보험 (회사 부담)</label>
-                <input type="text" class="form-input" value="3.7% (건설업)" />
+                <label class="form-label">국민연금 (%)</label>
+                <input type="number" step="0.01" class="form-input" id="rate-pension" value="9.0" />
+                <label class="form-label">건강보험 (%)</label>
+                <input type="number" step="0.01" class="form-input" id="rate-health" value="7.09" />
+                <label class="form-label">장기요양 (건강보험의 %)</label>
+                <input type="number" step="0.01" class="form-input" id="rate-longterm" value="12.95" />
+                <label class="form-label">고용보험 (%)</label>
+                <input type="number" step="0.01" class="form-input" id="rate-employ" value="1.8" />
+                <label class="form-label">산재보험 (회사 부담 %)</label>
+                <input type="number" step="0.01" class="form-input" id="rate-injury" value="3.7" />
+              </div>
+              <div style="text-align:right;margin-top:10px">
+                <button class="btn btn-primary btn-sm" onclick="window.mmRates&&window.mmRates.saveFromForm()">💾 요율 저장</button>
               </div>
             </div>
 
@@ -13234,6 +13226,36 @@ CREATE TABLE system_map_activity (
 
   </main>
 
+  <!-- ════ 운영 도구 (별도 페이지) [#152] ════ -->
+  <main class="main-area" data-screen="tools">
+    <div class="topbar">
+      <div>
+        <div class="breadcrumb">대시보드 / <span>운영 도구</span></div>
+        <div class="topbar-title">운영 도구</div>
+      </div>
+    </div>
+    <div class="preview-section">
+      <div class="section-title">⚙️ 운영 도구</div>
+      <div class="section-desc">백업·복원 · 경보 임계값 · 알림 수신자 · 사용자 관리 · 외부 인프라/API key. (자동 주입)</div>
+      <div id="tools-host"></div>
+    </div>
+  </main>
+
+  <!-- ════ 클라우드 연동 (별도 페이지) [#152] ════ -->
+  <main class="main-area" data-screen="cloud">
+    <div class="topbar">
+      <div>
+        <div class="breadcrumb">대시보드 / <span>클라우드 연동</span></div>
+        <div class="topbar-title">클라우드 연동</div>
+      </div>
+    </div>
+    <div class="preview-section">
+      <div class="section-title">☁️ Supabase 클라우드 연동</div>
+      <div class="section-desc">URL·anon key 입력 → 저장 → 연결 테스트. 여러 기기·직원 데이터 실시간 공유.</div>
+      <div id="cloud-host"></div>
+    </div>
+  </main>
+
 </div>
 
 <!-- 글로벌 액션 시스템 (Toast + 모달 + 자동 onclick 인식) -->
@@ -13547,8 +13569,6 @@ CREATE TABLE system_map_activity (
           <label class="form-label">👤 담당자</label>
           <select class="form-input">
             <option>배문기 대표</option>
-            <option>박관리</option>
-            <option>김현장</option>
           </select>
 
           <label class="form-label">📝 조치 상세 *</label>
@@ -15709,7 +15729,7 @@ CREATE TABLE system_map_activity (
 // 통합 데모 라우터 — Hash 기반 화면 전환
 // ═══════════════════════════════════════════════════════════════
 (function() {
-  const screens = ['overview', 'project-detail', 'alerts', 'activity', 'attendance', 'insurance', 'vendor-status', 'vendors', 'workers', 'settings'];
+  const screens = ['overview', 'project-detail', 'alerts', 'activity', 'attendance', 'insurance', 'vendor-status', 'vendors', 'workers', 'settings', 'tools', 'cloud'];
 
   function showScreen(id) {
     if (!id || !screens.includes(id)) id = 'overview';
@@ -17420,13 +17440,11 @@ CREATE TABLE system_map_activity (
       var infoEl = document.getElementById('mm-login-info');
       if (infoEl) { infoEl.textContent = msg; infoEl.style.display = 'block'; }
     }
-    // Supabase 상태 표시
+    // 인증 모드 표시 (운영 footer는 #147에서 숨김)
     var modeEl = document.getElementById('mm-login-mode');
     if (modeEl) {
-      modeEl.textContent = isSupabaseReady()
-        ? '☁️ Supabase 인증 모드'
-        : '💻 로컬 데모 모드 (설정에서 Supabase 연동 권장)';
-      modeEl.style.color = isSupabaseReady() ? '#059669' : '#D97706';
+      modeEl.textContent = '🔐 관리자 로그인 (아이디 bmg)';
+      modeEl.style.color = '#2563EB';
     }
     setTimeout(function() {
       var em = document.getElementById('mm-login-email');
@@ -17440,27 +17458,44 @@ CREATE TABLE system_map_activity (
     document.body.style.overflow = '';
   }
 
-  // 로그인 — Supabase 있으면 사용, 없으면 로컬 검증
+  // ── 자체 관리자 계정 (Supabase 불필요) [#148] ──
+  // 추가 계정은 ADMIN_ACCOUNTS 배열에 { id, pw, name, role } 추가
+  var ADMIN_ACCOUNTS = [
+    { id:'bmg', pw:'myungmoon2026', name:'배문기 대표', role:'ceo' }
+  ];
+
+  // 로그인 — 1) 자체 관리자 계정 우선 검증, 2) (이메일 형식이면) Supabase, 3) 폴백
   async function doLogin(email, password) {
-    var sb = getSupabaseClient();
-    if (sb) {
-      var res = await sb.auth.signInWithPassword({ email: email, password: password });
-      if (res.error) throw new Error(res.error.message);
-      var u = res.data.user;
-      return {
-        email: u.email,
-        name: (u.user_metadata && u.user_metadata.name) || u.email.split('@')[0],
-        role: (u.app_metadata && u.app_metadata.role) || 'user',
-        id: u.id,
-        demoMode: false,
-        supabase: true
-      };
+    var loginId = (email || '').trim();
+    if (!loginId || !password) throw new Error('아이디와 비밀번호를 입력하세요');
+
+    // 1) 자체 관리자 계정 (아이디 = bmg 등) — Supabase 없이 즉시 로그인
+    var acct = ADMIN_ACCOUNTS.find(function(a){ return a.id === loginId.toLowerCase(); });
+    if (acct) {
+      if (password !== acct.pw) throw new Error('비밀번호가 일치하지 않습니다');
+      return { email: acct.id, name: acct.name, role: acct.role, demoMode: false, supabase: false };
     }
-    // 폴백: 로컬 형식 검증만
-    if (!email || !password) throw new Error('이메일과 비밀번호를 입력하세요');
-    if (password.length < 4) throw new Error('비밀번호는 4자 이상이어야 합니다');
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) throw new Error('올바른 이메일 형식이 아닙니다');
-    return { email: email, name: email.split('@')[0], role: 'admin', demoMode: false, supabase: false };
+
+    // 2) 이메일 형식이면 Supabase Auth 시도 (직원 계정 — 클라우드 공유 시)
+    if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(loginId)) {
+      var sb = getSupabaseClient();
+      if (sb) {
+        var res = await sb.auth.signInWithPassword({ email: loginId, password: password });
+        if (res.error) throw new Error(res.error.message);
+        var u = res.data.user;
+        return {
+          email: u.email,
+          name: (u.user_metadata && u.user_metadata.name) || u.email.split('@')[0],
+          role: (u.app_metadata && u.app_metadata.role) || 'user',
+          id: u.id,
+          demoMode: false,
+          supabase: true
+        };
+      }
+    }
+
+    // 3) 일치하는 계정 없음
+    throw new Error('아이디 또는 비밀번호가 올바르지 않습니다');
   }
 
   async function doLogout() {
@@ -18404,7 +18439,7 @@ CREATE TABLE system_map_activity (
           '<div class="row gap-2" style="align-items:center">' +
             '<div class="avatar a-1" style="width:24px;height:24px;font-size:11px">' + initial + '</div>' +
             '<strong style="font-size:13px">' + (e.user||'게스트') + '</strong>' +
-            '<span class="badge" style="background:' + s.bg + ';color:' + s.fg + ';font-size:10px">' + e.action + '</span>' +
+            '<span class="badge" style="background:' + s.bg + ';color:' + s.fg + ';font-size:10px">' + (e.action||'활동') + '</span>' +
           '</div>' +
           (e.detail ? '<div style="font-size:13px;margin-top:6px">' + e.detail + '</div>' : '') +
         '</div>' +
@@ -19726,7 +19761,7 @@ CREATE TABLE system_map_activity (
 
   // ─── 8. Settings 화면 — 운영 도구 카드 자동 주입 ─── [#141.8]
   function injectSettingsUI() {
-    var screen = document.querySelector('[data-screen="settings"]');
+    var screen = document.querySelector('[data-screen="tools"]');
     if (!screen) return;
     if (document.getElementById('mm-settings-injected')) return;
     var th = (window.mmThresholds && window.mmThresholds.get) ? window.mmThresholds.get() : {profitMin:5,costMax:85,uncollectMax:30};
@@ -19781,7 +19816,8 @@ CREATE TABLE system_map_activity (
   </div>\
 </div>';
 
-    var preview = screen.querySelector('.preview-section');
+    var hostScreen = document.querySelector('[data-screen="tools"]');
+    var preview = (document.getElementById('tools-host')) || (hostScreen && hostScreen.querySelector('.preview-section')) || screen.querySelector('.preview-section');
     if (preview) {
       var wrap = document.createElement('div');
       wrap.innerHTML = html;
@@ -19789,10 +19825,24 @@ CREATE TABLE system_map_activity (
     }
   }
   window.addEventListener('hashchange', function(){
-    if ((location.hash||'').slice(1) === 'settings') setTimeout(injectSettingsUI, 250);
+    if ((location.hash||'').slice(1) === 'tools') setTimeout(injectSettingsUI, 250);
   });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(injectSettingsUI, 700); });
   else setTimeout(injectSettingsUI, 700);
+
+  // [#152] ☁️ Supabase 연동 카드를 settings → cloud 전용 페이지로 물리 이동
+  (function moveCloudCard(){
+    function go(){
+      var src = document.getElementById('sb-setup-wrap');
+      var dst = document.getElementById('cloud-host');
+      if (src && dst && src.parentNode !== dst) dst.appendChild(src);
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(go, 120); });
+    else setTimeout(go, 120);
+    window.addEventListener('hashchange', function(){
+      if ((location.hash||'').slice(1) === 'cloud') setTimeout(go, 60);
+    });
+  })();
 
   // ─── 9. 화면 진입 시 차트·집계 자동 갱신 ─── [#141.9]
   window.addEventListener('hashchange', function(){
@@ -19928,7 +19978,28 @@ CREATE TABLE system_map_activity (
     Array.from(svg.children).forEach(function(ch){
       if (ch.tagName.toLowerCase()==='circle' && ch.getAttribute('stroke') !== '#e5e7eb') ch.remove();
     });
-    if (total === 0) return; // 데이터 없음
+    // [#152] 중앙 금액 + 범례 %는 데이터가 없어도 항상 갱신 — 정적 데모(5,400만 / 35%) 잔존 차단
+    var manTxt = total>0 ? (Math.round(total/10000).toLocaleString()+'만') : '0';
+    svg.querySelectorAll('text').forEach(function(t){
+      var s=(t.textContent||'').trim();
+      if (s.indexOf('총')<0 && /(만|원)$|^[0-9,]+$/.test(s)) t.textContent = manTxt;
+    });
+    var JOBMAP = [['배관','배관공'],['덕트','덕트공'],['보온','보온공'],['용접','용접공'],['TAB','TAB'],['기타','TAB']];
+    donutCard.querySelectorAll('.row').forEach(function(row){
+      var pctSpan = row.querySelector('.t-num'); if(!pctSpan) return;
+      var txt = row.textContent||'';
+      var uniq = {}; JOBMAP.forEach(function(m){ if(txt.indexOf(m[0])>=0) uniq[m[1]]=1; });
+      var keys = Object.keys(uniq);
+      if (keys.length !== 1) return; // 단일 직종 범례 행만 (외곽 wrapper skip)
+      var v = byJob[keys[0]] || 0;
+      pctSpan.textContent = (total>0 ? Math.round(v/total*1000)/10 : 0) + '%';
+    });
+    // 데이터 없는 [data-job-pct] 마커도 동시 갱신
+    donutCard.querySelectorAll('[data-job-pct]').forEach(function(el){
+      var v = byJob[el.getAttribute('data-job-pct')] || 0;
+      el.textContent = (total>0 ? Math.round(v/total*1000)/10 : 0) + '%';
+    });
+    if (total === 0) return; // 데이터 없음 — 슬라이스 비움 + 금액/범례 0 처리 완료
     var rot = -90;
     Object.keys(byJob).sort(function(a,b){return byJob[b]-byJob[a];}).forEach(function(job){
       var ratio = byJob[job] / total;
@@ -19941,13 +20012,6 @@ CREATE TABLE system_map_activity (
       el.setAttribute('transform', 'rotate(' + rot + ' 50 50)');
       svg.appendChild(el);
       rot += ratio * 360;
-    });
-    // 우측 legend 갱신 시도
-    donutCard.querySelectorAll('[data-job-pct]').forEach(function(el){
-      var j = el.getAttribute('data-job-pct');
-      var v = byJob[j] || 0;
-      var pct = total>0 ? Math.round(v/total*100*10)/10 : 0;
-      el.textContent = pct + '%';
     });
   };
 
@@ -20254,7 +20318,7 @@ CREATE TABLE system_map_activity (
 
   // ─── 4. Settings 카드 — API key + 인프라 상태 자동 주입 ───
   function injectInfraCard() {
-    var screen = document.querySelector('[data-screen="settings"]');
+    var screen = document.querySelector('[data-screen="tools"]');
     if (!screen) return;
     if (document.getElementById('mm-infra-injected')) return;
     var keys = window.mmApiKeys.get();
@@ -20295,7 +20359,7 @@ CREATE TABLE system_map_activity (
     <button class="btn btn-primary btn-sm" onclick="window.mmApiKeys.set({resend:document.getElementById(&quot;mm-key-resend&quot;).value.trim(),sms:document.getElementById(&quot;mm-key-sms&quot;).value.trim(),smsProvider:document.getElementById(&quot;mm-key-sms-provider&quot;).value,smsSender:document.getElementById(&quot;mm-key-sms-sender&quot;).value.trim()})">🔑 API key 저장</button>\
   </div>\
 </div>';
-    var preview = screen.querySelector('.preview-section');
+    var preview = document.getElementById('tools-host') || screen.querySelector('.preview-section') || screen;
     if (preview) {
       var wrap = document.createElement('div');
       wrap.innerHTML = html;
@@ -20303,7 +20367,7 @@ CREATE TABLE system_map_activity (
     }
   }
   window.addEventListener('hashchange', function(){
-    if ((location.hash||'').slice(1) === 'settings') setTimeout(injectInfraCard, 350);
+    if ((location.hash||'').slice(1) === 'tools') setTimeout(injectInfraCard, 350);
   });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(injectInfraCard, 1300); });
   else setTimeout(injectInfraCard, 1300);
@@ -20594,6 +20658,689 @@ CREATE TABLE system_map_activity (
       }, 500);
     };
   }
+})();
+</script>
+
+<script id="mm-demo-cleanup">
+// 잔존 정적 데모 데이터 → 실데이터 하이드레이션 / 빈 상태 [#150]
+// 대상: workers·vendor-status·attendance·insurance 화면의 KPI·리더보드·PJ카드·PJ칩
+(function() {
+  'use strict';
+  function num(v){ return Number(String(v||'0').replace(/[^0-9.-]/g,'')) || 0; }
+  function load(k){ try{ var v=JSON.parse(localStorage.getItem(k)||'[]'); return Array.isArray(v)?v:[]; }catch(e){ return []; } }
+  function fmtMan(n){ return Math.round((n||0)/10000).toLocaleString()+'만'; }
+  function fmtEok(n){ return ((n||0)/1e8).toFixed(1)+'억'; }
+  function projects(){ return load('mm-dash-v4'); }
+  function workers(){ return load('mm-workers'); }
+  function attendance(){ return load('mm-attendance'); }
+  function vendors(){ return load('mm-vendors'); }
+
+  // KPI 숫자만 교체 (단위 span 보존)
+  function setKpiNum(el, val){ if(!el) return; el.innerHTML = el.innerHTML.replace(/[\d,\.]+/, (val||0).toLocaleString()); }
+  // 카드 h3 텍스트로 카드 본문(헤더 다음 요소) 찾기
+  function findListByTitle(screen, titleSub){
+    if(!screen) return null;
+    var cards = screen.querySelectorAll('.card-base');
+    for (var i=0;i<cards.length;i++){
+      var h = cards[i].querySelector('h3');
+      if (h && (h.textContent||'').indexOf(titleSub) >= 0){
+        var hd = cards[i].querySelector('.card-base-header');
+        return hd ? hd.nextElementSibling : cards[i].querySelector('.col');
+      }
+    }
+    return null;
+  }
+  function emptyBox(msg){
+    return '<div style="padding:30px 20px;text-align:center;color:#94a3b8;font-size:13px;font-weight:600">'+
+      '<div style="font-size:26px;margin-bottom:6px">📭</div>'+(msg||'데이터 없음')+'</div>';
+  }
+
+  // ─── workers 화면 ───
+  function cleanWorkers(){
+    var screen = document.querySelector('[data-screen="workers"]');
+    if (!screen) return;
+    var wk = workers(), at = attendance();
+    var total = wk.length;
+    var active = wk.filter(function(w){ return num(w.daysWorked)>0; }).length;
+    var ins8 = wk.filter(function(w){ return num(w.daysWorked)>=8; }).length;
+    var wageSum = wk.reduce(function(s,w){ return s+num(w.totalWage); }, 0);
+    var kpis = screen.querySelectorAll('.kpi-card .kpi-value');
+    if (kpis[0]) setKpiNum(kpis[0], total);
+    if (kpis[1]) setKpiNum(kpis[1], active);
+    if (kpis[2]) setKpiNum(kpis[2], ins8);
+    if (kpis[3]) setKpiNum(kpis[3], Math.round(wageSum/10000));
+    // 누적 인건비 TOP5
+    var list = findListByTitle(screen, '누적 인건비 TOP');
+    if (list){
+      var top = wk.slice().sort(function(a,b){ return num(b.totalWage)-num(a.totalWage); }).filter(function(w){return num(w.totalWage)>0;}).slice(0,5);
+      if (!top.length){ list.innerHTML = emptyBox('등록된 인건비 데이터 없음'); }
+      else {
+        var medals=['🥇','🥈','🥉','4','5'];
+        list.innerHTML = top.map(function(w,i){
+          return '<div class="row" style="align-items:center;gap:10px;padding:10px 12px;border-radius:8px;'+(i<3?'background:var(--bg-subtle)':'')+'">'+
+            '<span style="font-size:'+(i<3?'18px':'14px')+';font-weight:900;color:'+(i===0?'#D97706':i<3?'#94a3b8':'var(--text-tertiary)')+';width:24px;text-align:center">'+medals[i]+'</span>'+
+            '<div style="flex:1"><div style="font-size:13px;font-weight:800">'+(w.name||'—')+' <span class="badge" style="background:#DBEAFE;color:#1E40AF;font-size:10px">'+(w.primaryJob||'일반')+'</span></div>'+
+            '<div class="t-xs">출역 '+(w.daysWorked||0)+'일</div></div>'+
+            '<div style="text-align:right"><div style="font-size:14px;font-weight:800;color:var(--primary-700)" class="t-num">'+fmtMan(num(w.totalWage))+'</div></div></div>';
+        }).join('');
+      }
+    }
+  }
+
+  // ─── vendor-status 화면 ───
+  function cleanVendorStatus(){
+    var screen = document.querySelector('[data-screen="vendor-status"]');
+    if (!screen) return;
+    var vd = vendors(), ps = projects();
+    // 거래처별 매입 집계 (costItems)
+    var byVendor = {};
+    ps.forEach(function(p){
+      (p.costItems||[]).forEach(function(it){
+        var v = it.vendor||'—'; var amt = num(it.supplyAmt||it.supply||it.amount);
+        if (!byVendor[v]) byVendor[v]={amt:0,cnt:0};
+        byVendor[v].amt += amt; byVendor[v].cnt++;
+      });
+    });
+    var vendorNames = Object.keys(byVendor);
+    var totalPurchase = vendorNames.reduce(function(s,v){ return s+byVendor[v].amt; }, 0);
+    // 히어로 타이틀
+    var hero = screen.querySelector('.hero-title');
+    if (hero) hero.innerHTML = '업체별 현황<br/>'+vd.length+'개 협력 업체';
+    // KPI
+    var kpis = screen.querySelectorAll('.kpi-card .kpi-value');
+    if (kpis[0]) setKpiNum(kpis[0], vd.length);
+    if (kpis[1]) { kpis[1].innerHTML = kpis[1].innerHTML.replace(/[\d,\.]+억?/, fmtEok(totalPurchase)); }
+    if (kpis[2]) setKpiNum(kpis[2], 0);
+    // 거래액 TOP5
+    var list = findListByTitle(screen, '거래액 TOP');
+    if (list){
+      var top = vendorNames.map(function(v){ return {name:v,amt:byVendor[v].amt,cnt:byVendor[v].cnt}; })
+        .sort(function(a,b){ return b.amt-a.amt; }).slice(0,5);
+      if (!top.length){ list.innerHTML = emptyBox('매입 거래 데이터 없음'); }
+      else {
+        var medals=['🥇','🥈','🥉','4','5'];
+        list.innerHTML = top.map(function(t,i){
+          return '<div class="row" style="align-items:center;gap:10px;padding:10px 12px;border-radius:8px;'+(i<3?'background:var(--bg-subtle)':'')+'">'+
+            '<span style="font-size:'+(i<3?'18px':'14px')+';font-weight:900;width:24px;text-align:center">'+medals[i]+'</span>'+
+            '<div style="flex:1"><div style="font-size:13px;font-weight:800">'+t.name+'</div><div class="t-xs">'+t.cnt+'건 거래</div></div>'+
+            '<div style="text-align:right"><div style="font-size:14px;font-weight:800;color:var(--primary-700)" class="t-num">'+fmtEok(t.amt)+'</div></div></div>';
+        }).join('');
+      }
+    }
+    // 미지급 정산 TOP5
+    var unpaidList = findListByTitle(screen, '미지급 정산');
+    if (unpaidList){ unpaidList.innerHTML = emptyBox('미지급 데이터 없음 (매입 등록 시 자동 집계)'); }
+  }
+
+  // ─── attendance 화면 ───
+  function cleanAttendance(){
+    var screen = document.querySelector('[data-screen="attendance"]');
+    if (!screen) return;
+    var at = attendance(), wk = workers();
+    // 출역 TOP5
+    var list = findListByTitle(screen, '출역 TOP');
+    if (list){
+      var byW = {};
+      at.forEach(function(a){ if(!a.workerId) return; if(!byW[a.workerId]) byW[a.workerId]={name:a.workerName,job:a.jobType,days:0,wage:0}; byW[a.workerId].days++; byW[a.workerId].wage+=num(a.wage); });
+      var top = Object.keys(byW).map(function(k){return byW[k];}).sort(function(a,b){return b.days-a.days;}).slice(0,5);
+      if (!top.length){ list.innerHTML = emptyBox('출역 기록 없음'); }
+      else {
+        var medals=['🥇','🥈','🥉','4','5'];
+        list.innerHTML = top.map(function(t,i){
+          return '<div class="row" style="align-items:center;gap:10px;padding:10px 12px;border-radius:8px;'+(i<3?'background:var(--bg-subtle)':'')+'">'+
+            '<span style="font-size:'+(i<3?'18px':'14px')+';font-weight:900;width:24px;text-align:center">'+medals[i]+'</span>'+
+            '<div style="flex:1"><div style="font-size:13px;font-weight:800">'+(t.name||'—')+' <span class="badge" style="background:#DBEAFE;color:#1E40AF;font-size:10px">'+(t.job||'일반')+'</span></div></div>'+
+            '<div style="text-align:right"><div style="font-size:14px;font-weight:800;color:var(--primary-700)" class="t-num">'+t.days+'일</div></div></div>';
+        }).join('');
+      }
+    }
+    // 통합 명세 표 (정적 20행) → workers 실데이터 또는 빈 상태
+    var unifiedTbody = (document.getElementById('attendance-unified-table')||{}).querySelector ? document.getElementById('attendance-unified-table').querySelector('tbody') : null;
+    if (unifiedTbody){
+      if (!wk.length){
+        unifiedTbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:#94a3b8;font-size:14px">등록된 일용직이 없습니다 — 일용직 마스터에서 먼저 등록하세요</td></tr>';
+      } else {
+        unifiedTbody.innerHTML = wk.map(function(w){
+          var ins = num(w.daysWorked)>=8;
+          return '<tr><td><strong>'+(w.name||'—')+'</strong><div class="t-xs">'+(w.phone||'')+'</div></td>'+
+            '<td><span class="badge" style="background:#DBEAFE;color:#1E40AF">'+(w.primaryJob||'일반')+'</span></td>'+
+            '<td class="t-xs">—</td>'+
+            '<td class="right tnum"><strong>'+(w.daysWorked||0)+'일</strong></td>'+
+            '<td class="right tnum">'+num(w.primaryWage).toLocaleString()+'</td>'+
+            '<td class="right tnum"><strong>'+num(w.totalWage).toLocaleString()+'</strong></td>'+
+            '<td class="center">'+(ins?'<span class="badge badge-success">대상</span>':'<span class="t-xs" style="color:#94a3b8">—</span>')+'</td>'+
+            '<td class="center"><button class="btn btn-secondary btn-sm" onclick="window.location.hash=\'workers\'">관리</button></td></tr>';
+        }).join('');
+      }
+    }
+    // 섹션 타이틀 동적화
+    var st = document.getElementById('attendance-table-section-title');
+    if (st) st.textContent = '전체 작업자 통합 명세 ('+wk.length+'명)';
+    var sd = document.getElementById('attendance-table-section-desc');
+    if (sd) sd.textContent = wk.length ? ('전체 '+wk.length+'명 작업자 통합 표.') : '등록된 작업자가 없습니다.';
+  }
+
+  // ─── insurance 화면: 데모 PJ 카드 숨김 ───
+  function cleanInsurance(){
+    var screen = document.querySelector('[data-screen="insurance"]');
+    if (!screen) return;
+    var ps = projects();
+    var ids = ps.map(function(p){ return String(p.id); });
+    // 데모 PJ 카드 (data-pj 속성, 칩 제외) — 실제 프로젝트 없으면 숨김
+    screen.querySelectorAll('[data-pj]:not(.pj-chip)').forEach(function(card){
+      var pj = card.getAttribute('data-pj');
+      var exists = ids.some(function(id){ return id.indexOf(pj) >= 0; });
+      card.style.display = exists ? '' : 'none';
+    });
+  }
+
+  // ─── PJ 필터 칩 (attendance·insurance) 데모 제거 + 실프로젝트 ───
+  function cleanPjChips(){
+    var ps = projects();
+    // attendance datalist
+    var dl = document.getElementById('at-pj-list');
+    if (dl){
+      dl.innerHTML = ps.map(function(p){ return '<option value="'+(p.id||'')+' '+(p.name||'')+'"></option>'; }).join('');
+    }
+    // insurance pj-chip 버튼: 데모(988/985/981/991) 숨김, 전체만 유지
+    ['attendance','insurance'].forEach(function(sc){
+      var screen = document.querySelector('[data-screen="'+sc+'"]');
+      if (!screen) return;
+      screen.querySelectorAll('.pj-chip[data-pj]').forEach(function(chip){
+        var pj = chip.getAttribute('data-pj');
+        if (pj === 'all') return;
+        var exists = ps.some(function(p){ return String(p.id).indexOf(pj) >= 0; });
+        chip.style.display = exists ? '' : 'none';
+      });
+    });
+  }
+
+  // ─── overview 데모 시각화 3섹션 숨김 (미연동 쇼케이스) [#150b] ───
+  function hideOverviewDemo(){
+    var screen = document.querySelector('[data-screen="overview"]');
+    if (!screen) return;
+    var demoTitles = ['실시간 인터랙티브 시각화','차트 시스템','실시간 경보 & 활동'];
+    var titles = screen.querySelectorAll('.section-title');
+    titles.forEach(function(t){
+      var txt = t.textContent || '';
+      var match = demoTitles.some(function(d){ return txt.indexOf(d) >= 0; });
+      if (!match) return;
+      // 타이틀 + 다음 형제들을 다음 section-title 전까지 숨김
+      t.style.display = 'none';
+      var sib = t.nextElementSibling;
+      while (sib && !sib.classList.contains('section-title')){
+        sib.style.display = 'none';
+        sib = sib.nextElementSibling;
+      }
+    });
+  }
+
+  // ─── attendance 전체 현장 합산 + 4대보험 가입안내 실데이터 [#150c] ───
+  function cleanAttendanceSummary(){
+    var at = attendance(), wk = workers();
+    // 현재 월 (attendance 화면 select 기준, 없으면 전체)
+    var prefix = '';
+    var asc = document.querySelector('[data-screen="attendance"]');
+    if (asc){
+      var sels = asc.querySelectorAll('select'); var y=null,m=null;
+      sels.forEach(function(s){ var fo=(s.options[0]&&s.options[0].textContent||'').trim(); if(/월$/.test(fo)&&!m)m=s; else if(/^\d{4}$/.test(fo)&&!y)y=s; });
+      if (y&&m) prefix = y.value+'-'+String(parseInt((m.value||'').replace('월',''),10)||1).padStart(2,'0');
+    }
+    var monthly = prefix ? at.filter(function(a){return (a.date||'').indexOf(prefix)===0;}) : at;
+    // 합산
+    var byW = {};
+    monthly.forEach(function(a){ if(!a.workerId)return; if(!byW[a.workerId])byW[a.workerId]={name:a.workerName,days:0,wage:0,dates:[]}; byW[a.workerId].days++; byW[a.workerId].wage+=num(a.wage); byW[a.workerId].dates.push(a.date); });
+    var wkIds = Object.keys(byW);
+    var totalDays = monthly.length;
+    var totalWage = monthly.reduce(function(s,a){return s+num(a.wage);},0);
+    var ins8 = wkIds.filter(function(k){return byW[k].days>=8;}).length;
+    var avgWage = totalDays>0 ? Math.round(totalWage/totalDays) : 0;
+    var box = document.getElementById('at-summary-box');
+    if (box){
+      box.innerHTML =
+        '· 작업자: <strong>'+wkIds.length+'명</strong><br/>'+
+        '· 누적 출역: <strong>'+totalDays+'인-일</strong> · 평균 일당 <strong>'+avgWage.toLocaleString()+'원</strong><br/>'+
+        '· 인건비 합계: <strong>'+totalWage.toLocaleString()+'원</strong> (공급가 기준 / VAT 0)<br/>'+
+        '· 4대보험 가입 대상: <strong>'+ins8+'명</strong> (8일 이상 출역)';
+    }
+    // 4대보험 가입안내 카드 (8일 이상)
+    var list = document.getElementById('at-insurance-list');
+    if (list){
+      var enroll = load('mm-insurance-enrollments');
+      var enrolledNames = enroll.map(function(e){return e.workerName;});
+      var targets = wkIds.filter(function(k){return byW[k].days>=8;})
+        .map(function(k){return byW[k];}).sort(function(a,b){return b.days-a.days;});
+      if (!targets.length){
+        list.innerHTML = '<div style="padding:30px 20px;text-align:center;color:#94a3b8;font-size:13px;font-weight:600"><div style="font-size:26px;margin-bottom:6px">🛡️</div>8일 이상 출역자가 없습니다 — 출역 누적 시 자동 검출</div>';
+      } else {
+        list.innerHTML = targets.map(function(t){
+          var done = enrolledNames.indexOf(t.name) >= 0;
+          var badge = done ? '<span class="badge" style="background:#D1FAE5;color:#065F46;font-weight:800">✓ 가입완료</span>'
+            : '<span class="badge" style="background:#FEE2E2;color:#991B1B;font-weight:800">⚠ 미가입 '+t.days+'일</span>';
+          return '<div style="padding:14px 16px;background:#fff;border-radius:10px;border:1px solid #FCD34D">'+
+            '<div class="row" style="justify-content:space-between;align-items:flex-start;margin-bottom:8px">'+
+            '<div><div style="font-size:14px;font-weight:800">'+(t.name||'—')+' '+badge+'</div>'+
+            '<div class="t-xs">출역 '+t.days+'일</div></div>'+
+            '<div style="text-align:right"><div style="font-size:13px;font-weight:800;color:#D97706" class="t-num">'+t.wage.toLocaleString()+'</div><div class="t-xs">누적 인건비</div></div></div>'+
+            (done ? '' : '<button class="btn btn-primary btn-sm" style="width:100%" onclick="window.openModal&&openModal(\'global-insurance-enroll\')">📋 4대보험 자동 가입 처리</button>')+
+            '</div>';
+        }).join('');
+      }
+    }
+  }
+
+  // ─── alerts 화면: hero·KPI·타입분포 실데이터/0 [#150d] ───
+  function cleanAlerts(){
+    var screen = document.querySelector('[data-screen="alerts"]');
+    if (!screen) return;
+    var auto = []; try { var a = JSON.parse(localStorage.getItem('mm-auto-alerts')||'{}'); auto = (a && a.alerts) || []; } catch(e){}
+    var total = auto.length;
+    var high = auto.filter(function(x){ return x.severity==='high'; }).length;
+    var costAlerts = auto.filter(function(x){ return /원가/.test(x.type||''); }).length;
+    var uncollectAlerts = auto.filter(function(x){ return /미수/.test(x.type||''); }).length;
+    var unpaidAlerts = auto.filter(function(x){ return /미지급/.test(x.type||''); }).length;
+    // hero 3 stat
+    var heroStats = screen.querySelectorAll('.hero-stat .hero-stat-value');
+    if (heroStats[0]) setKpiNum(heroStats[0], total);
+    if (heroStats[1]) setKpiNum(heroStats[1], high);
+    if (heroStats[2]) setKpiNum(heroStats[2], 0);
+    // hero title
+    var ht = screen.querySelector('.hero-title');
+    if (ht) ht.innerHTML = '경보 관리<br/>'+total+'건 활성 경보';
+    // KPI 4
+    var kpis = screen.querySelectorAll('.kpi-card .kpi-value');
+    if (kpis[0]) setKpiNum(kpis[0], total);
+    if (kpis[1]) setKpiNum(kpis[1], costAlerts);
+    if (kpis[2]) setKpiNum(kpis[2], uncollectAlerts);
+    if (kpis[3]) setKpiNum(kpis[3], unpaidAlerts);
+    // 경보 타입별 분포 5카드
+    var setCnt = function(key, n){ var el = screen.querySelector('[data-alert-cnt="'+key+'"]'); if(el) el.textContent = (n||0)+'건'; };
+    setCnt('cost', costAlerts);
+    setCnt('uncollect', uncollectAlerts);
+    setCnt('unpaid', unpaidAlerts);
+    setCnt('cash', auto.filter(function(x){return /자금/.test(x.type||'');}).length);
+    setCnt('billing', auto.filter(function(x){return /신청|기성/.test(x.type||'');}).length);
+    // 활성 경보 상세 카운트
+    var dc = document.getElementById('alerts-detail-count');
+    if (dc) dc.textContent = '('+total+'건)';
+    // 사이드바 경보 배지
+    var navB = document.getElementById('nav-alert-badge');
+    if (navB) { if (total>0) { navB.textContent = total; navB.style.display=''; } else navB.style.display='none'; }
+  }
+
+  // ─── activity 화면: hero·KPI·필터칩·TOP5·타임라인헤더 실데이터/0 [#150e] ───
+  function cleanActivity(){
+    var screen = document.querySelector('[data-screen="activity"]');
+    if (!screen) return;
+    var logs = load('mm-activity-log');
+    var today = (new Date()).toISOString().slice(0,10);
+    var getTs = function(l){ return ((l.ts||l.timestamp)||'').slice(0,10); };
+    var todayN = logs.filter(function(l){ return getTs(l)===today; }).length;
+    var users = {}; logs.forEach(function(l){ var u=l.user||l.email; if(u) users[u]=(users[u]||0)+1; });
+    // hero 4 (활동/누적/경보/사용자)
+    var heroStats = screen.querySelectorAll('.hero-stat .hero-stat-value');
+    if (heroStats[0]) setKpiNum(heroStats[0], todayN);
+    if (heroStats[1]) setKpiNum(heroStats[1], logs.length);
+    if (heroStats[2]) setKpiNum(heroStats[2], 0);
+    if (heroStats[3]) setKpiNum(heroStats[3], Object.keys(users).length);
+    var uCount = Object.keys(users).length;
+    var heroU = document.getElementById('act-hero-users'); if (heroU) heroU.textContent = uCount+'명';
+    var kpiU = document.getElementById('act-kpi-users'); if (kpiU) kpiU.textContent = uCount+'명';
+    // 타임라인 헤더 카운트
+    var tc = document.getElementById('act-timeline-count');
+    if (tc) tc.textContent = logs.length ? ('('+logs.length+'건)') : '(기록 없음)';
+    // 페이지네이션
+    var pg = document.getElementById('act-pagination');
+    var pgi = document.getElementById('act-page-info');
+    if (pg) pg.style.display = logs.length ? 'flex' : 'none';
+    if (pgi) pgi.textContent = logs.length+'건';
+    // 필터 칩 카운트
+    var chipMap = { '전체':logs.length };
+    ['프로젝트','매입','기성','수금','출역','4대보험','거래처','설정'].forEach(function(k){
+      chipMap[k] = logs.filter(function(l){ return (l.action||'').indexOf(k)>=0 || (l.detail||'').indexOf(k)>=0; }).length;
+    });
+    screen.querySelectorAll('#act-filter-chips [data-act-filter]').forEach(function(btn){
+      var k = btn.getAttribute('data-act-filter');
+      btn.innerHTML = btn.innerHTML.replace(/\([\d,]+\)/, '('+(chipMap[k]||0)+')');
+    });
+    // 활동 TOP5
+    var list = findListByTitle(screen, '활동 TOP');
+    if (list){
+      var top = Object.keys(users).map(function(u){ return {name:u,cnt:users[u]}; }).sort(function(a,b){return b.cnt-a.cnt;}).slice(0,5);
+      if (!top.length){ list.innerHTML = emptyBox('활동 기록 없음'); }
+      else {
+        var medals=['🥇','🥈','🥉','4','5'];
+        list.innerHTML = top.map(function(t,i){
+          return '<div class="row" style="align-items:center;gap:10px;padding:10px 12px;border-radius:8px;'+(i<3?'background:var(--bg-subtle)':'')+'">'+
+            '<span style="font-size:'+(i<3?'18px':'14px')+';font-weight:900;width:24px;text-align:center">'+medals[i]+'</span>'+
+            '<div class="avatar a-1" style="width:28px;height:28px;font-size:12px">'+(t.name||'?').charAt(0)+'</div>'+
+            '<div style="flex:1"><div style="font-size:13px;font-weight:800">'+t.name+'</div></div>'+
+            '<div style="text-align:right"><div style="font-size:14px;font-weight:800;color:var(--primary-700)" class="t-num">'+t.cnt+'건</div></div></div>';
+        }).join('');
+      }
+    }
+    // 액션 분포 도넛 카드 숨김 (미연동)
+    var donutCard = null;
+    screen.querySelectorAll('.card-base').forEach(function(c){ var h=c.querySelector('h3'); if(h&&(h.textContent||'').indexOf('액션 타입 분포')>=0) donutCard=c; });
+    if (donutCard) donutCard.style.display = logs.length ? '' : 'none';
+  }
+
+  // ─── 히어로 배너 상단 숫자 + 잔여 정적 [#150f] ───
+  function setHeroStats(screenSel, vals){
+    var screen = document.querySelector(screenSel);
+    if (!screen) return;
+    var hero = screen.querySelector('.hero');
+    if (!hero) return;
+    var stats = hero.querySelectorAll('.hero-stat-value');
+    vals.forEach(function(v,i){ if(stats[i]) stats[i].textContent = v; });
+    // hero-stat-trend 중 하드코딩 데모 문구 중화
+    hero.querySelectorAll('.hero-stat-trend').forEach(function(t){
+      var tx=t.textContent||''; if(/전월|평균|YoY|활성률|즉시|양호|▲|▼/.test(tx)) t.textContent='';
+    });
+  }
+  function cleanResidual(){
+    var fmtMan = function(n){ return Math.round((n||0)/10000).toLocaleString()+'만'; };
+    // attendance 월별 집계
+    var at = attendance(), wk = workers();
+    var asc = document.querySelector('[data-screen="attendance"]');
+    var prefix='';
+    if (asc){ var s=asc.querySelectorAll('select'),y=null,m=null; s.forEach(function(x){var fo=(x.options[0]&&x.options[0].textContent||'').trim(); if(/월$/.test(fo)&&!m)m=x; else if(/^\d{4}$/.test(fo)&&!y)y=x;}); if(y&&m)prefix=y.value+'-'+String(parseInt((m.value||'').replace('월',''),10)||1).padStart(2,'0'); }
+    var monthly = prefix ? at.filter(function(a){return (a.date||'').indexOf(prefix)===0;}) : at;
+    var aWk={}; monthly.forEach(function(a){if(a.workerId)aWk[a.workerId]=(aWk[a.workerId]||0)+1;});
+    var aWage = monthly.reduce(function(s,a){return s+num(a.wage);},0);
+    setHeroStats('[data-screen="attendance"]', [monthly.length, fmtMan(aWage), Object.keys(aWk).length+'명']);
+    // attendance 직종 도넛 중앙 + 범례 %
+    var byJob={}; monthly.forEach(function(a){var j=a.jobType||'일반'; byJob[j]=(byJob[j]||0)+num(a.wage);});
+    var jobTotal=0; Object.keys(byJob).forEach(function(k){jobTotal+=byJob[k];});
+    if (asc){
+      asc.querySelectorAll('text').forEach(function(t){ if((t.textContent||'').match(/[\d,]+만/)) t.textContent = fmtMan(jobTotal); });
+      // 직종 도넛 범례 카드 찾아 % 갱신 (없으면 0%)
+      var jobCard=null;
+      asc.querySelectorAll('.card-base').forEach(function(c){ var h=c.querySelector('h3'); if(h&&(h.textContent||'').indexOf('직종별 인건비')>=0) jobCard=c; });
+      if (jobCard){
+        var jobMap={'배관공':0,'덕트공':0,'보온공':0,'용접공':0};
+        jobCard.querySelectorAll('.row').forEach(function(row){
+          var nameEl = row.querySelector('span[style*="flex:1"]');
+          var pctEl = row.querySelector('.t-num');
+          if (!nameEl || !pctEl) return;
+          var nm = (nameEl.textContent||'').trim();
+          var key = nm.indexOf('배관')>=0?'배관공':nm.indexOf('덕트')>=0?'덕트공':nm.indexOf('보온')>=0?'보온공':nm.indexOf('용접')>=0?'용접공':'기타';
+          var v = byJob[key]||0;
+          var pct = jobTotal>0 ? Math.round(v/jobTotal*100) : 0;
+          pctEl.textContent = pct + '%';
+        });
+      }
+    }
+
+    // workers 히어로
+    var totalW = wk.length, activeW = wk.filter(function(w){return num(w.daysWorked)>0;}).length, ins8 = wk.filter(function(w){return num(w.daysWorked)>=8;}).length;
+    setHeroStats('[data-screen="workers"]', [totalW, activeW+'명', fmtMan(wk.reduce(function(s,w){return s+num(w.totalWage);},0))]);
+
+    // insurance 히어로 + 합산 + 직종별 표 (8일+ 출역자 기준)
+    var ins8Ids = Object.keys(aWk).filter(function(k){return aWk[k]>=8;});
+    var base = monthly.filter(function(a){return ins8Ids.indexOf(a.workerId)>=0;}).reduce(function(s,a){return s+num(a.wage);},0);
+    var coShare = Math.round(base*0.115), empShare = Math.round(base*0.085);
+    setHeroStats('[data-screen="insurance"]', [ins8Ids.length+'명', fmtMan(coShare), fmtMan(empShare)]);
+    var insBox = document.getElementById('ins-summary-box');
+    if (insBox){
+      insBox.innerHTML = '· 가입 대상: <strong>'+ins8Ids.length+'명</strong> (8일 이상 출역)<br/>'+
+        '· 과세표준 합계: <strong>'+base.toLocaleString()+'원</strong><br/>'+
+        '· 회사 부담 합계: <strong>'+coShare.toLocaleString()+'원</strong><br/>'+
+        '· 근로자 공제 합계: <strong>'+empShare.toLocaleString()+'원</strong>';
+    }
+    var insTbody = document.getElementById('ins-job-tbody');
+    if (insTbody){
+      // 직종별 (8일+ 대상자)
+      var byJobIns={}; var wkMap={}; wk.forEach(function(w){wkMap[w.id]=w;});
+      ins8Ids.forEach(function(id){ var w=wkMap[id]; var job=(w&&w.primaryJob)||'일반'; var wage=monthly.filter(function(a){return a.workerId===id;}).reduce(function(s,a){return s+num(a.wage);},0); if(!byJobIns[job])byJobIns[job]={n:0,base:0}; byJobIns[job].n++; byJobIns[job].base+=wage; });
+      var jobs=Object.keys(byJobIns);
+      if (!jobs.length){ insTbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:30px;color:#94a3b8;font-size:13px">직종별 집계 데이터 없음 — 출역 8일 이상 누적 시 자동 산출</td></tr>'; }
+      else {
+        var tBase=0,tIns=0,tN=0;
+        var rows=jobs.map(function(j){ var b=byJobIns[j].base; var ins=Math.round(b*0.20); tBase+=b;tIns+=ins;tN+=byJobIns[j].n; return '<tr><td>'+j+'</td><td class="right tnum"><strong>'+byJobIns[j].n+'명</strong></td><td class="right tnum">'+b.toLocaleString()+'</td><td class="right tnum"><strong>'+ins.toLocaleString()+'</strong></td></tr>'; }).join('');
+        rows+='<tr class="row-subtotal" style="font-weight:800;background:var(--bg-subtle)"><td style="border-top:2px solid var(--border-strong)">합계</td><td class="right tnum" style="border-top:2px solid var(--border-strong)">'+tN+'명</td><td class="right tnum" style="border-top:2px solid var(--border-strong)">'+tBase.toLocaleString()+'</td><td class="right tnum" style="border-top:2px solid var(--border-strong)">'+tIns.toLocaleString()+'</td></tr>';
+        insTbody.innerHTML=rows;
+      }
+    }
+
+    // activity: 도넛 카드 항상 숨김(미연동) + 메타 문구 중화
+    var actScreen = document.querySelector('[data-screen="activity"]');
+    if (actScreen){
+      actScreen.querySelectorAll('.card-base').forEach(function(c){ var h=c.querySelector('h3'); if(h&&(h.textContent||'').indexOf('액션 타입 분포')>=0) c.style.display='none'; if(h&&(h.textContent||'').indexOf('시간대별')>=0) c.style.display='none'; });
+      actScreen.querySelectorAll('.kpi-meta span, .hero-stat-trend').forEach(function(t){ var tx=t.textContent||''; if(/일평균|전월|활성률/.test(tx)) t.textContent=''; });
+      // "/24" 잔여 제거 (활성 사용자)
+      actScreen.querySelectorAll('.hero-stat-value, .kpi-value').forEach(function(el){ if(/\/24/.test(el.textContent||'')) el.innerHTML = el.innerHTML.replace(/\/24/,''); });
+    }
+  }
+
+  // ─── 강력 정리: 데이터 없으면 분석 쇼케이스 통째 숨김 + 모든 숫자 0화 [#150g] ───
+  function nukeShowcases(){
+    var ps = projects(), vd = vendors();
+    // 매입 거래 존재 여부
+    var hasPurchase = ps.some(function(p){ return Array.isArray(p.costItems) && p.costItems.length; });
+
+    // 숫자/텍스트 강제 0화 헬퍼
+    function zeroKpis(screen){
+      if (!screen) return;
+      screen.querySelectorAll('.hero-stat-value, .kpi-value').forEach(function(el){
+        var t = el.innerHTML;
+        if (/[\d]/.test(t)) {
+          // 숫자 런 → 0 (단위/접미 span 보존)
+          el.innerHTML = t.replace(/[\d][\d,\.]*/, '0');
+        } else if (/[가-힣]/.test((el.textContent||'')) && !/명|건|개|원|억|만|천|%|일/.test(el.textContent||'')) {
+          // 업체명 등 텍스트 KPI → —
+          el.textContent = '—';
+        }
+      });
+      // 히어로/카드 trend·meta 데모 문구 제거
+      screen.querySelectorAll('.hero-stat-trend, .kpi-meta span, .kpi-trend').forEach(function(t){
+        var tx=t.textContent||''; if(/전월|평균|YoY|활성률|▲|▼|전년|per|중$|이번 달 신규/.test(tx)) t.textContent='';
+      });
+    }
+    // 분석 카드 숨김 헬퍼 (제목 키워드)
+    function hideCards(screen, keywords){
+      if (!screen) return;
+      screen.querySelectorAll('.card-base').forEach(function(c){
+        var h = c.querySelector('h3');
+        if (!h) return;
+        var tx = h.textContent || '';
+        if (keywords.some(function(k){ return tx.indexOf(k) >= 0; })) c.style.display = 'none';
+        else c.style.display = '';
+      });
+      // section-title 키워드 섹션도 숨김 (제목 + 다음 형제)
+      screen.querySelectorAll('.section-title').forEach(function(t){
+        var tx=t.textContent||'';
+        if (keywords.some(function(k){ return tx.indexOf(k)>=0; })){
+          t.style.display='none';
+          var sib=t.nextElementSibling;
+          while(sib && !sib.classList.contains('section-title')){ if(sib.querySelector&&sib.querySelector('h3')){} sib.style.display='none'; sib=sib.nextElementSibling; }
+        }
+      });
+    }
+
+    // ═ vendor-status ═
+    var vs = document.querySelector('[data-screen="vendor-status"]');
+    if (vs){
+      if (!hasPurchase && !vd.length){
+        zeroKpis(vs);
+        var vsHero = vs.querySelector('.hero-title'); if(vsHero) vsHero.innerHTML='업체별 현황<br/>0개 협력 업체';
+        hideCards(vs, ['결제 행태','9분류별 매입','거래액 TOP','미지급 정산','외상 현황']);
+      }
+    }
+    // ═ vendors ═
+    var vn = document.querySelector('[data-screen="vendors"]');
+    if (vn){
+      zeroKpis(vn);
+      var vnHero = vn.querySelector('.hero-title'); if(vnHero) vnHero.innerHTML='거래처 마스터<br/>'+vd.length+'개 협력업체';
+      var vnReg = vn.querySelector('.kpi-card .kpi-value'); if(vnReg) vnReg.innerHTML = vnReg.innerHTML.replace(/[\d][\d,\.]*/, vd.length);
+      if (!hasPurchase) hideCards(vn, ['거래액 TOP','미지급 정산']);
+    }
+    // ═ insurance KPI (data-kpi 미연동분 강제) ═
+    var ins = document.querySelector('[data-screen="insurance"]');
+    if (ins){
+      var at = attendance();
+      var prefix = '';
+      var s=ins.querySelectorAll('select'),y=null,m=null;
+      s.forEach(function(x){var fo=(x.options[0]&&x.options[0].textContent||'').trim(); if(/월$/.test(fo)&&!m)m=x; else if(/^\d{4}$/.test(fo)&&!y)y=x;});
+      if(y&&m)prefix=y.value+'-'+String(parseInt((m.value||'').replace('월',''),10)||1).padStart(2,'0');
+      var monthly = prefix ? at.filter(function(a){return (a.date||'').indexOf(prefix)===0;}) : at;
+      var dm={}; monthly.forEach(function(a){if(a.workerId)dm[a.workerId]=(dm[a.workerId]||0)+1;});
+      var ins8 = Object.keys(dm).filter(function(k){return dm[k]>=8;}).length;
+      var base = monthly.filter(function(a){return dm[a.workerId]>=8;}).reduce(function(s2,a){return s2+num(a.wage);},0);
+      var kpis = ins.querySelectorAll('.kpi-card .kpi-value');
+      if (kpis[0]) kpis[0].innerHTML = kpis[0].innerHTML.replace(/[\d][\d,\.]*/, ins8);
+      if (kpis[1]) kpis[1].innerHTML = kpis[1].innerHTML.replace(/[\d][\d,\.]*/, Math.round(base*0.115/1000).toLocaleString());
+      if (kpis[2]) kpis[2].innerHTML = kpis[2].innerHTML.replace(/[\d][\d,\.]*/, Math.round(base*0.085/1000).toLocaleString());
+      // 전체 가입자 통합 명세 (12명) 제목 + 표
+      ins.querySelectorAll('.section-title, .table-title').forEach(function(t){
+        if ((t.textContent||'').indexOf('전체 가입자')>=0) t.innerHTML = t.innerHTML.replace(/\(\s*\d+\s*명\s*\)/, '('+ins8+'명)').replace(/\d+명/, ins8+'명');
+      });
+      // 가입자 명세 표 비우기 (정적 행 있으면)
+      var insMainTbody = document.getElementById('insurance-tbody');
+      if (insMainTbody && !ins8){ /* mmInsurance가 처리 */ }
+      // KPI meta 제거
+      ins.querySelectorAll('.kpi-meta span, .kpi-trend').forEach(function(t){ var tx=t.textContent||''; if(/전월|▲|▼/.test(tx)) t.textContent=''; });
+    }
+  }
+
+  // ─── 범용 데모 토큰 스위퍼: 가짜 이름/거래처/PJ 든 행·카드 통째 숨김 [#151] ───
+  var FAKE_RE = /[가-힣]○○|대성덕트|동성배관|동성덕트|한국밸브|한국용접공사|신한HVAC|송원제어|경동나비엔|케이에이치엔지니어링|대구공조|김경리|이관리|박현장|최영업|이공장|정회계|김현장|박관리|명문-9\d\d|대구 삼성병원|부산 SK뷰|대전 가스공사|대전 한국가스|인천 인하대|광주 LH|SK에코플랜트|daesung@/;
+  // 실데이터 컨테이너(렌더 대상)는 건드리지 않음 — 비었거나 실데이터라 가짜 토큰 없음
+  var LIVE_IDS = ['at-tbody','at-insurance-list','at-summary-box','pjpur-tbody','pjpur-direct-items','pjbill-tbody','ov-project-tbody','insurance-tbody','ins-job-tbody','ins-summary-box','activity-log-list','vendors-tbody','workers-tbody'];
+  function inLive(el){
+    var n = el;
+    while (n && n !== document.body){
+      if (n.id && LIVE_IDS.indexOf(n.id) >= 0) return true;
+      if (n.tagName === 'DATALIST' || n.tagName === 'OPTION' || n.tagName === 'SCRIPT' || n.tagName === 'INPUT' || n.tagName === 'TEXTAREA') return true;
+      n = n.parentElement;
+    }
+    return false;
+  }
+  function nukeDemoTokens(){
+    var screens = document.querySelectorAll('.main-area[data-screen]');
+    screens.forEach(function(scr){
+      // 표 행
+      scr.querySelectorAll('tbody tr').forEach(function(tr){
+        if (inLive(tr)) return;
+        if (FAKE_RE.test(tr.textContent||'')) tr.style.display = 'none';
+      });
+      // 리더보드/리스트/카드 항목 (.row, .pj-card, .donut-v2-item 등)
+      scr.querySelectorAll('.row, .pj-card, .donut-v2-item, .card-base > div > div').forEach(function(el){
+        if (inLive(el)) return;
+        // 너무 큰 컨테이너(자식에 표 등 포함)는 제외 — 잎 수준만
+        if (el.querySelector('table, .kpi-grid, .hero')) return;
+        if (FAKE_RE.test(el.textContent||'') && (el.textContent||'').length < 200) el.style.display = 'none';
+      });
+    });
+  }
+
+  // ─── workers 직종별 인력 분포 도넛 (배관공 14명 등) [#151] ───
+  function cleanWorkersDonut(){
+    var scr = document.querySelector('[data-screen="workers"]');
+    if (!scr) return;
+    var wk = workers();
+    var byJob = {};
+    wk.forEach(function(w){ var j=w.primaryJob||'일반'; byJob[j]=(byJob[j]||0)+1; });
+    // 도넛 카드(제목 "직종별 인력") 찾아 인원수 갱신
+    scr.querySelectorAll('.card-base').forEach(function(c){
+      var h=c.querySelector('h3'); if(!h||(h.textContent||'').indexOf('직종별 인력')<0) return;
+      // 중앙 "총 인력 N"
+      c.querySelectorAll('text, .t-num, span').forEach(function(el){
+        var t=el.textContent||'';
+        if (/^\d+명$/.test(t.trim())){
+          // 범례 항목: 직종명 매칭
+          var row = el.closest('.row, div');
+          var nm = row ? (row.textContent||'') : '';
+          var key = nm.indexOf('배관')>=0?'배관공':nm.indexOf('덕트')>=0?'덕트공':nm.indexOf('보온')>=0?'보온공':nm.indexOf('용접')>=0?'용접공':nm.indexOf('TAB')>=0?'TAB':null;
+          if (key) el.textContent = (byJob[key]||0)+'명';
+        } else if (/총 인력/.test(t) || /^\d+$/.test(t.trim())) {
+          if (/^\d+$/.test(t.trim())) el.textContent = wk.length;
+        }
+      });
+    });
+  }
+
+  // ─── vendor-status / activity 검색칩 카운트 0화 [#151] ───
+  function cleanSearchChips(){
+    ['vendor-status','activity'].forEach(function(sc){
+      var scr=document.querySelector('[data-screen="'+sc+'"]'); if(!scr) return;
+      scr.querySelectorAll('button').forEach(function(b){
+        var t=b.textContent||'';
+        if (/\(\d[\d,]*개?\)/.test(t) && /외주|자재|상품|간접|비증빙|안전|인건|직불|전체|프로젝트|매입|기성|수금|출역|4대보험|거래처|설정|기타/.test(t)){
+          b.innerHTML = b.innerHTML.replace(/\(\s*\d[\d,]*\s*개?\s*\)/, '(0)');
+        }
+      });
+    });
+  }
+
+  function runAll(){
+    try { cleanWorkers(); } catch(e){}
+    try { cleanVendorStatus(); } catch(e){}
+    try { cleanAttendance(); } catch(e){}
+    try { cleanAttendanceSummary(); } catch(e){}
+    try { cleanInsurance(); } catch(e){}
+    try { cleanPjChips(); } catch(e){}
+    try { hideOverviewDemo(); } catch(e){}
+    try { cleanAlerts(); } catch(e){}
+    try { cleanActivity(); } catch(e){}
+    try { cleanResidual(); } catch(e){}
+    try { nukeShowcases(); } catch(e){}
+    try { cleanWorkersDonut(); } catch(e){}
+    try { cleanSearchChips(); } catch(e){}
+    try { nukeDemoTokens(); } catch(e){}
+  }
+  window.mmDemoCleanup = runAll;
+  var _mo = null, _busy = false;
+  function runSafe(){
+    if (_busy) return;
+    _busy = true;
+    if (_mo) { try { _mo.disconnect(); } catch(e){} }  // 자기 변경 재트리거 방지
+    try { runAll(); } catch(e){}
+    if (_mo) { try { _mo.observe(document.body, { childList:true, subtree:true }); } catch(e){} }
+    _busy = false;
+  }
+  runSafe();
+  [50,200,500,1000,1800].forEach(function(d){ setTimeout(runSafe, d); });
+  window.addEventListener('hashchange', function(){ runSafe(); setTimeout(runSafe, 250); });
+  window.addEventListener('storage', function(e){ if(/mm-/.test(e.key||'')) setTimeout(runSafe, 250); });
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', runSafe);
+  // DOM 변경 감지 — 외부 렌더가 정적 데모를 다시 그려도 재정리 (디바운스)
+  try {
+    var _mt = null;
+    _mo = new MutationObserver(function(){ if(_mt) return; _mt = setTimeout(function(){ _mt=null; runSafe(); }, 200); });
+    _mo.observe(document.body, { childList:true, subtree:true });
+  } catch(e){}
+
+  // ─── 4대보험 요율 연도별 저장/로드 [#151r] ───
+  var RATE_KEY = 'mm-insurance-rates';
+  var DEFAULT_RATES = {
+    '2024': { pension:9.0, health:7.09, longterm:12.81, employ:1.8, injury:3.7 },
+    '2025': { pension:9.0, health:7.09, longterm:12.95, employ:1.8, injury:3.7 },
+    '2026': { pension:9.0, health:7.09, longterm:12.95, employ:1.8, injury:3.7 }
+  };
+  function loadRates(){ try { return Object.assign({}, DEFAULT_RATES, JSON.parse(localStorage.getItem(RATE_KEY)||'{}')); } catch(e){ return Object.assign({}, DEFAULT_RATES); } }
+  window.mmRates = {
+    get: function(year){ var all=loadRates(); return all[String(year)] || all['2026'] || DEFAULT_RATES['2026']; },
+    saveFromForm: function(){
+      var ySel=document.getElementById('rate-year'); if(!ySel) return;
+      var year=ySel.value;
+      var g=function(id){ var e=document.getElementById(id); return e?Number(e.value)||0:0; };
+      var all=loadRates();
+      all[year]={ pension:g('rate-pension'), health:g('rate-health'), longterm:g('rate-longterm'), employ:g('rate-employ'), injury:g('rate-injury') };
+      try { localStorage.setItem(RATE_KEY, JSON.stringify(all)); if(window.globalToast) globalToast('💾 '+year+'년 요율 저장 완료','success'); if(window.mmAudit) window.mmAudit.log('시스템','4대보험 요율 저장 — '+year); }
+      catch(e){ alert('요율 저장 실패 — '+e.message); }
+    },
+    applyToForm: function(){
+      var ySel=document.getElementById('rate-year'); if(!ySel) return;
+      var r=window.mmRates.get(ySel.value);
+      var s=function(id,v){ var e=document.getElementById(id); if(e) e.value=v; };
+      s('rate-pension',r.pension); s('rate-health',r.health); s('rate-longterm',r.longterm); s('rate-employ',r.employ); s('rate-injury',r.injury);
+    }
+  };
+  // 연도 변경 시 폼 자동 로드
+  document.addEventListener('change', function(ev){ if(ev.target && ev.target.id==='rate-year' && window.mmRates) window.mmRates.applyToForm(); });
+  // settings 진입 시 폼 채우기
+  window.addEventListener('hashchange', function(){ if((location.hash||'').slice(1)==='settings') setTimeout(function(){ window.mmRates && window.mmRates.applyToForm(); }, 400); });
 })();
 </script>
 </body>
