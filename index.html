@@ -5222,7 +5222,7 @@ table.data-table {
             <tr><td colspan="8" style="text-align:center;padding:40px;color:#94a3b8;font-weight:600">
               <div style="font-size:28px;margin-bottom:6px">📁</div>
               <div style="font-size:13px;font-weight:800;color:#475569">등록된 프로젝트가 없습니다</div>
-              <div style="font-size:11px;margin-top:3px">우측 상단 + 신규 등록 또는 seed-data.html에서 시작하세요</div>
+              <div style="font-size:11px;margin-top:3px">우측 상단 + 신규 등록 으로 시작하세요</div>
             </td></tr>
           </tbody>
         </table>
@@ -16966,7 +16966,7 @@ CREATE TABLE system_map_activity (
       tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:#94a3b8;font-weight:600">' +
         '<div style="font-size:28px;margin-bottom:6px">📁</div>' +
         '<div style="font-size:13px;font-weight:800;color:#475569">등록된 프로젝트가 없습니다</div>' +
-        '<div style="font-size:11px;margin-top:3px">seed-data.html에서 시작하거나 + 신규 등록</div>' +
+        '<div style="font-size:11px;margin-top:3px">우측 상단 <b>+ 신규 등록</b> 으로 첫 현장을 등록하세요</div>' +
         '</td></tr>';
       return;
     }
@@ -17286,7 +17286,7 @@ CREATE TABLE system_map_activity (
 
     if (!projects.length) {
       input.value = '';
-      input.placeholder = '저장된 프로젝트 없음 — seed-data.html에서 주입하세요';
+      input.placeholder = '저장된 프로젝트 없음 — + 신규 등록으로 추가하세요';
       list.innerHTML = '';
       if (prevLbl) prevLbl.textContent = '—';
       if (nextLbl) nextLbl.textContent = '—';
