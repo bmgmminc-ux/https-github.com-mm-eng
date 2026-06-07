@@ -13653,6 +13653,48 @@ CREATE TABLE system_map_activity (
     </div>
   </div>
 
+  <!-- 글로벌 모달: 신규 프로젝트 등록 [#153] -->
+  <div class="modal-overlay" id="global-project-add">
+    <div class="modal-container modal-sm">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title">📁 신규 프로젝트 등록</div>
+          <div class="modal-subtitle">공사명만 입력해도 등록 가능 · 계약·원가는 상세에서 추가</div>
+        </div>
+        <button class="modal-close" onclick="closeModal('global-project-add')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-grid">
+          <label class="form-label">🏗️ 공사명 *</label>
+          <input type="text" class="form-input" placeholder="예: ○○빌딩 기계설비공사"/>
+
+          <label class="form-label">🏢 발주처</label>
+          <input type="text" class="form-input" placeholder="예: ○○건설"/>
+
+          <label class="form-label">💰 계약금액 (원, 공급가)</label>
+          <input type="text" class="form-input" placeholder="예: 500,000,000"/>
+
+          <label class="form-label">🔖 PJ NO (선택)</label>
+          <input type="text" class="form-input" placeholder="비우면 자동 생성 (MM-xxxxxx)"/>
+
+          <label class="form-label">📅 착공일 (선택)</label>
+          <input type="date" class="form-input"/>
+
+          <label class="form-label">🚦 상태</label>
+          <select class="form-input">
+            <option>진행중</option><option>준공</option><option>보류</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('global-project-add')">취소</button>
+        <button class="btn btn-primary" onclick="window.submitGlobalProjectAdd && window.submitGlobalProjectAdd()">
+          <svg class="icon icon-sm"><use href="#i-check"/></svg> 프로젝트 등록
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- 글로벌 모달: 신규 일용직 등록 -->
   <div class="modal-overlay" id="global-worker-add">
     <div class="modal-container modal-sm">
@@ -15545,7 +15587,7 @@ CREATE TABLE system_map_activity (
           } else if (screenId === 'workers') {
             btn.onclick = function() { openModal('global-worker-add'); };
           } else {
-            btn.onclick = function() { globalToast('📂 신규 등록 페이지 이동', 'info'); };
+            btn.onclick = function() { openModal('global-project-add'); };
           }
           return;
         }
@@ -19062,6 +19104,39 @@ CREATE TABLE system_map_activity (
       close('global-vendor-add');
       clearInputs('global-vendor-add');
     } catch(e) { alert('거래처 저장 실패 — ' + e.message); }
+  };
+
+  // ─── 신규 프로젝트 등록 → mm-dash-v4 저장 ─── [#153]
+  window.submitGlobalProjectAdd = function() {
+    var f = inputs('global-project-add');
+    var name = getVal(f, 0);
+    if (!name) { alert('공사명을 입력하세요'); return; }
+    var client = getVal(f, 1);
+    var contract = num(getVal(f, 2));
+    var pjno = getVal(f, 3);
+    var startDate = getVal(f, 4);
+    var status = getVal(f, 5) || '진행중';
+    try {
+      var arr = JSON.parse(localStorage.getItem('mm-dash-v4') || '[]');
+      if (!Array.isArray(arr)) arr = [];
+      var id = pjno || ('MM-' + String(Date.now()).slice(-6));
+      if (arr.some(function(p){ return (p.id||'') === id; })) { id = id + '-' + String(Date.now()).slice(-3); }
+      arr.unshift({
+        id: id, name: name, client: client,
+        contractOrig: contract, contractAdd: 0,
+        costs: {}, costItems: [], billings: [],
+        status: status, startDate: startDate,
+        createdAt: new Date().toISOString()
+      });
+      localStorage.setItem('mm-dash-v4', JSON.stringify(arr));
+      if (window.ovProjectList && window.ovProjectList.render) window.ovProjectList.render();
+      if (window.ovPeriod && window.ovPeriod.applyPeriod) { try { window.ovPeriod.applyPeriod(sessionStorage.getItem('mm-ov-period')||'all'); } catch(e){} }
+      if (window.mmData && window.mmData.pushTable) { try { window.mmData.pushTable('projects'); } catch(e){} }
+      toast('📁 프로젝트 등록 완료 — ' + name + ' (' + id + ')', 'success');
+      audit('데이터', '프로젝트 등록 — ' + id + ' ' + name);
+      close('global-project-add');
+      clearInputs('global-project-add');
+    } catch(e) { alert('프로젝트 저장 실패 — ' + e.message); }
   };
 
   // ─── 일용직 등록 → mmWorkers 저장 ─── [#139.2]
