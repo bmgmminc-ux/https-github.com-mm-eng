@@ -8537,7 +8537,7 @@ table.data-table {
             <span class="cal-legend-item h-2">4-6명</span>
             <span class="cal-legend-item h-3">7-10명</span>
             <span class="cal-legend-item h-4">11명+</span>
-            <span style="margin-left:auto" class="t-xs">총 247 인-일</span>
+            <span style="margin-left:auto" class="t-xs">총 0 인-일</span>
           </div>
         </div>
 
@@ -8669,7 +8669,7 @@ table.data-table {
 
       <!-- ═════ 현장별 출역 정리 (PJ 그룹화) ═════ -->
       <!-- ═════ 표 영역: 동적 섹션 타이틀 ═════ -->
-      <div class="section-title">👥 <span id="attendance-table-section-title">전체 작업자 통합 명세 (23명)</span></div>
+      <div class="section-title">👥 <span id="attendance-table-section-title">전체 작업자 통합 명세 (0명)</span></div>
       <div class="section-desc"><span id="attendance-table-section-desc">전체 4개 PJ의 23명 작업자 통합 표. 특정 현장만 보려면 상단 PJ 필터 클릭.</span></div>
 
       <!-- ═════ "전체" 모드 통합 표 (23명) ═════ -->
@@ -9465,8 +9465,9 @@ table.data-table {
           var titleEl = ctx.querySelector('#attendance-table-section-title');
           var descEl = ctx.querySelector('#attendance-table-section-desc');
           if (pj === 'all') {
-            if (titleEl) titleEl.textContent = '전체 작업자 통합 명세 (23명)';
-            if (descEl) descEl.textContent = '전체 4개 PJ의 23명 작업자 통합 표. 특정 현장만 보려면 상단 PJ 필터 클릭.';
+            var _wc = 0; try { _wc = (JSON.parse(localStorage.getItem('mm-workers')||'[]')||[]).length; } catch(e){}
+            if (titleEl) titleEl.textContent = '전체 작업자 통합 명세 (' + _wc + '명)';
+            if (descEl) descEl.textContent = '전체 작업자 통합 표. 특정 현장만 보려면 상단 PJ 필터 클릭.';
           } else {
             if (titleEl) titleEl.textContent = pjLabels[pj] + ' 작업자 명세';
             if (descEl) descEl.textContent = '해당 현장의 작업자만 표시. 전체 보기는 상단 "📊 전체" 클릭.';
@@ -9741,7 +9742,7 @@ table.data-table {
 
       <!-- ═════ 현장별 4대보험 가입자 명세 (PJ 그룹화) ═════ -->
       <!-- ═════ 표 영역: 동적 섹션 타이틀 ═════ -->
-      <div class="section-title">📋 <span id="insurance-table-section-title">전체 가입자 통합 명세 (12명)</span></div>
+      <div class="section-title">📋 <span id="insurance-table-section-title">전체 가입자 통합 명세 (0명)</span></div>
       <div class="section-desc"><span id="insurance-table-section-desc">전체 4개 PJ의 12명 가입자 통합 표. 특정 현장만 보려면 상단 PJ 필터 클릭.</span></div>
 
       <!-- ═════ "전체" 모드 통합 표 (12명) ═════ -->
@@ -10327,8 +10328,9 @@ table.data-table {
           var titleEl = ctx.querySelector('#insurance-table-section-title');
           var descEl = ctx.querySelector('#insurance-table-section-desc');
           if (pj === 'all') {
-            if (titleEl) titleEl.textContent = '전체 가입자 통합 명세 (12명)';
-            if (descEl) descEl.textContent = '전체 4개 PJ의 12명 가입자 통합 표. 특정 현장만 보려면 상단 PJ 필터 클릭.';
+            var _ic = 0; try { _ic = (JSON.parse(localStorage.getItem('mm-workers')||'[]')||[]).length; } catch(e){}
+            if (titleEl) titleEl.textContent = '전체 가입자 통합 명세 (' + _ic + '명)';
+            if (descEl) descEl.textContent = '전체 가입자 통합 표. 특정 현장만 보려면 상단 PJ 필터 클릭.';
           } else {
             if (titleEl) titleEl.textContent = pjLabels[pj] + ' 4대보험 가입자 명세';
             if (descEl) descEl.textContent = '해당 현장의 가입자만 표시. 전체 보기는 상단 "📊 전체" 클릭.';
@@ -16057,7 +16059,7 @@ CREATE TABLE system_map_activity (
   }
   window.mmBilling = {
     addRound: function() {
-      billing.items.push({ round: billing.items.length+1, applyDate:'', applySupply:0, applyTax:0, applyTotal:0, receiveDate:'', advanceAmount:0, billingAmount:0 });
+      billing.items.push({ round: billing.items.length+1, applyDate:new Date().toISOString().slice(0,10), applySupply:0, applyTax:0, applyTotal:0, receiveDate:'', advanceAmount:0, billingAmount:0 });
       billingRender();
     },
     remove: function(i) { if (confirm('이 회차를 삭제하시겠습니까?')) { billing.items.splice(i,1); billingRender() } },
@@ -16808,7 +16810,7 @@ CREATE TABLE system_map_activity (
     // 기성: 회차의 applyDate가 기간 안에 들어가는 것만
     var billSupply = 0, billTotal = 0, billReceived = 0;
     (p.billingItems || []).forEach(function(b) {
-      var bd = new Date(b.applyDate);
+      var bd = new Date(b.applyDate || p.startDate || p.createdAt || '2024-01-01'); // [#153] 신청일 미입력 시 프로젝트 일자로 fallback → 전체현황 KPI 누락 방지
       if (isNaN(bd) || bd < start || bd > end) return;
       billSupply   += num(b.applySupply);
       billTotal    += num(b.applyTotal);
