@@ -1,0 +1,11 @@
+# ㈜명문이엔지 v3 — Netlify 배포 설정
+# 정적 사이트(루트의 index.html) + 서버리스 함수(netlify/functions)
+[build]
+  publish = "."
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+[build.environment]
+  NODE_VERSION = "18"

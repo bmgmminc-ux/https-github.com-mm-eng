@@ -19184,15 +19184,15 @@ CREATE TABLE system_map_activity (
     </div>\
     <div style="padding:14px;border:1px solid #e5e7eb;border-radius:10px;background:#fafbfc">\
       <div style="font-size:14px;font-weight:900;margin-bottom:8px">📧 Resend (이메일)</div>\
-      <input id="mm-key-resend" type="password" placeholder="re_xxxxxxxxxx" value="'+(keys.resend||'')+'" style="width:100%;padding:6px;border:1px solid #cbd5e1;border-radius:5px;font-size:12px;margin-bottom:6px"/>\
-      <div style="font-size:11px;color:'+(keys.resend?'#059669':'#94a3b8')+'">'+(keys.resend?'✅ key 저장됨':'⚠️ 미발급 — resend.com 가입 후 입력')+'</div>\
+      <div style="font-size:11px;color:#64748b;margin-bottom:6px;line-height:1.5">키는 <b>서버(Netlify 환경변수)</b>에서 관리합니다 — 브라우저에 저장하지 않습니다.<br>Netlify → Environment variables → <code>RESEND_API_KEY</code> (도메인 인증 후 <code>RESEND_FROM</code>)</div>\
+      <input id="mm-test-email" placeholder="테스트 수신 이메일" style="width:100%;padding:6px;border:1px solid #cbd5e1;border-radius:5px;font-size:12px;margin-bottom:6px"/>\
+      <button class="btn btn-primary btn-sm" style="width:100%" onclick="window.mmSendEmail((document.getElementById(&quot;mm-test-email&quot;).value||&quot;&quot;).trim(),&quot;[명문이엔지] 테스트 메일&quot;,&quot;Resend 연동 테스트 메일입니다. 도착하면 정상 작동입니다.&quot;)">📧 테스트 발송</button>\
     </div>\
     <div style="padding:14px;border:1px solid #e5e7eb;border-radius:10px;background:#fafbfc">\
       <div style="font-size:14px;font-weight:900;margin-bottom:8px">📱 SMS</div>\
-      <select id="mm-key-sms-provider" style="width:100%;padding:6px;border:1px solid #cbd5e1;border-radius:5px;font-size:12px;margin-bottom:6px"><option value="">— 미사용 —</option><option value="aligo"'+(keys.smsProvider==='aligo'?' selected':'')+'>알리고</option><option value="nhn"'+(keys.smsProvider==='nhn'?' selected':'')+'>NHN Cloud</option></select>\
-      <input id="mm-key-sms" type="password" placeholder="SMS API key" value="'+(keys.sms||'')+'" style="width:100%;padding:6px;border:1px solid #cbd5e1;border-radius:5px;font-size:12px;margin-bottom:4px"/>\
-      <input id="mm-key-sms-sender" placeholder="발신번호 (053-000-0000)" value="'+(keys.smsSender||'')+'" style="width:100%;padding:6px;border:1px solid #cbd5e1;border-radius:5px;font-size:12px;margin-bottom:6px"/>\
-      <div style="font-size:11px;color:'+(keys.sms?'#059669':'#94a3b8')+'">'+(keys.sms?'✅ key 저장됨':'⚠️ 미발급')+'</div>\
+      <div style="font-size:11px;color:#64748b;margin-bottom:6px;line-height:1.5">키/발신번호는 <b>서버(Netlify 환경변수)</b>에서 관리합니다.<br>Netlify → Environment variables → <code>ALIGO_API_KEY</code> · <code>ALIGO_USER_ID</code> · <code>ALIGO_SENDER</code></div>\
+      <input id="mm-test-phone" placeholder="테스트 수신 번호 (010-0000-0000)" style="width:100%;padding:6px;border:1px solid #cbd5e1;border-radius:5px;font-size:12px;margin-bottom:6px"/>\
+      <button class="btn btn-primary btn-sm" style="width:100%" onclick="window.mmSendSms((document.getElementById(&quot;mm-test-phone&quot;).value||&quot;&quot;).trim(),&quot;[명문이엔지] 테스트 SMS입니다&quot;)">📱 테스트 발송</button>\
     </div>\
     <div style="padding:14px;border:1px solid #e5e7eb;border-radius:10px;background:#fafbfc">\
       <div style="font-size:14px;font-weight:900;margin-bottom:8px">💾 저장소 상태</div>\
@@ -19203,7 +19203,7 @@ CREATE TABLE system_map_activity (
     </div>\
   </div>\
   <div style="padding:0 16px 16px;text-align:right">\
-    <button class="btn btn-primary btn-sm" onclick="window.mmApiKeys.set({resend:document.getElementById(&quot;mm-key-resend&quot;).value.trim(),sms:document.getElementById(&quot;mm-key-sms&quot;).value.trim(),smsProvider:document.getElementById(&quot;mm-key-sms-provider&quot;).value,smsSender:document.getElementById(&quot;mm-key-sms-sender&quot;).value.trim()})">🔑 API key 저장</button>\
+    <span style="font-size:11px;color:#94a3b8">발송 키는 Netlify 환경변수에서 관리됩니다 (브라우저 비저장)</span>\
   </div>\
 </div>';
     var preview = document.getElementById('tools-host') || screen.querySelector('.preview-section') || screen;
@@ -19382,19 +19382,18 @@ CREATE TABLE system_map_activity (
   // 2. 이메일 발송 (Resend) [#145.2]
   // ═══════════════════════════════════════════════════════════════
   window.mmSendEmail = async function(to, subject, html) {
-    var keys = (window.mmApiKeys && window.mmApiKeys.get) ? window.mmApiKeys.get() : {};
-    if (!keys.resend) { toast('Resend API key 미설정', 'warn'); return false; }
+    // 서버 프록시(Netlify Function) 경유 — 키는 서버 환경변수에만 존재, 브라우저 비노출
+    // Resend 는 브라우저 직접 호출(CORS) 차단이므로 서버 함수가 대신 호출
     try {
-      // 도메인 인증 전: onboarding@resend.dev fallback
-      var from = 'onboarding@resend.dev';
-      var r = await fetch('https://api.resend.com/emails', {
+      var r = await fetch('/.netlify/functions/send-email', {
         method:'POST',
-        headers:{ 'Authorization':'Bearer '+keys.resend, 'Content-Type':'application/json' },
-        body: JSON.stringify({ from:from, to:[to], subject:subject, html:html })
+        headers:{ 'Content-Type':'application/json' },
+        body: JSON.stringify({ to:to, subject:subject, html:html })
       });
-      var data = await r.json();
-      if (r.ok) { toast('📧 메일 발송 완료 — '+to, 'success'); audit('알림', '메일 — '+to); return true; }
-      toast('📧 메일 실패: '+(data.message||r.statusText), 'warn'); return false;
+      var data = {};
+      try { data = await r.json(); } catch(e) {}
+      if (r.ok && data.id) { toast('📧 메일 발송 완료 — '+to, 'success'); audit('알림', '메일 — '+to); return true; }
+      toast('📧 메일 실패: '+(data.message||data.error||r.statusText), 'warn'); return false;
     } catch(e) { toast('📧 메일 오류 — '+e.message, 'warn'); return false; }
   };
 
@@ -19402,24 +19401,18 @@ CREATE TABLE system_map_activity (
   // 3. SMS 발송 (알리고 우선) [#145.3]
   // ═══════════════════════════════════════════════════════════════
   window.mmSendSms = async function(to, message) {
-    var keys = (window.mmApiKeys && window.mmApiKeys.get) ? window.mmApiKeys.get() : {};
-    if (!keys.sms || !keys.smsSender) { toast('SMS key/발신번호 미설정', 'warn'); return false; }
+    // 서버 프록시(Netlify Function) 경유 — 알리고 키/발신번호는 서버 환경변수에만 존재, 브라우저 비노출
+    // 알리고는 브라우저 직접 호출(CORS) 차단이므로 서버 함수가 대신 호출
     try {
-      if (keys.smsProvider === 'aligo') {
-        var body = new FormData();
-        body.append('key', keys.sms);
-        body.append('user_id', keys.smsUserId || '');
-        body.append('sender', keys.smsSender);
-        body.append('receiver', to);
-        body.append('msg', message);
-        body.append('msg_type', message.length > 90 ? 'LMS' : 'SMS');
-        var r = await fetch('https://apis.aligo.in/send/', { method:'POST', body:body });
-        var data = await r.json();
-        if (data.result_code === '1') { toast('📱 SMS 발송 — '+to, 'success'); audit('알림', 'SMS — '+to); return true; }
-        toast('📱 SMS 실패: '+(data.message||'unknown'), 'warn'); return false;
-      } else {
-        toast('📱 NHN Cloud SMS 미구현 — 알리고 권장', 'warn'); return false;
-      }
+      var r = await fetch('/.netlify/functions/send-sms', {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json' },
+        body: JSON.stringify({ to:to, message:message })
+      });
+      var data = {};
+      try { data = await r.json(); } catch(e) {}
+      if (r.ok && data.result_code === '1') { toast('📱 SMS 발송 — '+to, 'success'); audit('알림', 'SMS — '+to); return true; }
+      toast('📱 SMS 실패: '+(data.message||data.error||r.statusText), 'warn'); return false;
     } catch(e) { toast('📱 SMS 오류 — '+e.message, 'warn'); return false; }
   };
 
