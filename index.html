@@ -5311,7 +5311,7 @@ table.data-table {
         <div class="pjnav-search">
           <span class="ico">🔍</span>
           <input id="pjnav-input" list="pjnav-list" autocomplete="off"
-                 placeholder="프로젝트 검색 — 명문-988, 대구 삼성병원..." />
+                 placeholder="프로젝트 검색 — 현장명 또는 번호" />
           <datalist id="pjnav-list"></datalist>
           <span class="chevron">▼</span>
           <kbd>⌘P</kbd>
@@ -7236,7 +7236,7 @@ table.data-table {
     <div class="modal-body" style="padding:20px 28px">
       <div style="padding:16px;border-radius:10px;background:#FEE2E2;border:1px solid #DC2626;margin-bottom:16px;font-size:14px;color:#991B1B">⚠️ <strong id="mm-del-pid">—</strong>을(를) 영구 삭제합니다. 이 작업은 되돌릴 수 없습니다.<br>매입·기성·기타수익 모든 데이터가 함께 삭제됩니다.</div>
       <label style="display:block;font-size:13px;margin-bottom:6px">확인: 프로젝트 ID를 정확히 입력하세요</label>
-      <input id="mm-del-confirm" type="text" placeholder="예: 명문-988" style="padding:12px 16px;border-radius:8px;border:1px solid #DC2626;font-size:14px;width:100%;background:#fff;margin-bottom:12px;box-sizing:border-box">
+      <input id="mm-del-confirm" type="text" placeholder="프로젝트 번호" style="padding:12px 16px;border-radius:8px;border:1px solid #DC2626;font-size:14px;width:100%;background:#fff;margin-bottom:12px;box-sizing:border-box">
       <label style="display:block;font-size:13px;margin-bottom:6px">관리자 비밀번호</label>
       <input id="mm-del-pw" type="password" placeholder="mmeng2026" style="padding:12px 16px;border-radius:8px;border:1px solid #DC2626;font-size:14px;width:100%;background:#fff;box-sizing:border-box">
     </div>
@@ -7335,7 +7335,7 @@ table.data-table {
             <div class="hero-stat">
               <div class="hero-stat-label">활성 경보</div>
               <div class="hero-stat-value t-num">15</div>
-              <div class="hero-stat-trend">전월 9건</div>
+              <div class="hero-stat-trend"></div>
             </div>
             <div class="hero-stat" style="border-color:#FCA5A5">
               <div class="hero-stat-label" style="color:#991B1B">최우선</div>
@@ -7367,7 +7367,7 @@ table.data-table {
           <div class="kpi-value t-num">15<span style="font-size:18px;font-weight:700">건</span></div>
           <div class="kpi-meta">
             <span class="kpi-trend up" style="color:#DC2626">▲ +6건</span>
-            <span>전월 9건</span>
+            <span></span>
           </div>
           <svg class="kpi-spark" viewBox="0 0 100 40" preserveAspectRatio="none">
             <defs><linearGradient id="sp-al-1" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#DC2626" stop-opacity="0.4"/><stop offset="100%" stop-color="#DC2626" stop-opacity="0"/></linearGradient></defs>
@@ -7773,7 +7773,7 @@ table.data-table {
             <div class="hero-stat accent">
               <div class="hero-stat-label">이번 달</div>
               <div class="hero-stat-value t-num">1,847</div>
-              <div class="hero-stat-trend">▲ +18% 전월</div>
+              <div class="hero-stat-trend"></div>
             </div>
             <div class="hero-stat success">
               <div class="hero-stat-label">활성 사용자</div>
@@ -7844,7 +7844,7 @@ table.data-table {
           <div class="kpi-value t-num">1,847<span style="font-size:18px;font-weight:700">건</span></div>
           <div class="kpi-meta">
             <span class="kpi-trend up">▲ +18%</span>
-            <span>전월 1,565건</span>
+            <span></span>
           </div>
           <svg class="kpi-spark" viewBox="0 0 100 40" preserveAspectRatio="none">
             <defs><linearGradient id="sp-act-3" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#10B981" stop-opacity="0.4"/><stop offset="100%" stop-color="#10B981" stop-opacity="0"/></linearGradient></defs>
@@ -8298,15 +8298,11 @@ table.data-table {
             <button class="pj-chip active" data-pj="all" onclick="setAttendancePjFilter('all')">📊 전체</button>
             <div style="position:relative;flex:1;max-width:380px;min-width:240px;display:inline-flex;align-items:center">
               <input type="text" id="at-pj-search" list="at-pj-list" autocomplete="off"
-                placeholder="🔍 현장명·번호로 검색 (예: 명문-988, 삼성병원)"
+                placeholder="🔍 현장명·번호로 검색 (프로젝트 번호, 삼성병원)"
                 style="flex:1;padding:8px 12px;border:1.5px solid #93C5FD;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;background:linear-gradient(135deg,#EFF6FF,#DBEAFE);color:#0f172a;outline:none;min-width:0"
                 onchange="window.setAttendancePjFilterBySearch && window.setAttendancePjFilterBySearch(this.value)"
                 onkeydown="if(event.key==='Enter'){event.preventDefault();window.setAttendancePjFilterBySearch&&window.setAttendancePjFilterBySearch(this.value)}"/>
               <datalist id="at-pj-list">
-                <option value="명문-988 대구 삼성병원"></option>
-                <option value="명문-985 부산 SK뷰"></option>
-                <option value="명문-981 대전 가스공사"></option>
-                <option value="명문-991 인천 인하대"></option>
               </datalist>
             </div>
             <script>window.setAttendancePjFilterBySearch=function(v){if(!v){window.setAttendancePjFilter&&window.setAttendancePjFilter('all');return;}var s=String(v).toLowerCase();if(s.indexOf('전체')>=0||s==='all')return window.setAttendancePjFilter&&window.setAttendancePjFilter('all');if(s.indexOf('988')>=0||s.indexOf('삼성')>=0)return window.setAttendancePjFilter&&window.setAttendancePjFilter('988');if(s.indexOf('985')>=0||s.indexOf('sk')>=0)return window.setAttendancePjFilter&&window.setAttendancePjFilter('985');if(s.indexOf('981')>=0||s.indexOf('가스')>=0)return window.setAttendancePjFilter&&window.setAttendancePjFilter('981');if(s.indexOf('991')>=0||s.indexOf('인하')>=0)return window.setAttendancePjFilter&&window.setAttendancePjFilter('991');window.setAttendancePjFilter&&window.setAttendancePjFilter('all');};</script>
@@ -8739,10 +8735,6 @@ table.data-table {
 
             <label class="form-label">🏗️ 프로젝트</label>
             <select class="form-input">
-              <option>명문-988 대구 삼성병원</option>
-              <option>명문-985 부산 SK뷰</option>
-              <option>명문-981 대전 가스공사</option>
-              <option>명문-991 인천 인하대</option>
             </select>
 
             <label class="form-label">🔧 직종</label>
@@ -9566,9 +9558,6 @@ table.data-table {
           </select>
           <select class="form-input" style="width:160px">
             <option>전체 프로젝트</option>
-            <option>명문-988 대구 삼성병원</option>
-            <option>명문-985 부산 SK뷰</option>
-            <option>명문-981 대전 가스공사</option>
           </select>
         </div>
 
@@ -10107,7 +10096,7 @@ table.data-table {
 
             <div class="form-grid" style="margin-bottom:14px">
               <label class="form-label">🏢 업체명 *</label>
-              <input type="text" class="form-input" id="vd-name" placeholder="예: (주)대성덕트"/>
+              <input type="text" class="form-input" id="vd-name" placeholder="예: (주)○○설비"/>
 
               <label class="form-label">📋 사업자등록번호</label>
               <input type="text" class="form-input" id="vd-bizno" placeholder="000-00-00000"/>
@@ -12391,7 +12380,7 @@ CREATE TABLE system_map_activity (
       <div class="modal-body">
         <div class="form-grid">
           <label class="form-label">🏢 업체명 *</label>
-          <input type="text" class="form-input" placeholder="예: (주)대성덕트"/>
+          <input type="text" class="form-input" placeholder="예: (주)○○설비"/>
 
           <label class="form-label">📋 사업자등록번호</label>
           <input type="text" class="form-input" placeholder="000-00-00000"/>
