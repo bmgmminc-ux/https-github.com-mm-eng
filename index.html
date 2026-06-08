@@ -15318,6 +15318,18 @@ CREATE TABLE system_map_activity (
           return;
         }
 
+        // 매입 등록 (프로젝트 컨텍스트 필요) [#153] — project-detail 버튼은 inline onclick이라 제외됨
+        if (text.includes('매입 등록')) {
+          btn.onclick = function() {
+            var ps = []; try { ps = JSON.parse(localStorage.getItem('mm-dash-v4') || '[]'); } catch(e){}
+            if (!Array.isArray(ps) || !ps.length) { if(window.globalToast) globalToast('먼저 프로젝트를 등록하세요 (전체 현황 → + 신규 등록)', 'info'); return; }
+            var pid = sessionStorage.getItem('mm-selected-pid');
+            if (!pid) { if(window.globalToast) globalToast('전체 현황에서 프로젝트를 선택한 뒤 매입을 등록하세요', 'info'); location.hash = 'overview'; return; }
+            openModal('modal-purchase');
+          };
+          return;
+        }
+
         // 출역 등록
         if (text.includes('출역 등록') || text === '⏰ 출역 등록') {
           btn.onclick = function() { openModal('global-attendance-add'); };
