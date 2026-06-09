@@ -3979,21 +3979,9 @@ table.data-table {
       <input type="password" id="mm-login-pw" placeholder="••••••••" required />
       <div class="mm-login-error" id="mm-login-error"></div>
       <button type="submit" class="btn-login" id="mm-login-submit">🔐 로그인</button>
-      <button type="button" class="btn-demo" id="mm-login-demo">🚀 데모 계정으로 들어가기</button>
       <div class="mm-login-switch">
         <span id="mm-login-switch-text">계정이 없으신가요?</span>
         <a id="mm-login-toggle">회원가입</a>
-      </div>
-      <div class="mm-login-roles" id="mm-login-roles">
-        <div style="font-size:11px;font-weight:800;color:#64748b;text-align:center">권한 역할을 선택하세요</div>
-        <div class="role-opt">
-          <button type="button" data-role="ceo">👑 CEO</button>
-          <button type="button" data-role="admin">🛠 관리자</button>
-        </div>
-        <div class="role-opt">
-          <button type="button" data-role="user">👤 일반</button>
-          <button type="button" data-role="demo">👁 읽기전용</button>
-        </div>
       </div>
     </form>
     <div class="mm-login-footer" id="mm-login-footer">
@@ -16380,8 +16368,8 @@ CREATE TABLE system_map_activity (
       }
     });
 
-    // 데모 버튼 → 역할 선택 토글
-    demoBtn.addEventListener('click', function() {
+    // 데모 로그인 완전 제거됨 (운영용) — demoBtn/roles 마크업 없음. null 가드로 안전.
+    if (demoBtn) demoBtn.addEventListener('click', function() {
       var roles = document.getElementById('mm-login-roles');
       if (roles) roles.classList.toggle('show');
     });
