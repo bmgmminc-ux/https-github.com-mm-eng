@@ -4207,8 +4207,9 @@ table.data-table {
         .ov-period-left { display:flex; flex-direction:column; gap:3px; }
         .ov-period-title { font-size:13px; font-weight:900; color:#0f172a; letter-spacing:-.01em; display:flex; align-items:center; gap:6px; }
         .ov-period-title .ico { font-size:14px; }
-        .ov-period-meta { font-size:11px; font-weight:700; color:#64748b; padding-left:20px; font-variant-numeric:tabular-nums; }
-        .ov-period-meta b { color:#0f172a; font-weight:900; }
+        .ov-period-meta { font-size:15px; font-weight:700; color:#475569; padding-left:20px; font-variant-numeric:tabular-nums; display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }
+        .ov-period-meta b { color:#1d4ed8; font-weight:900; font-size:22px; line-height:1.1; }
+        .ov-period-meta #ov-period-range { font-size:14px; color:#64748b; }
         .ov-period-segs { display:inline-flex; gap:4px; padding:4px; background:#f1f5f9; border-radius:10px; }
         .ov-period-segs button { padding:7px 14px; border-radius:7px; border:0; background:transparent;
           font-size:12px; font-weight:800; color:#64748b; cursor:pointer; transition:all .12s; letter-spacing:-.005em; }
@@ -7173,7 +7174,7 @@ table.data-table {
       <div id="mm-cd-bulkbar" style="display:none;align-items:center;gap:8px;padding:10px 16px;background:#FEF3C7;border:1px solid #FDE68A;border-radius:10px"><span id="mm-cd-bulkcount" style="font-size:13px;font-weight:700;color:#92400E"></span><select id="mm-cd-bulkmove" style="padding:6px 10px;border-radius:6px;border:1px solid #d1d5db;font-size:12px"></select><button class="btn btn-sm" style="padding:6px 12px;border:1px solid #2563EB;background:#fff;color:#2563EB;border-radius:6px;cursor:pointer" onclick="mmContractDist.moveSelected()">→ 분류 이동</button><button class="btn btn-sm" style="padding:6px 12px;border:1px solid #DC2626;background:#fff;color:#DC2626;border-radius:6px;cursor:pointer" onclick="mmContractDist.removeSelected()">🗑 선택 삭제</button><button class="btn btn-sm" style="padding:6px 12px;border:1px solid #94a3b8;background:#fff;color:#64748b;border-radius:6px;cursor:pointer;margin-left:auto" onclick="mmContractDist.clearSelection()">선택 해제</button></div>
       <div id="mm-cd-kanban" style="display:flex;gap:10px;overflow-x:auto;padding-bottom:8px"></div>
     </div>
-    <div class="modal-footer" style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:14px 28px;background:#F1F5F9"><div style="font-size:15px;font-weight:700">전체 합계 (<span id="mm-cd-total-count">0</span>건) · 계약 총액: <span id="mm-cd-contract" style="color:#2563EB">0</span> · 분산: <strong id="mm-cd-distsum" style="color:#2563EB;font-size:18px">0</strong> · 미분산: <span id="mm-cd-undist" style="color:#DC2626;font-weight:700">0</span></div><div style="display:flex;gap:8px"><button class="btn btn-secondary btn-sm" onclick="mmContractDist.readPaste()" style="border:1px solid #059669;background:#ECFDF5;color:#059669;font-weight:700">📋 붙여넣기</button><button class="btn btn-ghost" onclick="closeModal('modal-contract-dist')">취소</button><button class="btn btn-primary" onclick="mmContractDist.save()">💾 저장 (예산 반영)</button></div></div>
+    <div class="modal-footer" style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:14px 28px;background:#F1F5F9"><div style="font-size:15px;font-weight:700">전체 합계 (<span id="mm-cd-total-count">0</span>건) · 계약 총액: <span id="mm-cd-contract" style="color:#2563EB">0</span> · 분산: <strong id="mm-cd-distsum" style="color:#2563EB;font-size:18px">0</strong> · 미분산: <span id="mm-cd-undist" style="color:#DC2626;font-weight:700">0</span></div><div style="display:flex;gap:8px"><button class="btn btn-sm" onclick="mmContractDist.clearAll()" style="border:1px solid #DC2626;background:#fff;color:#DC2626;font-weight:700">🗑 전체 삭제</button><button class="btn btn-secondary btn-sm" onclick="mmContractDist.readPaste()" style="border:1px solid #059669;background:#ECFDF5;color:#059669;font-weight:700">📋 붙여넣기</button><button class="btn btn-ghost" onclick="closeModal('modal-contract-dist')">취소</button><button class="btn btn-primary" onclick="mmContractDist.save()">💾 저장 (예산 반영)</button></div></div>
   </div>
 </div>
 <!-- 5. 원가 분산 (카드형 칸반) -->
@@ -7185,7 +7186,7 @@ table.data-table {
       <div id="mm-od-bulkbar" style="display:none;align-items:center;gap:8px;padding:10px 16px;background:#FEF3C7;border:1px solid #FDE68A;border-radius:10px"><span id="mm-od-bulkcount" style="font-size:13px;font-weight:700;color:#92400E"></span><select id="mm-od-bulkmove" style="padding:6px 10px;border-radius:6px;border:1px solid #d1d5db;font-size:12px"></select><button class="btn btn-sm" style="padding:6px 12px;border:1px solid #2563EB;background:#fff;color:#2563EB;border-radius:6px;cursor:pointer" onclick="mmCostDist.moveSelected()">→ 분류 이동</button><button class="btn btn-sm" style="padding:6px 12px;border:1px solid #DC2626;background:#fff;color:#DC2626;border-radius:6px;cursor:pointer" onclick="mmCostDist.removeSelected()">🗑 선택 삭제</button><button class="btn btn-sm" style="padding:6px 12px;border:1px solid #94a3b8;background:#fff;color:#64748b;border-radius:6px;cursor:pointer;margin-left:auto" onclick="mmCostDist.clearSelection()">선택 해제</button></div>
       <div id="mm-od-kanban" style="display:flex;gap:10px;overflow-x:auto;padding-bottom:8px"></div>
     </div>
-    <div class="modal-footer" style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:14px 28px;background:#F1F5F9"><div style="font-size:15px;font-weight:700">전체 합계 (<span id="mm-od-total-count">0</span>건) · 원가 예산: <strong id="mm-od-distsum" style="color:#D97706;font-size:18px">0</strong></div><div style="display:flex;gap:8px"><button class="btn btn-secondary btn-sm" onclick="mmCostDist.readPaste()" style="border:1px solid #059669;background:#ECFDF5;color:#059669;font-weight:700">📋 붙여넣기</button><button class="btn btn-ghost" onclick="closeModal('modal-cost-dist')">취소</button><button class="btn btn-primary" onclick="mmCostDist.save()">💾 저장 (예산 반영)</button></div></div>
+    <div class="modal-footer" style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:14px 28px;background:#F1F5F9"><div style="font-size:15px;font-weight:700">전체 합계 (<span id="mm-od-total-count">0</span>건) · 원가 예산: <strong id="mm-od-distsum" style="color:#D97706;font-size:18px">0</strong></div><div style="display:flex;gap:8px"><button class="btn btn-sm" onclick="mmCostDist.clearAll()" style="border:1px solid #DC2626;background:#fff;color:#DC2626;font-weight:700">🗑 전체 삭제</button><button class="btn btn-secondary btn-sm" onclick="mmCostDist.readPaste()" style="border:1px solid #059669;background:#ECFDF5;color:#059669;font-weight:700">📋 붙여넣기</button><button class="btn btn-ghost" onclick="closeModal('modal-cost-dist')">취소</button><button class="btn btn-primary" onclick="mmCostDist.save()">💾 저장 (예산 반영)</button></div></div>
   </div>
 </div>
 <!-- 6. 편집 -->
@@ -7267,6 +7268,29 @@ table.data-table {
         });
       }
     });
+    // [검색] 상단 통합 검색창 — Enter 시 프로젝트(번호·현장명·발주처) 검색 → 상세 이동 (중복 바인딩 방지)
+    if (!window.__mmSearchBound) {
+      window.__mmSearchBound = true;
+      document.addEventListener('keydown', function(ev){
+        if (ev.key !== 'Enter') return;
+        var el = ev.target;
+        if (!el || el.tagName !== 'INPUT' || !/통합 검색/.test(el.placeholder || '')) return;
+        var q = (el.value || '').trim().toLowerCase();
+        if (!q) return;
+        var ps = []; try { ps = JSON.parse(localStorage.getItem('mm-dash-v4') || '[]'); } catch(_e){}
+        if (!Array.isArray(ps)) ps = [];
+        var hits = ps.filter(function(p){ return ((p.id||'') + ' ' + (p.name||'') + ' ' + (p.client||'')).toLowerCase().indexOf(q) > -1; });
+        if (hits.length) {
+          var hit = hits[0];
+          try { sessionStorage.setItem('mm-selected-pid', hit.id); } catch(_e){}
+          location.hash = '#project-detail';
+          if (window.globalToast) globalToast('🔍 ' + hit.id + ' ' + (hit.name||'') + ' 이동' + (hits.length>1 ? (' (외 ' + (hits.length-1) + '건)') : ''), 'success', 4000);
+          el.blur();
+        } else {
+          if (window.globalToast) globalToast('🔍 "' + (el.value||'') + '" 검색 결과 없음 (프로젝트 번호·현장명·발주처)', 'warning', 4000);
+        }
+      });
+    }
   </script>
 
   </main>
@@ -13452,10 +13476,26 @@ CREATE TABLE system_map_activity (
         function _amt(v){ if (v == null) return 0; if (typeof v === 'number') return isFinite(v) ? v : 0; var s = String(v).replace(/[^\d.\-]/g, ''); var n = parseFloat(s); return isNaN(n) ? 0 : n; }
         var SUBTOTAL_RE = /소\s*계|합\s*계|총\s*계|총\s*공\s*사|도\s*급|원\s*가\s*계|^\s*계\s*$|[\[\(]\s*계\s*[\]\)]/;
 
-        var distribution = { subcontract:0, material:0, product:0, indirect:0, unverified:0, labor:0, safety:0, direct:0, labor_direct:0 };
+        // 품명 키워드 → 9분류 자동 분류 (대표님이 드래그로 수정 가능)
+        function _classify(desc){
+          var d = String(desc || '').toLowerCase();
+          if (/안전|산업안전|보건/.test(d)) return 'safety';
+          if (/인건.*직불|직불.*인건|노무.*직불/.test(d)) return 'labordirect';
+          if (/직불|선급/.test(d)) return 'direct';
+          if (/인건|일당|노무|일용|노임|급여|수당|품\s*셈/.test(d)) return 'labor';
+          if (/fcu|ahu|항온항습|냉동|냉각탑|보일러|칠러|chiller|펌프|에어컨|실외기|실내기|히터|제어반|장비|기기|유닛|unit|완제품|제품|기계|열교환/.test(d)) return 'product';
+          if (/외주|시공|설치|철거|하도급|용접|시운전|해체|양중|도장|미장|방수|보온공|배관공|덕트공|tab/.test(d)) return 'outsource';
+          if (/보험|가설|임대|품질|간접|관리비/.test(d)) return 'indirect';
+          if (/차량|유류|식대|소모|교통|운송|운반|숙박|잡비|현장경비/.test(d)) return 'cashexp';
+          if (/배관|밸브|덕트|자재|재료|동관|강관|보온|단열|앵글|행거|피팅|플랜지|볼트|너트|호스|이음|엘보|티이|유니온|레듀서|가스켓|니플|커버|배선|전선|케이블|판넬|패널|그릴|디퓨저|챔버|드레인|보냉/.test(d)) return 'material';
+          return 'material'; // 기본값: 자재
+        }
+
+        var items = [];  // [{cat, name, amount}] — 품명별 개별 항목
+        var distribution = { outsource:0, material:0, product:0, indirect:0, cashexp:0, labor:0, safety:0, direct:0, labordirect:0 };
         var realTotal = 0, mode = '';
 
-        // ── 형식 A: 표준품셈 내역서 (재료비/노무비/경비 컬럼) ──
+        // ── 형식 A: 표준품셈 내역서 (재료비/노무비/경비 컬럼) — 품명별 개별 항목 ──
         var hRow = -1;
         for (var r = 0; r < Math.min(rows.length, 15); r++) {
           var _j = (rows[r] || []).map(function(c){ return String(c || ''); }).join('|');
@@ -13475,61 +13515,49 @@ CREATE TABLE system_map_activity (
               if (_t === '재료비') g['재료비'] = c3 + 1;
               if (_t === '노무비') g['노무비'] = c3 + 1;
               if (_t === '경비') g['경비'] = c3 + 1;
+              if (_t.indexOf('합계') > -1) g['합계'] = c3 + 1;
             }
           }
-          var matC = g['재료비'], labC = g['노무비'], expC = g['경비'];
-          var dMat=0,dLab=0,dExp=0, sMat=0,sLab=0,sExp=0;
+          var matC = g['재료비'], labC = g['노무비'], expC = g['경비'], sumC = g['합계'];
           for (var i = hRow + 2; i < rows.length; i++) {
             var row = rows[i] || [], nm = String(row[0] || '').trim();
-            var mv = matC != null ? _amt(row[matC]) : 0, lv = labC != null ? _amt(row[labC]) : 0, ev = expC != null ? _amt(row[expC]) : 0;
-            if (SUBTOTAL_RE.test(nm)) { sMat += mv; sLab += lv; sExp += ev; }
-            else { dMat += mv; dLab += lv; dExp += ev; }
+            if (!nm || SUBTOTAL_RE.test(nm)) continue;  // 소계/합계/빈 행 제외(중복합산 방지)
+            var lineTot = sumC != null ? _amt(row[sumC]) : 0;
+            if (lineTot <= 0) lineTot = (matC!=null?_amt(row[matC]):0) + (labC!=null?_amt(row[labC]):0) + (expC!=null?_amt(row[expC]):0);
+            if (lineTot <= 0) continue;  // 금액 없는 구분/헤더 행 제외
+            items.push({ cat: _classify(nm), name: nm, amount: lineTot });
           }
-          var _useD = (dMat + dLab + dExp) > 0;
-          distribution.material = _useD ? dMat : sMat;
-          distribution.labor    = _useD ? dLab : sLab;
-          distribution.indirect = _useD ? dExp : sExp;
-          realTotal = distribution.material + distribution.labor + distribution.indirect;
         } else {
-          // ── 형식 B: 단순 목록 (품명 | 금액) — 키워드 분류 ──
+          // ── 형식 B: 단순 목록 (품명 | 금액) — 항목별 ──
           mode = '단순목록';
           var amtCol = -1, hdr = rows[0] || [];
           for (var h = 0; h < hdr.length; h++) { if (/금\s*액|공급\s*가|합\s*계|총\s*액/.test(String(hdr[h] || ''))) amtCol = h; }
           for (var k = 1; k < rows.length; k++) {
             var cols = rows[k] || []; if (!cols.length) continue;
             var nm2 = String(cols[0] || '').trim();
-            if (SUBTOTAL_RE.test(nm2)) continue;
+            if (!nm2 || SUBTOTAL_RE.test(nm2)) continue;
             var a;
             if (amtCol >= 0) a = _amt(cols[amtCol]);
             else { a = 0; for (var ci = cols.length - 1; ci >= 0; ci--) { var _n = _amt(cols[ci]); if (_n > 0 && _n < 1e10) { a = _n; break; } } }
             if (a <= 0) continue;
-            var desc = nm2.toLowerCase(), cat = 'subcontract';
-            if (/배관|밸브|덕트|자재|재료/.test(desc)) cat = 'material';
-            else if (/fcu|ahu|완제품|상품|장비/.test(desc)) cat = 'product';
-            else if (/보험|임대|간접/.test(desc)) cat = 'indirect';
-            else if (/인건|일당|노무|일용직/.test(desc)) cat = 'labor';
-            else if (/안전/.test(desc)) cat = 'safety';
-            else if (/직불/.test(desc)) cat = 'direct';
-            else if (/외주|시공|하도급/.test(desc)) cat = 'subcontract';
-            distribution[cat] += a; realTotal += a;
+            items.push({ cat: _classify(nm2), name: nm2, amount: a });
           }
         }
 
-        // ── 실제 금액 0 → 가짜 데이터 채우지 않음 (명확히 실패 고지) ──
+        // 카테고리별 합계 + 총계
+        items.forEach(function(it){ distribution[it.cat] = (distribution[it.cat] || 0) + it.amount; realTotal += it.amount; });
+
+        // ── 실제 금액 0 → 가짜 데이터 채우지 않음 ──
         if (realTotal <= 0) {
           if (window.globalToast) globalToast('⚠ 견적서에서 금액을 읽지 못했습니다 — 양식(재료비/노무비/경비 또는 금액 열)을 확인하세요. 기존 데이터는 변경하지 않았습니다.', 'error', 9000);
           return;
         }
 
-        // ── 결과 캐시 ──
-        try {
-          localStorage.setItem('mm-budget-distribution', JSON.stringify({ mode: mode, contractAmount: realTotal, distribution: distribution, timestamp: new Date().toISOString() }));
-        } catch (e) {}
+        try { localStorage.setItem('mm-budget-distribution', JSON.stringify({ mode: mode, contractAmount: realTotal, distribution: distribution, itemCount: items.length, timestamp: new Date().toISOString() })); } catch (e) {}
 
-        // ── 현재 프로젝트에 실제 분산 기록 (budgetItems=원본 + p.costs=파생, 일치하게) ──
+        // ── 현재 프로젝트에 항목별 분산 기록 (budgetItems=항목 카드 + p.costs=카테고리 합계) ──
         try {
-          var DIST_TO_CAT = { subcontract:'outsource', material:'material', product:'product', indirect:'indirect', unverified:'cashexp', labor:'labor', safety:'safety', direct:'direct', labor_direct:'labordirect' };
-          var CAT_KO = { outsource:'외주비', material:'자재비', product:'상품비', indirect:'간접비', cashexp:'비증빙경비', labor:'인건비', safety:'안전관리비', direct:'직불금', labordirect:'인건비직불금' };
+          var CATKEYS = ['outsource','material','product','indirect','cashexp','labor','safety','direct','labordirect'];
           var _raw = localStorage.getItem('mm-dash-v4');
           var _ps = _raw ? JSON.parse(_raw) : [];
           if (!Array.isArray(_ps)) _ps = [];
@@ -13540,17 +13568,17 @@ CREATE TABLE system_map_activity (
           _p.costs = _p.costs || {};
           // 이전 견적서 자동생성 항목만 제거(누적 방지), 수동 입력 항목은 보존
           _p.budgetItems = (_p.budgetItems || []).filter(function(b){ return !(b && b.src === 'estimate' && (b.mode || 'contract') === 'contract'); });
-          var _seq = 0;
-          Object.keys(DIST_TO_CAT).forEach(function(dk){
-            var ck = DIST_TO_CAT[dk];
-            var _av = Math.round(distribution[dk] || 0);
-            _p.costs[ck] = _p.costs[ck] || { contract:0, actual:0 };
-            // [감사 #6] 분산값이 있는 카테고리만 갱신 — 견적서에 없는 카테고리의 기존 계약분산은 0으로 덮지 않고 보존
-            if (_av > 0) {
-              _p.costs[ck].contract = _av;  // 예산 분석 표용 합계(파생)
-              _p.budgetItems.push({ id: 'bi-est-' + ck + '-' + Date.now() + '-' + (_seq++), type: ck, name: '견적서 ' + (CAT_KO[ck] || ck), amount: _av, mode: 'contract', src: 'estimate' });
-            }
+          // 항목별 카드 생성 (품명 그대로, 9분류 자동 배치)
+          var _seq = 0, _ts = Date.now();
+          items.forEach(function(it){
+            _p.budgetItems.push({ id: 'bi-est-' + it.cat + '-' + _ts + '-' + (_seq++), type: it.cat, name: it.name, amount: Math.round(it.amount), mode: 'contract', src: 'estimate' });
           });
+          // costs[cat].contract = 해당 분류의 모든 contract budgetItems 합으로 재계산
+          //   구 견적 항목은 위에서 제거됐으므로, 재업로드 시 이전 분류의 stale 값까지 정리됨(수동 입력 항목은 보존)
+          CATKEYS.forEach(function(ck){ _p.costs[ck] = _p.costs[ck] || { contract:0, actual:0 }; });
+          var _csum = {};
+          (_p.budgetItems || []).forEach(function(b){ if (b && (b.mode || 'contract') === 'contract') _csum[b.type] = (_csum[b.type] || 0) + (Math.round(b.amount) || 0); });
+          CATKEYS.forEach(function(ck){ _p.costs[ck].contract = _csum[ck] || 0; });
           if (!_p.contractOrig || _p.contractOrig <= 0) _p.contractOrig = Math.round(realTotal);
           _ps[_idx] = _p;
           localStorage.setItem('mm-dash-v4', JSON.stringify(_ps));
@@ -13559,7 +13587,7 @@ CREATE TABLE system_map_activity (
           try { if (window.pjDashboard && window.pjDashboard.render) setTimeout(function(){ window.pjDashboard.render(); }, 60); } catch (e) {}
           if (window.globalToast) {
             var _won = function(n){ return Math.round(n).toLocaleString(); };
-            globalToast('✓ 견적서(' + mode + ') 분석 완료 → 합계 ' + _won(realTotal) + '원 · 자재 ' + _won(distribution.material) + ' / 인건 ' + _won(distribution.labor) + ' / 간접 ' + _won(distribution.indirect), 'success', 9000);
+            globalToast('✓ 견적서(' + mode + ') 분석 → ' + items.length + '개 항목을 9분류에 자동 배치 (합계 ' + _won(realTotal) + '원). 분류가 틀리면 계약 분산에서 드래그로 옮기세요.', 'success', 10000);
           }
         } catch (_we) { if (window.globalToast) globalToast('⚠ 계약 분산 저장 실패: ' + _we.message, 'error'); }
 
@@ -15681,6 +15709,21 @@ CREATE TABLE system_map_activity (
       render();
     }
     function clearSelection() { st.selected = {}; render() }
+    function clearAll() {
+      if (!st.items.length) { if (window.globalToast) globalToast('삭제할 항목이 없습니다', 'info'); return; }
+      var _lbl = (mode === 'contract') ? '계약 분산' : '원가 분산';
+      if (!confirm(_lbl + ' 전체 ' + st.items.length + '건을 삭제하시겠습니까? (되돌릴 수 없음)')) return;
+      st.project.budgetItems = (st.project.budgetItems || []).filter(function(b){ return (b.mode || 'contract') !== mode; });
+      st.items = []; st.selected = {}; st.editingId = null;
+      st.project.costs = st.project.costs || {};
+      CATS.forEach(function(c){
+        st.project.costs[c.key] = st.project.costs[c.key] || { contract:0, actual:0 };
+        if (mode === 'contract') st.project.costs[c.key].contract = 0; else st.project.costs[c.key].actual = 0;
+      });
+      persistProject(st.project);
+      render();
+      if (window.globalToast) globalToast('✓ ' + _lbl + ' 전체 삭제됨', 'success');
+    }
     function startEdit(id) { st.editingId = id; render(); setTimeout(function(){var el=document.getElementById('mm-edit-name-'+id); if(el)el.focus()}, 0) }
     function cancelEdit() { st.editingId = null; render() }
     function commitEdit(id) {
@@ -15736,8 +15779,7 @@ CREATE TABLE system_map_activity (
       CATS.forEach(function(c) {
         st.project.costs[c.key] = st.project.costs[c.key] || { contract:0, actual:0 };
         var items = st.project.budgetItems.filter(function(b){return b.type===c.key && (b.mode||'contract')==='contract'});
-        // [감사 rank3] 이 카테고리에 항목이 하나도 없으면 기존 contract 값을 0으로 덮지 않고 보존(부분 비움 데이터 손실 방지)
-        if (items.length === 0) return;
+        // budgetItems 합으로 재계산 — 드래그로 비운 분류는 0 반영(빈 칸반 보호는 load의 costs→budgetItems 복원이 담당)
         var sum = 0;
         items.forEach(function(b){sum += num(b.amount)});
         st.project.costs[c.key].contract = sum;
@@ -15748,7 +15790,7 @@ CREATE TABLE system_map_activity (
     // ── public API ──
     var api = {
       addItem: addItem, remove: remove, toggle: toggle, toggleCol: toggleCol,
-      moveSelected: moveSelected, removeSelected: removeSelected, clearSelection: clearSelection,
+      moveSelected: moveSelected, removeSelected: removeSelected, clearSelection: clearSelection, clearAll: clearAll,
       startEdit: startEdit, cancelEdit: cancelEdit, commitEdit: commitEdit,
       onDragStart: onDragStart, onDragOver: onDragOver, onDrop: onDrop,
       readPaste: readPaste, save: save,
