@@ -17520,6 +17520,7 @@ CREATE TABLE system_map_activity (
       startDate: pr.start_date || '', endDate: pr.end_date || '',
       contractOrig: num(pr.contract_orig), contractAdd: num(pr.contract_add),
       status: pr.status || '진행중', progress: num(pr.progress) || 0,
+      createdAt: pr.created_at || '', budgetItems: Array.isArray(pr.budget_items) ? pr.budget_items : [],
       memo: pr.memo || '', costs: {}, costItems: [], billingItems: [], otherIncomeItems: []
     };
     (costRows||[]).forEach(function(r) {
@@ -17527,9 +17528,10 @@ CREATE TABLE system_map_activity (
     });
     (ciRows||[]).forEach(function(r) {
       p.costItems.push({
-        type: r.type, vendor: r.vendor||'', desc: r.desc_text||'',
+        type: r.type, vendor: r.vendor||'', workerName: r.worker_name||'', desc: r.desc_text||'',
         supplyAmt: num(r.supply_amt), tax: num(r.tax), total: num(r.total),
-        paidAmount: num(r.paid_amount), date: r.doc_date||'', paidDate: r.doc_date||'', memo: r.memo||''
+        paidAmount: num(r.paid_amount), contractAmt: num(r.contract_amt), deduction: num(r.deduction),
+        date: r.doc_date||'', paidDate: r.paid_date||'', createdAt: r.created_at||'', memo: r.memo||''
       });
     });
     (bRows||[]).sort(function(a,b){return (a.round_no||0)-(b.round_no||0)}).forEach(function(r) {
@@ -17562,17 +17564,20 @@ CREATE TABLE system_map_activity (
       id: p.id, owner_id: ownerId, name: p.name||'', type: p.type||'',
       client: p.client||'', start_date: p.startDate||null, end_date: p.endDate||null,
       contract_orig: bint(p.contractOrig), contract_add: bint(p.contractAdd), memo: p.memo||'',
-      status: p.status||'진행중', progress: num(p.progress)||0
+      status: p.status||'진행중', progress: num(p.progress)||0,
+      budget_items: (p.budgetItems||[]).filter(function(b){ return b && b.src !== 'derived'; })
     };
+    if (p.createdAt) proj.created_at = p.createdAt;  // 있을 때만 — projects.created_at DB default now() 보존
     var costs = CATS.map(function(c) {
       var k = (p.costs && p.costs[c]) || {};
       return { project_id: p.id, category: c, contract: bint(k.contract),
                actual: bint(k.actual), seed_actual: bint(k._seedActual) };
     });
     var costItems = (p.costItems||[]).filter(function(it){return it.type}).map(function(it) {
-      return { project_id: p.id, type: it.type, vendor: it.vendor||null, desc_text: it.desc||null,
+      return { project_id: p.id, type: it.type, vendor: it.vendor||null, worker_name: it.workerName||null, desc_text: it.desc||null,
         supply_amt: bint(it.supplyAmt), tax: bint(it.tax), total: bint(it.total),
-        paid_amount: bint(it.paidAmount), doc_date: it.paidDate||it.createdAt||it.date||null, memo: it.memo||null };
+        paid_amount: bint(it.paidAmount), contract_amt: bint(it.contractAmt), deduction: bint(it.deduction),
+        doc_date: it.date||null, paid_date: it.paidDate||null, created_at: it.createdAt||null, memo: it.memo||null };
     });
     var billingItems = (p.billingItems||[]).map(function(b, i) {
       return { project_id: p.id, round_no: i+1, apply_date: b.applyDate||null,
