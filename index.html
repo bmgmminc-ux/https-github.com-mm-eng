@@ -17417,13 +17417,13 @@ CREATE TABLE system_map_activity (
   function saveLocal(arr) { localStorage.setItem(DASH_KEY, JSON.stringify(arr)) }
 
   // ── Supabase rows → localStorage Project 형식 ──
-  function assembleProject(pr, costRows, ciRows, bRows) {
+  function assembleProject(pr, costRows, ciRows, bRows, oiRows) {
     var p = {
       id: pr.id, name: pr.name, type: pr.type, client: pr.client,
       startDate: pr.start_date || '', endDate: pr.end_date || '',
       contractOrig: num(pr.contract_orig), contractAdd: num(pr.contract_add),
       status: pr.status || '진행중', progress: num(pr.progress) || 0,
-      memo: pr.memo || '', costs: {}, costItems: [], billingItems: []
+      memo: pr.memo || '', costs: {}, costItems: [], billingItems: [], otherIncomeItems: []
     };
     (costRows||[]).forEach(function(r) {
       p.costs[r.category] = { contract: num(r.contract), actual: num(r.actual), _seedActual: num(r.seed_actual) };
@@ -17440,6 +17440,13 @@ CREATE TABLE system_map_activity (
         applyDate: r.apply_date||'', applySupply: num(r.apply_supply),
         applyTax: num(r.apply_tax), applyTotal: num(r.apply_total),
         receiveDate: r.receive_date||'', advanceAmount: num(r.advance_amount), billingAmount: num(r.billing_amount)
+      });
+    });
+    (oiRows||[]).forEach(function(r) {
+      p.otherIncomeItems.push({
+        vendor: r.vendor||'', desc: r.desc_text||'',
+        supplyAmt: num(r.supply_amt), tax: num(r.tax), total: num(r.total),
+        received: num(r.received), receivedDate: r.received_date||'', memo: r.memo||''
       });
     });
     return p;
@@ -17469,7 +17476,12 @@ CREATE TABLE system_map_activity (
         receive_date: b.receiveDate||null, billing_amount: num(b.billingAmount),
         advance_amount: num(b.advanceAmount) };
     });
-    return { project: proj, costs: costs, costItems: costItems, billingItems: billingItems };
+    var otherIncomeItems = (p.otherIncomeItems||[]).map(function(o) {
+      return { project_id: p.id, vendor: o.vendor||null, desc_text: o.desc||null,
+        supply_amt: num(o.supplyAmt), tax: num(o.tax), total: num(o.total),
+        received: num(o.received), received_date: o.receivedDate||null, memo: o.memo||null };
+    });
+    return { project: proj, costs: costs, costItems: costItems, billingItems: billingItems, otherIncomeItems: otherIncomeItems };
   }
 
   // ── PULL: Supabase → localStorage ──
@@ -17482,12 +17494,14 @@ CREATE TABLE system_map_activity (
       var cRes  = await sb.from('project_costs').select('*');
       var ciRes = await sb.from('cost_items').select('*');
       var bRes  = await sb.from('billing_items').select('*');
+      var oiData = []; try { var oiRes = await sb.from('other_income_items').select('*'); if (oiRes && !oiRes.error && oiRes.data) oiData = oiRes.data; } catch(e) {}
 
       var projects = (pRes.data||[]).map(function(pr) {
         return assembleProject(pr,
           (cRes.data||[]).filter(function(r){return r.project_id===pr.id}),
           (ciRes.data||[]).filter(function(r){return r.project_id===pr.id}),
-          (bRes.data||[]).filter(function(r){return r.project_id===pr.id}));
+          (bRes.data||[]).filter(function(r){return r.project_id===pr.id}),
+          oiData.filter(function(r){return r.project_id===pr.id}));
       });
       saveLocal(projects);
       window.dispatchEvent(new StorageEvent('storage', { key: DASH_KEY }));
@@ -17522,6 +17536,14 @@ CREATE TABLE system_map_activity (
           var r4 = await sb.from('billing_items').insert(d.billingItems);
           if (r4.error) throw r4.error;
         }
+        // 기타수익 — 비치명적(테이블/RLS 미비 시에도 핵심 동기화 보존)
+        try {
+          await sb.from('other_income_items').delete().eq('project_id', d.project.id);
+          if (d.otherIncomeItems && d.otherIncomeItems.length) {
+            var r5 = await sb.from('other_income_items').insert(d.otherIncomeItems);
+            if (r5.error) throw r5.error;
+          }
+        } catch(oiErr) { if (window.console) console.warn('[기타수익 sync 건너뜀]', (oiErr && oiErr.message) || oiErr); }
       }
       return { ok:true, msg:'업로드 완료 — 프로젝트 ' + projects.length + '건' };
     } catch(e) { return { ok:false, msg:'PUSH 실패: ' + (e.message||e) } }
