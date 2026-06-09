@@ -5358,7 +5358,7 @@ table.data-table {
         <button class="action-btn" onclick="openModal('modal-other-income')">💵 기타수익</button>
         <button class="action-btn" onclick="openModal('modal-contract-dist')">📋 계약 분산</button>
         <button class="action-btn" onclick="document.getElementById('estimate-excel-input').click()">📊 견적서 Excel</button>
-        <input type="file" id="estimate-excel-input" accept=".csv,.xlsx" style="display:none" onchange="window.processEstimateExcel(this.files[0], 500000000)"/>
+        <input type="file" id="estimate-excel-input" accept=".csv,.xlsx" style="display:none" onchange="(function(inp){try{var raw=localStorage.getItem('mm-dash-v4');var ps=raw?JSON.parse(raw):[];if(!Array.isArray(ps))ps=[];var pid=sessionStorage.getItem('mm-selected-pid');var p=pid?ps.find(function(x){return x.id===pid}):ps[0];var amt=p?((Number(String(p.contractOrig||0).replace(/[^0-9.-]/g,''))||0)+(Number(String(p.contractAdd||0).replace(/[^0-9.-]/g,''))||0)):0;window.processEstimateExcel(inp.files[0], amt||500000000);}catch(e){window.processEstimateExcel(inp.files[0], 500000000);}finally{inp.value='';}})(this)"/>
         <button class="action-btn" onclick="openModal('modal-cost-dist')">🔀 원가 분산</button>
         <button class="action-btn" onclick="openModal('modal-report')">📊 보고서</button>
         <button class="action-btn" onclick="openModal('modal-edit')">✏️ 편집</button>
@@ -5913,7 +5913,8 @@ table.data-table {
       netContract:netContract, costContract:costContract, costActual:costActual, costActualVAT:Math.round(costActual*1.1),
       profit:profit, profitRate:profitRate, costRate:costRate, remain:remain, burnRate:burnRate,
       billingApplied:billingApplied, billingAppliedSupply:billingAppliedSupply, billingReceived:billingReceived,
-      uncollected:uncollected, collectRate:collectRate, billingRate:billingRate
+      uncollected:uncollected, collectRate:collectRate, billingRate:billingRate,
+      status:p.status||'진행중', progress:num(p.progress)||0
     };
   }
 
@@ -6017,7 +6018,7 @@ table.data-table {
     setT('pjd-hero-date', '📅 계약일 ' + (k.startDate||'—'));
     var heroStat = k.profitRate >= 0.15 ? '🟢 양호' : (k.profitRate >= 0 ? '🟡 주의' : '🔴 위험');
     setH('pjd-hero-status', '<span class="dot-status live"></span>' + heroStat + ' · 원가율 ' + pct(k.costRate));
-    setT('pjd-hero-client', '🏢 ' + (k.client||'—') + ' · 진행중');
+    setT('pjd-hero-client', '🏢 ' + (k.client||'—') + ' · ' + (k.status||'진행중'));
     setH('pjd-hero-contract', fmt(k.contract));
     setT('pjd-hero-contract-vat', 'VAT포함 ' + fmt(k.contractVAT).replace(/<[^>]+>/g,''));
     setH('pjd-hero-cost', fmt(k.costActual));
@@ -13481,6 +13482,37 @@ CREATE TABLE system_map_activity (
           }));
         } catch (e) {}
 
+        // ── [FIX] 현재 프로젝트 p.costs[CAT].contract 에 9분류 분산 기록 ──
+        try {
+          var DIST_TO_CAT = {
+            subcontract:'outsource', material:'material', product:'product',
+            indirect:'indirect', unverified:'cashexp', labor:'labor',
+            safety:'safety', direct:'direct', labor_direct:'labordirect'
+          };
+          var _raw = localStorage.getItem('mm-dash-v4');
+          var _ps = _raw ? JSON.parse(_raw) : [];
+          if (!Array.isArray(_ps)) _ps = [];
+          var _pid = sessionStorage.getItem('mm-selected-pid');
+          var _idx = _pid ? _ps.findIndex(function(p){return p.id===_pid}) : (_ps.length?0:-1);
+          if (_idx >= 0) {
+            var _p = _ps[_idx];
+            _p.costs = _p.costs || {};
+            Object.keys(DIST_TO_CAT).forEach(function(dk){
+              var ck = DIST_TO_CAT[dk];
+              _p.costs[ck] = _p.costs[ck] || { contract:0, actual:0 };
+              _p.costs[ck].contract = Math.round(distribution[dk] || 0);
+            });
+            _ps[_idx] = _p;
+            localStorage.setItem('mm-dash-v4', JSON.stringify(_ps));
+            try { window.dispatchEvent(new StorageEvent('storage', { key:'mm-dash-v4' })); } catch(e){}
+            try { if (window.pjBudget && window.pjBudget.render) setTimeout(window.pjBudget.render, 50); } catch(e){}
+            try { if (window.pjDashboard && window.pjDashboard.render) setTimeout(window.pjDashboard.render, 50); } catch(e){}
+            if (window.globalToast) globalToast('💾 9분류 분산 → 프로젝트 계약(' + _p.id + ')에 반영', 'success');
+          } else {
+            if (window.globalToast) globalToast('⚠ 선택된 프로젝트가 없어 계약 분산을 저장하지 못함', 'warning');
+          }
+        } catch (e) { if (window.globalToast) globalToast('⚠ 계약 분산 저장 실패: ' + e.message, 'error'); }
+
         // 결과를 BudgetKanbanModal에 표시 (있으면)
         showBudgetKanbanResult(distribution, contractAmount);
       };
@@ -17390,6 +17422,7 @@ CREATE TABLE system_map_activity (
       id: pr.id, name: pr.name, type: pr.type, client: pr.client,
       startDate: pr.start_date || '', endDate: pr.end_date || '',
       contractOrig: num(pr.contract_orig), contractAdd: num(pr.contract_add),
+      status: pr.status || '진행중', progress: num(pr.progress) || 0,
       memo: pr.memo || '', costs: {}, costItems: [], billingItems: []
     };
     (costRows||[]).forEach(function(r) {
@@ -17406,7 +17439,7 @@ CREATE TABLE system_map_activity (
       p.billingItems.push({
         applyDate: r.apply_date||'', applySupply: num(r.apply_supply),
         applyTax: num(r.apply_tax), applyTotal: num(r.apply_total),
-        receiveDate: r.receive_date||'', billingAmount: num(r.billing_amount)
+        receiveDate: r.receive_date||'', advanceAmount: num(r.advance_amount), billingAmount: num(r.billing_amount)
       });
     });
     return p;
@@ -17417,7 +17450,8 @@ CREATE TABLE system_map_activity (
     var proj = {
       id: p.id, owner_id: ownerId, name: p.name||'', type: p.type||'',
       client: p.client||'', start_date: p.startDate||null, end_date: p.endDate||null,
-      contract_orig: num(p.contractOrig), contract_add: num(p.contractAdd), memo: p.memo||''
+      contract_orig: num(p.contractOrig), contract_add: num(p.contractAdd), memo: p.memo||'',
+      status: p.status||'진행중', progress: num(p.progress)||0
     };
     var costs = CATS.map(function(c) {
       var k = (p.costs && p.costs[c]) || {};
@@ -17432,7 +17466,8 @@ CREATE TABLE system_map_activity (
     var billingItems = (p.billingItems||[]).map(function(b, i) {
       return { project_id: p.id, round_no: i+1, apply_date: b.applyDate||null,
         apply_supply: num(b.applySupply), apply_tax: num(b.applyTax), apply_total: num(b.applyTotal),
-        receive_date: b.receiveDate||null, billing_amount: num(b.billingAmount) };
+        receive_date: b.receiveDate||null, billing_amount: num(b.billingAmount),
+        advance_amount: num(b.advanceAmount) };
     });
     return { project: proj, costs: costs, costItems: costItems, billingItems: billingItems };
   }
@@ -17865,7 +17900,7 @@ CREATE TABLE system_map_activity (
       arr.unshift({
         id: id, name: name, client: client,
         contractOrig: contract, contractAdd: 0,
-        costs: {}, costItems: [], billings: [],
+        costs: {}, costItems: [], billingItems: [], otherIncomeItems: [],
         status: status, startDate: startDate,
         createdAt: new Date().toISOString()
       });
