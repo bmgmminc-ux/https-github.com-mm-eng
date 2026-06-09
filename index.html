@@ -16236,6 +16236,13 @@ CREATE TABLE system_map_activity (
     { id:'bmg', pw:'myungmoon2026', name:'배문기 대표', role:'ceo' }
   ];
 
+  // Supabase 인증 성공 후 CEO 권한을 부여할 이메일 (비밀번호 인증 통과해야만 적용 — 안전)
+  // 우선순위: Supabase app_metadata.role > 이 목록 > 'user'
+  var MM_ADMIN_EMAILS = ['bmgmminc@gmail.com'];
+  function mmRoleFor(email) {
+    return (MM_ADMIN_EMAILS.indexOf((email||'').toLowerCase().trim()) > -1) ? 'ceo' : 'user';
+  }
+
   // 로그인 — 1) 자체 관리자 계정 우선 검증, 2) (이메일 형식이면) Supabase, 3) 폴백
   async function doLogin(email, password) {
     var loginId = (email || '').trim();
@@ -16258,7 +16265,7 @@ CREATE TABLE system_map_activity (
         return {
           email: u.email,
           name: (u.user_metadata && u.user_metadata.name) || u.email.split('@')[0],
-          role: (u.app_metadata && u.app_metadata.role) || 'user',
+          role: (u.app_metadata && u.app_metadata.role) || mmRoleFor(u.email),
           id: u.id,
           demoMode: false,
           supabase: true
@@ -16337,10 +16344,13 @@ CREATE TABLE system_map_activity (
           if (data.session && data.user) {
             // Confirm email OFF → 즉시 로그인
             var u = data.user;
-            setAuth({ email:u.email, name:name, role:'user', id:u.id, demoMode:false, supabase:true });
+            setAuth({ email:u.email, name:name, role:mmRoleFor(u.email), id:u.id, demoMode:false, supabase:true });
             applyRole(); hideLogin();
             if (window.mmAudit) window.mmAudit.log('로그인', u.email + ' (신규 가입)');
-            if (window.mmData && window.mmData.syncOnLogin) window.mmData.syncOnLogin();
+            if (window.mmData) {
+              if (window.mmData.setAutoSync) window.mmData.setAutoSync(true);
+              if (window.mmData.syncOnLogin) window.mmData.syncOnLogin();
+            }
           } else {
             // Confirm email ON → 이메일 확인 안내 + 로그인 모드 복귀
             var infoEl = document.getElementById('mm-login-info');
@@ -16359,8 +16369,9 @@ CREATE TABLE system_map_activity (
           applyRole();
           hideLogin();
           if (window.mmAudit) window.mmAudit.log('로그인', user.email + ' (' + (user.role||'user') + ')');
-          if (user.supabase && window.mmData && window.mmData.syncOnLogin) {
-            window.mmData.syncOnLogin();
+          if (user.supabase && window.mmData) {
+            if (window.mmData.setAutoSync) window.mmData.setAutoSync(true);  // 저장 시 자동 클라우드 백업
+            if (window.mmData.syncOnLogin) window.mmData.syncOnLogin();
           }
         }
       } catch(err) {
