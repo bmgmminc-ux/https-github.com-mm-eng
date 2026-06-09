@@ -14402,7 +14402,7 @@ CREATE TABLE system_map_activity (
           return;
         }
         if (text.includes('분석 리포트')) {
-          btn.onclick = function() { globalToast('📊 거래처 분석 리포트 생성 중...', 'info'); };
+          btn.onclick = function() { if (window.mmVendorReport) window.mmVendorReport(); else globalToast('리포트 모듈 미로드', 'error'); };
           return;
         }
         if (text.includes('재계산') || text.includes('집계 재계산')) {
@@ -14765,25 +14765,50 @@ CREATE TABLE system_map_activity (
     } catch (e) { state.pasteMap = ['vendor','desc','supplyAmt','total','memo']; }
   }
   function saveProject() {
-    // [요청] 매입 저장 전 — 거래처(mm-vendors-v2)에 미등록 업체를 먼저 등록 (붙여넣기·임포트 등 모든 경로 보장)
+    // [요청] 매입 저장 전 — 거래처/일용직이 마스터에 미등록이면 차단 + '지금 등록'(확인) 제공
     try {
       var _vraw = localStorage.getItem('mm-vendors-v2');
       var _vendors = _vraw ? JSON.parse(_vraw) : [];
       if (!Array.isArray(_vendors)) _vendors = [];
-      var _vadd = 0;
+      var _wraw = localStorage.getItem('mm-workers');
+      var _workers = _wraw ? JSON.parse(_wraw) : [];
+      if (!Array.isArray(_workers)) _workers = [];
+      var _missV = [], _missW = [], _sv = {}, _sw = {};
       (state.items || []).forEach(function(it){
-        var _nm = (it.vendor || '').trim();
-        if (!_nm) return;  // 빈 업체명(노무 등)은 제외
-        var _nn = normVendor(_nm);
-        if (_nn && !_vendors.some(function(v){ return normVendor(typeof v === 'string' ? v : v.name) === _nn; })) {
-          _vendors.push({ id: 'V-' + Date.now() + '-' + _vadd, name: _nm, createdAt: new Date().toISOString().substring(0,10) });
-          _vadd++;
+        var _vn = (it.vendor || '').trim();
+        if (_vn) {
+          var _nv = normVendor(_vn);
+          if (_nv && !_sv[_nv] && !_vendors.some(function(v){ return normVendor(typeof v === 'string' ? v : v.name) === _nv; })) { _sv[_nv] = 1; _missV.push(_vn); }
+        }
+        var _wn = (it.workerName || '').trim();
+        if (_wn) {
+          var _nw = normVendor(_wn);
+          if (_nw && !_sw[_nw] && !_workers.some(function(w){ return normVendor((w && w.name) || '') === _nw; })) { _sw[_nw] = 1; _missW.push(_wn); }
         }
       });
-      if (_vadd > 0) {
-        localStorage.setItem('mm-vendors-v2', JSON.stringify(_vendors));
-        try { window.dispatchEvent(new StorageEvent('storage', { key:'mm-vendors-v2' })); } catch(e){}
-        if (window.globalToast) window.globalToast('🏢 미등록 업체 ' + _vadd + '곳을 거래처에 먼저 등록 후 매입 저장', 'info', 5000);
+      if (_missV.length || _missW.length) {
+        var _ln = [];
+        if (_missV.length) _ln.push('▪ 미등록 거래처 (' + _missV.length + '): ' + _missV.join(', '));
+        if (_missW.length) _ln.push('▪ 미등록 일용직 (' + _missW.length + '): ' + _missW.join(', '));
+        var _msg = '거래처/일용직 마스터에 미등록 항목이 있어 매입을 저장할 수 없습니다.\n\n' + _ln.join('\n') +
+                   '\n\n[확인] 지금 거래처/일용직에 등록하고 매입을 저장\n[취소] 저장하지 않음 (등록 화면에서 먼저 등록)';
+        if (!confirm(_msg)) {
+          if (window.globalToast) window.globalToast('🚫 매입 저장 취소 — 미등록 거래처/일용직을 먼저 등록하세요', 'warning', 6000);
+          return;
+        }
+        var _today = new Date().toISOString().substring(0,10);
+        if (_missV.length) {
+          _missV.forEach(function(nm, i){ _vendors.push({ id: 'V-' + Date.now() + '-' + i, name: nm, createdAt: _today }); });
+          localStorage.setItem('mm-vendors-v2', JSON.stringify(_vendors));
+          try { window.dispatchEvent(new StorageEvent('storage', { key:'mm-vendors-v2' })); } catch(e){}
+        }
+        if (_missW.length) {
+          _missW.forEach(function(nm, i){ _workers.unshift({ id: 'WK' + Date.now() + '-' + i, name: nm, primaryJob:'일반', primaryWage:0, altJobs:[], daysWorked:0, totalWage:0, createdAt: new Date().toISOString() }); });
+          localStorage.setItem('mm-workers', JSON.stringify(_workers));
+          try { window.dispatchEvent(new StorageEvent('storage', { key:'mm-workers' })); } catch(e){}
+          try { if (window.mmWorkers && window.mmWorkers.render) window.mmWorkers.render(); } catch(e){}
+        }
+        if (window.globalToast) window.globalToast('🏢 지금 등록 완료 — 거래처 ' + _missV.length + ' · 일용직 ' + _missW.length + '곳 → 매입 저장', 'success', 5000);
       }
     } catch (_ve) {}
     var raw = localStorage.getItem('mm-dash-v4');
@@ -14838,18 +14863,7 @@ CREATE TABLE system_map_activity (
       var guess = R(value);
       if (guess && guess !== row.type) row.type = guess;
     }
-    if (field === 'vendor' && value) {
-      // 신규 업체 자동 등록 (정규화)
-      var raw = localStorage.getItem('mm-vendors-v2');
-      var vendors = raw ? JSON.parse(raw) : [];
-      if (!Array.isArray(vendors)) vendors = [];
-      var n = normVendor(value);
-      if (n && !vendors.some(function(v){return normVendor(typeof v==='string'?v:v.name)===n})) {
-        vendors.push({ id:'V-'+Date.now(), name:value });
-        localStorage.setItem('mm-vendors-v2', JSON.stringify(vendors));
-        if (window.globalToast) window.globalToast('🏢 신규 거래처 자동 등록: ' + value, 'info');
-      }
-    }
+    // [정책변경] 거래처는 타이핑 시 자동등록하지 않음 — 저장 시 '미등록 차단 + 지금 등록' 확인으로 일원화
     state.items[idx] = row;
     render();
   }
@@ -17218,6 +17232,114 @@ CREATE TABLE system_map_activity (
     if (isNaN(d)) return 0;
     return Math.floor((today() - d) / 86400000);
   }
+
+  // ── [분석 리포트] 거래처 매입·결제 분석 리포트 생성 (인쇄/PDF) ──
+  window.mmVendorReport = function() {
+    var projects = loadProjects();
+    var V = {};
+    projects.forEach(function(p) {
+      (p.costItems || []).forEach(function(it) {
+        var nm = (it.vendor || '').trim() || (it.workerName || '').trim() || '(미지정)';
+        var isW = !(it.vendor || '').trim() && !!(it.workerName || '').trim();
+        if (!V[nm]) V[nm] = { name:nm, isWorker:isW, count:0, supply:0, total:0, paid:0, cats:{}, pjs:{}, last:'', payDays:[] };
+        var v = V[nm];
+        var supply = num(it.supplyAmt || it.total || 0);
+        var total = num(it.total || (num(it.supplyAmt) + num(it.tax)) || 0);
+        v.count++; v.supply += supply; v.total += total; v.paid += num(it.paidAmount || 0);
+        if (it.type) v.cats[it.type] = (v.cats[it.type] || 0) + supply;
+        v.pjs[p.id || p.name || ''] = 1;
+        var dt = it.date || it.createdAt || '';
+        if (dt && (!v.last || dt > v.last)) v.last = dt;
+        if (it.paidDate && (it.createdAt || it.date)) {
+          var d1 = new Date(it.createdAt || it.date), d2 = new Date(it.paidDate);
+          if (!isNaN(d1) && !isNaN(d2)) { var dd = Math.round((d2 - d1) / 86400000); if (dd >= 0) v.payDays.push(dd); }
+        }
+      });
+    });
+    var list = Object.keys(V).map(function(k) {
+      var v = V[k];
+      v.unpaid = Math.max(0, v.total - v.paid);
+      v.avgPay = v.payDays.length ? Math.round(v.payDays.reduce(function(a, b){ return a + b; }, 0) / v.payDays.length) : null;
+      v.pjCount = Object.keys(v.pjs).length;
+      v.topCat = Object.keys(v.cats).sort(function(a, b){ return v.cats[b] - v.cats[a]; })[0] || '';
+      return v;
+    }).sort(function(a, b){ return b.supply - a.supply; });
+    if (!list.length) { if (window.globalToast) window.globalToast('매입 데이터가 없어 리포트를 생성할 수 없습니다', 'warning'); return; }
+
+    var totSupply = list.reduce(function(s, v){ return s + v.supply; }, 0);
+    var totUnpaid = list.reduce(function(s, v){ return s + v.unpaid; }, 0);
+    var catTot = {};
+    list.forEach(function(v){ Object.keys(v.cats).forEach(function(c){ catTot[c] = (catTot[c] || 0) + v.cats[c]; }); });
+    var top5 = list.slice(0, 5);
+    var top5Share = totSupply ? Math.round(top5.reduce(function(s, v){ return s + v.supply; }, 0) / totSupply * 100) : 0;
+    var unpaidList = list.filter(function(v){ return v.unpaid > 0; }).sort(function(a, b){ return b.unpaid - a.unpaid; }).slice(0, 8);
+
+    var won = function(n){ return Math.round(n || 0).toLocaleString(); };
+    var nowd = new Date();
+    var ds = nowd.getFullYear() + '-' + ('0' + (nowd.getMonth() + 1)).slice(-2) + '-' + ('0' + nowd.getDate()).slice(-2);
+
+    var bodyRows = list.map(function(v){
+      return '<tr><td>' + v.name + (v.isWorker ? ' <span class="muted">(일용직)</span>' : '') + '</td>' +
+        '<td>' + (CAT_LABEL[v.topCat] || '-') + '</td>' +
+        '<td>' + v.count + '</td><td>' + v.pjCount + '</td>' +
+        '<td>' + won(v.supply) + '</td>' +
+        '<td class="' + (v.unpaid > 0 ? 'red' : '') + '">' + (v.unpaid > 0 ? won(v.unpaid) : '-') + '</td>' +
+        '<td>' + (v.avgPay != null ? v.avgPay + '일' : '<span class="muted">미정</span>') + '</td>' +
+        '<td>' + (v.last || '-') + '</td></tr>';
+    }).join('');
+    var catRows = CATS.filter(function(c){ return catTot[c]; }).sort(function(a, b){ return catTot[b] - catTot[a]; }).map(function(c){
+      var pct = totSupply ? Math.round(catTot[c] / totSupply * 100) : 0;
+      return '<tr><td>' + (CAT_LABEL[c] || c) + '</td><td>' + won(catTot[c]) + '</td><td>' + pct + '%</td></tr>';
+    }).join('');
+    var unpaidRows = unpaidList.length ? unpaidList.map(function(v){
+      return '<tr><td>' + v.name + '</td><td class="red">' + won(v.unpaid) + '</td><td>' + (v.avgPay != null ? v.avgPay + '일' : '미정') + '</td></tr>';
+    }).join('') : '<tr><td colspan="3" class="muted">미지급 없음 ✓</td></tr>';
+
+    var html = '<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><title>거래처 매입·결제 분석 리포트</title>' +
+      '<style>body{font-family:"Malgun Gothic",-apple-system,sans-serif;margin:0;padding:32px;color:#1e293b;background:#fff}' +
+      'h1{font-size:22px;margin:0 0 4px}.sub{color:#64748b;font-size:13px;margin-bottom:24px}' +
+      '.kpis{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:24px}' +
+      '.kpi{flex:1;min-width:150px;border:1px solid #e2e8f0;border-radius:12px;padding:14px 16px}' +
+      '.kpi .l{font-size:12px;color:#64748b}.kpi .v{font-size:23px;font-weight:800;color:#1d4ed8;margin-top:4px}' +
+      'table{width:100%;border-collapse:collapse;margin-bottom:24px;font-size:13px}' +
+      'th,td{padding:8px 10px;border-bottom:1px solid #e2e8f0;text-align:right}' +
+      'th{background:#f8fafc;font-weight:700;color:#475569}' +
+      'th:first-child,td:first-child,th:nth-child(2),td:nth-child(2){text-align:left}' +
+      '.red{color:#dc2626;font-weight:700}.muted{color:#94a3b8}' +
+      '.sec{font-size:15px;font-weight:800;margin:22px 0 10px;border-left:4px solid #1d4ed8;padding-left:8px}' +
+      '.btn{background:#1d4ed8;color:#fff;border:none;padding:10px 20px;border-radius:8px;font-size:14px;cursor:pointer}' +
+      '@media print{.noprint{display:none}body{padding:10px}}</style></head><body>' +
+      '<button class="btn noprint" onclick="window.print()" style="float:right">🖨 인쇄 / PDF 저장</button>' +
+      '<h1>📊 거래처 매입·결제 분석 리포트</h1>' +
+      '<div class="sub">㈜명문이엔지 · 생성일 ' + ds + ' · 9분류 매입 기준 · 전체 ' + list.length + '개 거래처/일용직</div>' +
+      '<div class="kpis">' +
+      '<div class="kpi"><div class="l">거래처/일용직</div><div class="v">' + list.length + '</div></div>' +
+      '<div class="kpi"><div class="l">누적 매입(공급가)</div><div class="v">' + won(totSupply) + '</div></div>' +
+      '<div class="kpi"><div class="l">총 미지급</div><div class="v" style="color:#dc2626">' + won(totUnpaid) + '</div></div>' +
+      '<div class="kpi"><div class="l">TOP5 점유율</div><div class="v">' + top5Share + '%</div></div></div>' +
+      '<div class="sec">거래처별 매입·결제 현황</div>' +
+      '<table><thead><tr><th>업체/일용직</th><th>주분류</th><th>거래</th><th>PJ수</th><th>누적매입</th><th>미지급</th><th>평균결제</th><th>마지막거래</th></tr></thead><tbody>' + bodyRows + '</tbody></table>' +
+      '<div class="sec">9분류별 매입 분포</div>' +
+      '<table><thead><tr><th>분류</th><th>금액(공급가)</th><th>비중</th></tr></thead><tbody>' + catRows + '</tbody></table>' +
+      '<div class="sec">⚠ 미지급 집중 (상위 8)</div>' +
+      '<table><thead><tr><th>업체/일용직</th><th>미지급액</th><th>평균결제일</th></tr></thead><tbody>' + unpaidRows + '</tbody></table>' +
+      '<div class="sub" style="margin-top:20px">본 리포트는 ㈜명문이엔지 회계 시스템에서 ' + ds + ' 자동 생성되었습니다.</div>' +
+      '</body></html>';
+
+    var w = window.open('', '_blank');
+    if (w && w.document) {
+      w.document.open(); w.document.write(html); w.document.close();
+    } else {
+      try {
+        var blob = new Blob([html], { type:'text/html;charset=utf-8' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a'); a.href = url; a.download = '거래처매입분석_' + ds + '.html';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
+      } catch (e) {}
+    }
+    if (window.globalToast) window.globalToast('📊 거래처 분석 리포트 생성 — ' + list.length + '개 업체 (인쇄/PDF 가능)', 'success', 5000);
+  };
 
   function renderAlerts() {
     var tbody = document.getElementById('alerts-tbody');
