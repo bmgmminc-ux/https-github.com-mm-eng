@@ -14743,28 +14743,24 @@ CREATE TABLE system_map_activity (
     if (!Array.isArray(projects)) projects = [];
     var idx = projects.findIndex(function(p){return p.id===state.project.id});
     state.project.costItems = state.items;
-    // costs.{type}.actual 자동 동기화 — 시드 baseline 보존 [클로드 검토 ▲ #113]
+    // costs.{type}.actual 단일 원본 = 매입 명세 costItems 합산 [actual 단일원본 리팩터]
     var CATS = ['outsource','material','product','indirect','cashexp','labor','safety','direct','labordirect'];
     state.project.costs = state.project.costs || {};
-    // 1) 시드 actual을 _seedActual로 1회 백업 (이후 보존)
+    // 1) costItems 합산
+    var sums = {};
     CATS.forEach(function(t) {
       state.project.costs[t] = state.project.costs[t] || { contract:0, actual:0 };
-      if (state.project.costs[t]._seedActual == null) {
-        state.project.costs[t]._seedActual = state.project.costs[t].actual || 0;
-      }
+      sums[t] = 0;
     });
-    // 2) costItems 합산
-    var sums = {};
-    CATS.forEach(function(t) { sums[t] = 0 });
     state.items.forEach(function(it) {
       var t = it.type;
       if (!t || CATS.indexOf(t) < 0) return;
       var amt = Number(String(it.supplyAmt||it.total||0).replace(/[^0-9.-]/g,'')) || 0;
       sums[t] += amt;
     });
-    // 3) 최종 actual = 시드 baseline + costItems 합산 (시드 데모와 신규 입력 양쪽 보존)
+    // 2) actual 단일 원본 = 매입 명세 costItems 합산 (원가칸반/시드와 충돌 제거)
     CATS.forEach(function(t) {
-      state.project.costs[t].actual = (state.project.costs[t]._seedActual || 0) + sums[t];
+      state.project.costs[t].actual = sums[t];
     });
     if (idx >= 0) projects[idx] = state.project; else projects.push(state.project);
     localStorage.setItem('mm-dash-v4', JSON.stringify(projects));
@@ -15265,7 +15261,8 @@ CREATE TABLE system_map_activity (
     return api;
   }
   window.mmContractDist = makeDist('contract', 'modal-contract-dist', 'mm-cd-pid', 'mm-cd-summary', 'mm-cd-kanban', '#2563EB');
-  window.mmCostDist = makeDist('cost', 'modal-cost-dist', 'mm-od-pid', 'mm-od-summary', 'mm-od-kanban', '#D97706');
+  // [정리] 구버전 makeDist('cost') 인스턴스 제거 — 이후 makeKanban('cost')가 mmCostDist를 재할당(보기전용·actual 단일원본).
+  //        구버전은 actual을 직접 덮어쓰는 죽은 코드 + watchOpen 이중 옵저버라 부활 위험 제거.
 
   // ═══════════════════════════════════════════════════════════════
   // 6. mmEdit — 프로젝트 메타 편집
@@ -15513,13 +15510,20 @@ CREATE TABLE system_map_activity (
       st.project = currentProject();
       st.project.budgetItems = st.project.budgetItems || [];
       st.items = st.project.budgetItems.filter(function(b){return (b.mode||'contract')===mode});
-      // [동기화 복원] 이 모드 항목이 비었는데 costs에 분산값이 있으면 costs에서 자동 복원
-      // (budgetItems는 클라우드 미동기화 → pull로 유실. costs는 동기화되므로 항상 복원 가능)
-      if (st.items.length === 0 && st.project.costs) {
+      // [동기화 복원] 이 모드 항목이 비었으면 단일 원본에서 카테고리별 파생 카드를 복원
+      // (budgetItems는 클라우드 미동기화 → pull로 유실. 동기화되는 단일 원본에서 항상 복원 가능)
+      //  - contract 모드: costs[cat].contract  /  cost 모드: 매입 costItems(type별 공급가 합)=actual 단일원본
+      if (st.items.length === 0) {
         var _restored = [];
+        var _ci = (mode === 'cost') ? (st.project.costItems || []) : null;
         CATS.forEach(function(c){
-          var _cc = st.project.costs[c.key];
-          var _v = _cc ? num(mode === 'contract' ? _cc.contract : _cc.actual) : 0;
+          var _v = 0;
+          if (mode === 'contract') {
+            var _cc = st.project.costs && st.project.costs[c.key];
+            _v = _cc ? num(_cc.contract) : 0;
+          } else {
+            _ci.forEach(function(it){ if (it.type === c.key) _v += num(it.supplyAmt != null ? it.supplyAmt : it.total); });
+          }
           if (_v > 0) {
             var _it = { id:'bi-'+mode+'-'+c.key+'-r'+Math.random().toString(36).slice(2,7), type:c.key, name:(mode==='contract'?'계약 ':'원가 ')+c.label, amount:_v, mode:mode, src:'derived' };
             st.project.budgetItems.push(_it);
@@ -15625,6 +15629,7 @@ CREATE TABLE system_map_activity (
 
     // ── 액션 ──
     function addItem() {
+      if (mode === 'cost') { if (window.globalToast) globalToast('ℹ 원가는 [매입 등록]에서 관리됩니다 — 이 화면은 보기 전용입니다', 'info', 5000); return; }
       var type = document.getElementById(opts.newTypeId).value;
       var name = document.getElementById(opts.newNameId).value.trim();
       var amt = num(document.getElementById(opts.newAmtId).value);
@@ -15721,17 +15726,21 @@ CREATE TABLE system_map_activity (
       }).catch(function(e){alert('클립보드 접근 실패: '+e.message)});
     }
     function save() {
-      // costs[cat].{contract|actual} = sum of items in that cat
+      // [E7] cost 모드는 보기 전용 — 원가(actual)는 매입 명세(costItems) 단일 원본이므로 칸반은 actual을 쓰지 않는다
+      if (mode === 'cost') {
+        if (window.globalToast) globalToast('ℹ 원가는 [매입 등록]에서 관리됩니다 — 이 화면은 보기 전용입니다', 'info', 5000);
+        return;
+      }
+      // contract 모드: costs[cat].contract = sum of items in that cat
       st.project.costs = st.project.costs || {};
       CATS.forEach(function(c) {
         st.project.costs[c.key] = st.project.costs[c.key] || { contract:0, actual:0 };
-        var items = st.project.budgetItems.filter(function(b){return b.type===c.key && (b.mode||'contract')===mode});
-        // [감사 rank3] 이 카테고리에 항목이 하나도 없으면 기존 costs 값을 0으로 덮지 않고 보존(부분 비움 데이터 손실 방지)
+        var items = st.project.budgetItems.filter(function(b){return b.type===c.key && (b.mode||'contract')==='contract'});
+        // [감사 rank3] 이 카테고리에 항목이 하나도 없으면 기존 contract 값을 0으로 덮지 않고 보존(부분 비움 데이터 손실 방지)
         if (items.length === 0) return;
         var sum = 0;
         items.forEach(function(b){sum += num(b.amount)});
-        if (mode === 'contract') st.project.costs[c.key].contract = sum;
-        else st.project.costs[c.key].actual = sum;
+        st.project.costs[c.key].contract = sum;
       });
       persistProject(st.project);
     }
@@ -17514,7 +17523,7 @@ CREATE TABLE system_map_activity (
       memo: pr.memo || '', costs: {}, costItems: [], billingItems: [], otherIncomeItems: []
     };
     (costRows||[]).forEach(function(r) {
-      p.costs[r.category] = { contract: num(r.contract), actual: num(r.actual), _seedActual: num(r.seed_actual) };
+      p.costs[r.category] = { contract: num(r.contract), actual: num(r.actual) };  // [정리] _seedActual 죽은 캐시 로드 제거(actual 단일원본)
     });
     (ciRows||[]).forEach(function(r) {
       p.costItems.push({
@@ -17537,6 +17546,13 @@ CREATE TABLE system_map_activity (
         received: num(r.received), receivedDate: r.received_date||'', memo: r.memo||''
       });
     });
+    // [actual 단일원본] pull 직후 actual을 매입 명세(costItems) 합으로 재계산 — project_costs.actual 캐시 표류 방지(다기기 정합)
+    //  costItems가 하나도 없는 프로젝트는 건드리지 않음(레거시/시드 actual 보존)
+    if (p.costItems.length > 0) {
+      var _ciSum = {};
+      p.costItems.forEach(function(it){ if (it.type) _ciSum[it.type] = (_ciSum[it.type] || 0) + (num(it.supplyAmt) || 0); });
+      Object.keys(p.costs).forEach(function(cat){ if (p.costs[cat]) p.costs[cat].actual = _ciSum[cat] || 0; });
+    }
     return p;
   }
 
@@ -18038,7 +18054,7 @@ CREATE TABLE system_map_activity (
       if (!Array.isArray(arr)) arr = [];
       arr.unshift({
         id:'WK'+Date.now(), name:name, rrn:rrn, phone:phone,
-        primaryJob:job, primaryWage:wage||220000, altJobs:[],
+        primaryJob:job, primaryWage:wage, altJobs:[],
         daysWorked:0, totalWage:0, createdAt:new Date().toISOString()
       });
       localStorage.setItem('mm-workers', JSON.stringify(arr));
@@ -18066,11 +18082,11 @@ CREATE TABLE system_map_activity (
       if (!Array.isArray(workers)) workers = [];
       var w = workers.find(function(x){ return (x.name||'').trim() === workerName; });
       if (!w) {
-        w = { id:'WK'+Date.now(), name:workerName, primaryJob:'일반', primaryWage:wage||220000, altJobs:[], daysWorked:0, totalWage:0, createdAt:new Date().toISOString() };
+        w = { id:'WK'+Date.now(), name:workerName, primaryJob:'일반', primaryWage:wage, altJobs:[], daysWorked:0, totalWage:0, createdAt:new Date().toISOString() };
         workers.unshift(w);
         localStorage.setItem('mm-workers', JSON.stringify(workers));
       }
-      if (!wage) wage = num(w.primaryWage) || 220000;
+      if (!wage) wage = num(w.primaryWage);  // [감사 rank1] 빈 일당 220,000 합성 제거 — 미입력은 0(미산정)
       var arr = JSON.parse(localStorage.getItem('mm-attendance') || '[]');
       if (!Array.isArray(arr)) arr = [];
       if (arr.some(function(a){ return a.workerId===w.id && a.date===date; })) {
@@ -19462,7 +19478,7 @@ CREATE TABLE system_map_activity (
           if (!Array.isArray(arr)) arr = [];
           p.rows.forEach(function(r, i) {
             var name = (r[0]||'').trim(); if (!name) return;
-            arr.push({ id:'WK'+ts+'_'+i, name:name, rrn:(r[1]||'').trim(), phone:(r[2]||'').trim(), primaryJob:(r[3]||'일반').trim(), primaryWage:num(r[4])||220000, altJobs:[], daysWorked:0, totalWage:0, createdAt:new Date().toISOString() });
+            arr.push({ id:'WK'+ts+'_'+i, name:name, rrn:(r[1]||'').trim(), phone:(r[2]||'').trim(), primaryJob:(r[3]||'일반').trim(), primaryWage:num(r[4]), altJobs:[], daysWorked:0, totalWage:0, createdAt:new Date().toISOString() });
             count++;
           });
           localStorage.setItem('mm-workers', JSON.stringify(arr));
@@ -19477,10 +19493,10 @@ CREATE TABLE system_map_activity (
             if (!date || !workerName) return;
             var w = workers.find(function(x){return (x.name||'').trim()===workerName;});
             if (!w) {
-              w = { id:'WK'+ts+'_'+i, name:workerName, primaryJob:(r[2]||'일반').trim(), primaryWage:num(r[3])||220000, altJobs:[], daysWorked:0, totalWage:0, createdAt:new Date().toISOString() };
+              w = { id:'WK'+ts+'_'+i, name:workerName, primaryJob:(r[2]||'일반').trim(), primaryWage:num(r[3]), altJobs:[], daysWorked:0, totalWage:0, createdAt:new Date().toISOString() };
               workers.push(w);
             }
-            arr.push({ id:'AT'+ts+'_'+i, date:date, workerId:w.id, workerName:w.name, jobType:(r[2]||w.primaryJob||'일반').trim(), wage:num(r[3])||num(w.primaryWage)||220000, projectLabel:(r[4]||'').trim(), createdAt:new Date().toISOString() });
+            arr.push({ id:'AT'+ts+'_'+i, date:date, workerId:w.id, workerName:w.name, jobType:(r[2]||w.primaryJob||'일반').trim(), wage:num(r[3])||num(w.primaryWage), projectLabel:(r[4]||'').trim(), createdAt:new Date().toISOString() });
             count++;
           });
           localStorage.setItem('mm-workers', JSON.stringify(workers));
