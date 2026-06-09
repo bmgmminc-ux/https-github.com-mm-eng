@@ -17407,6 +17407,7 @@ CREATE TABLE system_map_activity (
   var CATS = ['outsource','material','product','indirect','cashexp','labor','safety','direct','labordirect'];
 
   function num(v) { return Number(String(v||'0').replace(/[^0-9.-]/g,'')) || 0 }
+  function bint(v) { return Math.round(num(v)) }  // bigint 컬럼용 — 소수 방지(원 단위 정수)
   function sbClient() { return window.mmSupabase && window.mmSupabase.getClient && window.mmSupabase.getClient() }
   function sbReady() { return window.mmSupabase && window.mmSupabase.isReady && window.mmSupabase.isReady() }
 
@@ -17457,24 +17458,24 @@ CREATE TABLE system_map_activity (
     var proj = {
       id: p.id, owner_id: ownerId, name: p.name||'', type: p.type||'',
       client: p.client||'', start_date: p.startDate||null, end_date: p.endDate||null,
-      contract_orig: num(p.contractOrig), contract_add: num(p.contractAdd), memo: p.memo||'',
+      contract_orig: bint(p.contractOrig), contract_add: bint(p.contractAdd), memo: p.memo||'',
       status: p.status||'진행중', progress: num(p.progress)||0
     };
     var costs = CATS.map(function(c) {
       var k = (p.costs && p.costs[c]) || {};
-      return { project_id: p.id, category: c, contract: num(k.contract),
-               actual: num(k.actual), seed_actual: num(k._seedActual) };
+      return { project_id: p.id, category: c, contract: bint(k.contract),
+               actual: bint(k.actual), seed_actual: bint(k._seedActual) };
     });
     var costItems = (p.costItems||[]).filter(function(it){return it.type}).map(function(it) {
       return { project_id: p.id, type: it.type, vendor: it.vendor||null, desc_text: it.desc||null,
-        supply_amt: num(it.supplyAmt), tax: num(it.tax), total: num(it.total),
-        paid_amount: num(it.paidAmount), doc_date: it.date||null, memo: it.memo||null };
+        supply_amt: bint(it.supplyAmt), tax: bint(it.tax), total: bint(it.total),
+        paid_amount: bint(it.paidAmount), doc_date: it.date||null, memo: it.memo||null };
     });
     var billingItems = (p.billingItems||[]).map(function(b, i) {
       return { project_id: p.id, round_no: i+1, apply_date: b.applyDate||null,
-        apply_supply: num(b.applySupply), apply_tax: num(b.applyTax), apply_total: num(b.applyTotal),
-        receive_date: b.receiveDate||null, billing_amount: num(b.billingAmount),
-        advance_amount: num(b.advanceAmount) };
+        apply_supply: bint(b.applySupply), apply_tax: bint(b.applyTax), apply_total: bint(b.applyTotal),
+        receive_date: b.receiveDate||null, billing_amount: bint(b.billingAmount),
+        advance_amount: bint(b.advanceAmount) };
     });
     var otherIncomeItems = (p.otherIncomeItems||[]).map(function(o) {
       return { project_id: p.id, vendor: o.vendor||null, desc_text: o.desc||null,
