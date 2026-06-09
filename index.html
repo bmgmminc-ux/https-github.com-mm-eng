@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css">
 <!-- Supabase JS Client v2 [#121] -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js" crossorigin></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" crossorigin></script>
 <style>
 /* ═══════════════════════════════════════════════════════════════
    MM E.N.G v23 PREMIUM DESIGN SYSTEM v2
@@ -13433,18 +13434,26 @@ CREATE TABLE system_map_activity (
 
       var reader = new FileReader();
       reader.onload = function(e) {
-        var text = e.target.result.replace(/^\uFEFF/, '');
-        var lines = text.split(/\r?\n/).filter(function(l) { return l.trim() !== ''; });
+        var rows = [];
+        try {
+          if (/\.xlsx?$/.test((file.name||'').toLowerCase()) && typeof XLSX !== 'undefined') {
+            var _wb = XLSX.read(new Uint8Array(e.target.result), { type:'array' });
+            rows = XLSX.utils.sheet_to_json(_wb.Sheets[_wb.SheetNames[0]], { header:1, raw:true, defval:'' });
+          } else {
+            rows = String(e.target.result||'').replace(/^\uFEFF/, '').split(/\r?\n/).filter(function(l){ return l.trim() !== ''; }).map(function(l){ return l.split(','); });
+          }
+        } catch(_pe) { if (window.globalToast) globalToast('견적서 파싱 실패: ' + _pe.message, 'error'); rows = []; }
 
         // 견적 항목 자동 분류 (키워드 매칭)
         var distribution = {};
         Object.keys(BUDGET_DISTRIBUTION_DEFAULTS).forEach(function(k) { distribution[k] = 0; });
 
         var classified = 0;
-        lines.slice(1).forEach(function(line) {
-          var cols = line.split(',');
-          var desc = (cols[0] || '').toLowerCase();
-          var amount = normalizeAmount(cols[1] || cols[2] || '0');
+        (rows || []).slice(1).forEach(function(cols) {
+          if (!cols || !cols.length) return;
+          var desc = String(cols[0] || '').toLowerCase();
+          var amount = 0;
+          for (var ci = 0; ci < cols.length; ci++) { var n = normalizeAmount(cols[ci]); if (n > amount) amount = n; }
 
           // 키워드 매칭
           var cat = 'subcontract';  // 기본
@@ -13516,7 +13525,7 @@ CREATE TABLE system_map_activity (
         // 결과를 BudgetKanbanModal에 표시 (있으면)
         showBudgetKanbanResult(distribution, contractAmount);
       };
-      reader.readAsText(file, 'UTF-8');
+      if (/\.xlsx?$/.test((file.name||'').toLowerCase())) reader.readAsArrayBuffer(file); else reader.readAsText(file, 'UTF-8');
     };
 
     function showBudgetKanbanResult(distribution, total) {
