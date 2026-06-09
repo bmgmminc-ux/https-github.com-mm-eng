@@ -4088,7 +4088,7 @@ table.data-table {
       <div class="sidebar-label">마스터</div>
       <button class="nav-item" data-nav="vendor-status">
         <span class="icon-wrap"><svg class="icon"><use href="#i-vendors"/></svg></span>
-        <span class="nav-text">업체별 현황</span>
+        <span class="nav-text">거래처 매입·결제 현황</span>
       </button>
       <button class="nav-item" data-nav="vendors">
         <span class="icon-wrap"><svg class="icon"><use href="#i-vendor-mgr"/></svg></span>
@@ -7132,7 +7132,6 @@ table.data-table {
       <div style="overflow-x:auto"><table id="mm-purchase-table" class="data-table" style="width:100%;border-collapse:separate;border-spacing:0;font-size:15"></table></div>
     </div>
     <div class="modal-footer" style="display:flex;justify-content:flex-end;gap:8px;padding:16px 28px">
-      <button class="btn btn-sm" style="border:1px solid #059669;color:#059669;background:#fff;padding:10px 20px;border-radius:8px;font-weight:600;cursor:pointer" onclick="mmPurchase.exportExcel()">📤 엑셀</button>
       <button class="btn btn-ghost" onclick="closeModal('modal-purchase')">취소</button>
       <button class="btn btn-primary" onclick="mmPurchase.save()">💾 저장</button>
     </div>
@@ -7186,7 +7185,7 @@ table.data-table {
       <div id="mm-od-bulkbar" style="display:none;align-items:center;gap:8px;padding:10px 16px;background:#FEF3C7;border:1px solid #FDE68A;border-radius:10px"><span id="mm-od-bulkcount" style="font-size:13px;font-weight:700;color:#92400E"></span><select id="mm-od-bulkmove" style="padding:6px 10px;border-radius:6px;border:1px solid #d1d5db;font-size:12px"></select><button class="btn btn-sm" style="padding:6px 12px;border:1px solid #2563EB;background:#fff;color:#2563EB;border-radius:6px;cursor:pointer" onclick="mmCostDist.moveSelected()">→ 분류 이동</button><button class="btn btn-sm" style="padding:6px 12px;border:1px solid #DC2626;background:#fff;color:#DC2626;border-radius:6px;cursor:pointer" onclick="mmCostDist.removeSelected()">🗑 선택 삭제</button><button class="btn btn-sm" style="padding:6px 12px;border:1px solid #94a3b8;background:#fff;color:#64748b;border-radius:6px;cursor:pointer;margin-left:auto" onclick="mmCostDist.clearSelection()">선택 해제</button></div>
       <div id="mm-od-kanban" style="display:flex;gap:10px;overflow-x:auto;padding-bottom:8px"></div>
     </div>
-    <div class="modal-footer" style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:14px 28px;background:#F1F5F9"><div style="font-size:15px;font-weight:700">전체 합계 (<span id="mm-od-total-count">0</span>건) · 원가 예산: <strong id="mm-od-distsum" style="color:#D97706;font-size:18px">0</strong></div><div style="display:flex;gap:8px"><button class="btn btn-sm" onclick="mmCostDist.clearAll()" style="border:1px solid #DC2626;background:#fff;color:#DC2626;font-weight:700">🗑 전체 삭제</button><button class="btn btn-secondary btn-sm" onclick="mmCostDist.readPaste()" style="border:1px solid #059669;background:#ECFDF5;color:#059669;font-weight:700">📋 붙여넣기</button><button class="btn btn-ghost" onclick="closeModal('modal-cost-dist')">취소</button><button class="btn btn-primary" onclick="mmCostDist.save()">💾 저장 (예산 반영)</button></div></div>
+    <div class="modal-footer" style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:14px 28px;background:#F1F5F9"><div style="font-size:15px;font-weight:700">전체 합계 (<span id="mm-od-total-count">0</span>건) · 원가 예산: <strong id="mm-od-distsum" style="color:#D97706;font-size:18px">0</strong></div><div style="display:flex;gap:8px"><button class="btn btn-sm" onclick="mmCostDist.clearAll()" style="border:1px solid #DC2626;background:#fff;color:#DC2626;font-weight:700">🗑 전체 삭제</button><button class="btn btn-ghost" onclick="closeModal('modal-cost-dist')">취소</button><button class="btn btn-primary" onclick="mmCostDist.save()">💾 저장 (예산 반영)</button></div></div>
   </div>
 </div>
 <!-- 6. 편집 -->
@@ -9395,8 +9394,8 @@ table.data-table {
 
     <div class="topbar">
       <div>
-        <div class="breadcrumb">대시보드 / 마스터 / <span>업체별 현황</span></div>
-        <div class="topbar-title">업체별 현황</div>
+        <div class="breadcrumb">대시보드 / 마스터 / <span>거래처 매입·결제 현황</span></div>
+        <div class="topbar-title">거래처 매입·결제 현황</div>
       </div>
       <div class="search-bar">
         <svg class="icon icon-sm"><use href="#i-search"/></svg>
@@ -9433,7 +9432,7 @@ table.data-table {
         <div class="hero-grid">
           <div>
             <div class="hero-eyebrow">마스터 분석 · 업체별 매입 통합 추적</div>
-            <div class="hero-title">업체별 현황<br/>42개 협력 업체 분석</div>
+            <div class="hero-title">거래처 매입·결제 현황<br/>42개 협력 업체 분석</div>
             <div class="hero-meta">
               <span>📅 2026년 5월 3일 일요일</span>
               <span><span class="dot-status live"></span>이번 달 거래 38건</span>
@@ -9639,7 +9638,7 @@ table.data-table {
               <tr>
                 <td colspan="10" style="text-align:center;padding:48px 20px;color:#94a3b8;font-weight:600">
                   <div style="font-size:32px;margin-bottom:8px">📊</div>
-                  <div style="font-size:14px;font-weight:800;color:#475569;margin-bottom:4px">업체별 현황 데이터 없음</div>
+                  <div style="font-size:14px;font-weight:800;color:#475569;margin-bottom:4px">거래처 매입·결제 현황 데이터 없음</div>
                   <div style="font-size:12px">매입 등록이 누적되면 자동 집계됩니다</div>
                 </td>
               </tr>
@@ -9838,7 +9837,7 @@ table.data-table {
 
       <!-- 도메인 룰 안내 -->
       <div style="padding:14px 18px;background:var(--bg-subtle);border-radius:10px;border-left:4px solid var(--primary-500);margin-bottom:24px">
-        <div style="font-size:13px;font-weight:800;color:var(--text-primary);margin-bottom:6px">📌 업체별 현황 도메인 룰</div>
+        <div style="font-size:13px;font-weight:800;color:var(--text-primary);margin-bottom:6px">📌 거래처 매입·결제 현황 도메인 룰</div>
         <div class="t-xs" style="line-height:1.7;color:var(--text-secondary)">
           · 9분류 매입 자동 분류 (도메인 룰 4): 외주·자재·상품·간접·비증빙·인건·안전·직불·인건직불<br/>
           · 직불금 + 인건직불금은 캐시플로우에서 제외 (도메인 룰 1) — 발주처 직접지급<br/>
@@ -14766,6 +14765,27 @@ CREATE TABLE system_map_activity (
     } catch (e) { state.pasteMap = ['vendor','desc','supplyAmt','total','memo']; }
   }
   function saveProject() {
+    // [요청] 매입 저장 전 — 거래처(mm-vendors-v2)에 미등록 업체를 먼저 등록 (붙여넣기·임포트 등 모든 경로 보장)
+    try {
+      var _vraw = localStorage.getItem('mm-vendors-v2');
+      var _vendors = _vraw ? JSON.parse(_vraw) : [];
+      if (!Array.isArray(_vendors)) _vendors = [];
+      var _vadd = 0;
+      (state.items || []).forEach(function(it){
+        var _nm = (it.vendor || '').trim();
+        if (!_nm) return;  // 빈 업체명(노무 등)은 제외
+        var _nn = normVendor(_nm);
+        if (_nn && !_vendors.some(function(v){ return normVendor(typeof v === 'string' ? v : v.name) === _nn; })) {
+          _vendors.push({ id: 'V-' + Date.now() + '-' + _vadd, name: _nm, createdAt: new Date().toISOString().substring(0,10) });
+          _vadd++;
+        }
+      });
+      if (_vadd > 0) {
+        localStorage.setItem('mm-vendors-v2', JSON.stringify(_vendors));
+        try { window.dispatchEvent(new StorageEvent('storage', { key:'mm-vendors-v2' })); } catch(e){}
+        if (window.globalToast) window.globalToast('🏢 미등록 업체 ' + _vadd + '곳을 거래처에 먼저 등록 후 매입 저장', 'info', 5000);
+      }
+    } catch (_ve) {}
     var raw = localStorage.getItem('mm-dash-v4');
     var projects = raw ? JSON.parse(raw) : [];
     if (!Array.isArray(projects)) projects = [];
@@ -14853,6 +14873,10 @@ CREATE TABLE system_map_activity (
   }
   function quickFillPaid(idx) {
     editField(idx, 'paidAmount', state.items[idx].total || 0);
+  }
+  function markUnpaid(idx) {
+    editField(idx, 'paidAmount', 0);  // 지급액 0 → 미지급 전환 (editField가 재렌더)
+    if (state.items[idx]) { state.items[idx].paidDate = ''; render(); }  // 지급일 제거
   }
 
   // ── 클립보드 paste ──
@@ -15021,7 +15045,7 @@ CREATE TABLE system_map_activity (
             + '<td style="padding:14px;border-bottom:1px solid #f1f5f9;min-width:117px">'+nInp('supplyAmt',it.supplyAmt)+'</td>'
             + (vat0?'':'<td style="padding:14px;border-bottom:1px solid #f1f5f9;text-align:right;color:#64748b">'+fmt(it.tax)+'</td>')
             + '<td style="padding:14px;border-bottom:1px solid #f1f5f9;text-align:right;font-weight:700">'+fmt(it.total)+'</td>'
-            + (direct?'':'<td style="padding:14px;border-bottom:1px solid #f1f5f9;min-width:140px"><div style="display:flex;align-items:center;gap:4px">'+nInp('paidAmount',it.paidAmount||0)+(isUnpaid?'<button onclick="mmPurchase.quickPaid('+oi+')" title="합계를 지급액으로" style="padding:4px 8px;border-radius:6px;border:1px solid #059669;background:#ECFDF5;color:#059669;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">지급</button>':'')+'</div></td>')
+            + (direct?'':'<td style="padding:14px;border-bottom:1px solid #f1f5f9;min-width:140px"><div style="display:flex;align-items:center;gap:4px">'+nInp('paidAmount',it.paidAmount||0)+(isUnpaid?'<button onclick="mmPurchase.quickPaid('+oi+')" title="합계를 지급액으로" style="padding:4px 8px;border-radius:6px;border:1px solid #059669;background:#ECFDF5;color:#059669;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">지급</button>':((it.total||0)>0&&(it.paidAmount||0)>0?'<button onclick="mmPurchase.markUnpaid('+oi+')" title="지급액 0으로 — 미지급 전환" style="padding:4px 8px;border-radius:6px;border:1px solid #DC2626;background:#FEF2F2;color:#DC2626;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">미지급</button>':''))+'</div></td>')
             + '<td style="padding:14px;border-bottom:1px solid #f1f5f9">'+inp('memo',it.memo)+'</td>'
             + '<td style="padding:14px;border-bottom:1px solid #f1f5f9"><button onclick="mmPurchase.removeRow('+oi+')" style="background:none;border:none;cursor:pointer;font-size:16px;color:#DC2626">🗑</button></td>'
             + '</tr>';
@@ -15036,7 +15060,7 @@ CREATE TABLE system_map_activity (
     removeRow: removeRow,
     edit: function(idx, field, val) { editField(idx, field, val) },
     editNum: function(idx, field, val) { editField(idx, field, num(val)) },
-    quickPaid: quickFillPaid,
+    quickPaid: quickFillPaid, markUnpaid: markUnpaid,
     readPaste: readPaste,
     applyPaste: applyPaste,
     cancelPaste: function() { state.paste = null; render() },
@@ -17284,7 +17308,7 @@ CREATE TABLE system_map_activity (
     if (!vendors.length) {
       tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:48px 20px;color:#94a3b8;font-weight:600">' +
         '<div style="font-size:32px;margin-bottom:8px">📊</div>' +
-        '<div style="font-size:14px;font-weight:800;color:#475569">업체별 현황 데이터 없음</div>' +
+        '<div style="font-size:14px;font-weight:800;color:#475569">거래처 매입·결제 현황 데이터 없음</div>' +
         '<div style="font-size:12px;margin-top:3px">매입 등록(거래처 입력)이 누적되면 자동 집계됩니다</div></td></tr>';
       return;
     }
@@ -19792,7 +19816,7 @@ CREATE TABLE system_map_activity (
     var totalPurchase = vendorNames.reduce(function(s,v){ return s+byVendor[v].amt; }, 0);
     // 히어로 타이틀
     var hero = screen.querySelector('.hero-title');
-    if (hero) hero.innerHTML = '업체별 현황<br/>'+vd.length+'개 협력 업체';
+    if (hero) hero.innerHTML = '거래처 매입·결제 현황<br/>'+vd.length+'개 협력 업체';
     // KPI
     var kpis = screen.querySelectorAll('.kpi-card .kpi-value');
     if (kpis[0]) setKpiNum(kpis[0], vd.length);
@@ -20210,7 +20234,7 @@ CREATE TABLE system_map_activity (
     if (vs){
       if (!hasPurchase && !vd.length){
         zeroKpis(vs);
-        var vsHero = vs.querySelector('.hero-title'); if(vsHero) vsHero.innerHTML='업체별 현황<br/>0개 협력 업체';
+        var vsHero = vs.querySelector('.hero-title'); if(vsHero) vsHero.innerHTML='거래처 매입·결제 현황<br/>0개 협력 업체';
         hideCards(vs, ['결제 행태','9분류별 매입','거래액 TOP','미지급 정산','외상 현황']);
       }
     }
