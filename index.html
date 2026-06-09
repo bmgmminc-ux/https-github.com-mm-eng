@@ -13428,109 +13428,144 @@ CREATE TABLE system_map_activity (
     };
 
     // 견적서 Excel/CSV 업로드 → 9분류 자동 분배
+    // 견적서 Excel/CSV 업로드 → 9분류 자동 분배 (표준품셈 내역서 / 단순목록 모두 지원)
+    // 견적서 Excel/CSV 업로드 → 9분류 자동 분배 (표준품셈 내역서 / 단순목록 모두 지원)
     window.processEstimateExcel = function(file, contractAmount) {
       if (!file) return;
-      contractAmount = contractAmount || 500000000;  // 기본값 5억
-
       var reader = new FileReader();
+      var isExcel = /\.xlsx?$/i.test(file.name || '');
       reader.onload = function(e) {
         var rows = [];
         try {
-          if (/\.xlsx?$/.test((file.name||'').toLowerCase()) && typeof XLSX !== 'undefined') {
+          if (isExcel && typeof XLSX !== 'undefined') {
             var _wb = XLSX.read(new Uint8Array(e.target.result), { type:'array' });
             rows = XLSX.utils.sheet_to_json(_wb.Sheets[_wb.SheetNames[0]], { header:1, raw:true, defval:'' });
           } else {
-            rows = String(e.target.result||'').replace(/^\uFEFF/, '').split(/\r?\n/).filter(function(l){ return l.trim() !== ''; }).map(function(l){ return l.split(','); });
+            rows = String(e.target.result || '').replace(/^﻿/, '').split(/\r?\n/).filter(function(l){ return l.trim() !== ''; }).map(function(l){ return l.split(','); });
           }
-        } catch(_pe) { if (window.globalToast) globalToast('견적서 파싱 실패: ' + _pe.message, 'error'); rows = []; }
+        } catch (_pe) {
+          if (window.globalToast) globalToast('견적서 파싱 실패: ' + _pe.message, 'error');
+          return;
+        }
+        if (!rows.length) { if (window.globalToast) globalToast('견적서가 비어 있습니다', 'error'); return; }
 
-        // 금액 컬럼 식별 — 헤더에서 금액/공급가/합계(사업자번호·전화 오탐 방지)
-        var _amtCol = -1, _hdr = rows[0] || [];
-        for (var _h = 0; _h < _hdr.length; _h++) { if (/금\s*액|공급\s*가|합\s*계|총\s*액/.test(String(_hdr[_h]||''))) { _amtCol = _h; } }
+        function _amt(v){ if (v == null) return 0; if (typeof v === 'number') return isFinite(v) ? v : 0; var s = String(v).replace(/[^\d.\-]/g, ''); var n = parseFloat(s); return isNaN(n) ? 0 : n; }
+        var SUBTOTAL_RE = /소\s*계|합\s*계|총\s*계|총\s*공\s*사|도\s*급|원\s*가\s*계|^\s*계\s*$|[\[\(]\s*계\s*[\]\)]/;
 
-        // 견적 항목 자동 분류 (키워드 매칭)
-        var distribution = {};
-        Object.keys(BUDGET_DISTRIBUTION_DEFAULTS).forEach(function(k) { distribution[k] = 0; });
+        var distribution = { subcontract:0, material:0, product:0, indirect:0, unverified:0, labor:0, safety:0, direct:0, labor_direct:0 };
+        var realTotal = 0, mode = '';
 
-        var classified = 0;
-        (rows || []).slice(1).forEach(function(cols) {
-          if (!cols || !cols.length) return;
-          var desc = String(cols[0] || '').toLowerCase();
-          var amount = 0;
-          if (_amtCol >= 0) { amount = normalizeAmount(cols[_amtCol]); }
-          else { for (var ci = cols.length - 1; ci >= 0; ci--) { var n = normalizeAmount(cols[ci]); if (n > 0 && n < 10000000000) { amount = n; break; } } }
-
-          // 키워드 매칭
-          var cat = 'subcontract';  // 기본
-          if (/배관|밸브|덕트|자재|재료/.test(desc)) cat = 'material';
-          else if (/fcu|ahu|완제품|상품|장비/.test(desc)) cat = 'product';
-          else if (/보험|임대|간접/.test(desc)) cat = 'indirect';
-          else if (/인건|일당|노무|일용직/.test(desc)) cat = 'labor';
-          else if (/안전|관리비.*안전/.test(desc)) cat = 'safety';
-          else if (/직불|발주처.*직접/.test(desc)) cat = 'direct';
-          else if (/외주|시공|하도급/.test(desc)) cat = 'subcontract';
-
-          distribution[cat] += amount;
-          if (amount > 0) classified++;
-        });
-
-        // 0인 분류는 표준 비율로 보정
-        var totalClassified = Object.values(distribution).reduce(function(a, b) { return a + b; }, 0);
-        if (totalClassified < contractAmount * 0.5) {
-          // 너무 적게 분류된 경우 표준 비율 적용
-          Object.keys(BUDGET_DISTRIBUTION_DEFAULTS).forEach(function(k) {
-            distribution[k] = Math.round(contractAmount * BUDGET_DISTRIBUTION_DEFAULTS[k]);
-          });
-          if (window.globalToast) globalToast('⚠ 견적 행 분류 부족 — 표준 비율로 자동 적용', 'warning');
+        // ── 형식 A: 표준품셈 내역서 (재료비/노무비/경비 컬럼) ──
+        var hRow = -1;
+        for (var r = 0; r < Math.min(rows.length, 15); r++) {
+          var _j = (rows[r] || []).map(function(c){ return String(c || ''); }).join('|');
+          if (/재\s*료\s*비/.test(_j) && /노\s*무\s*비/.test(_j)) { hRow = r; break; }
+        }
+        if (hRow >= 0) {
+          mode = '표준내역서';
+          var mainH = rows[hRow] || [], subH = rows[hRow + 1] || [], _cur = '', g = {};
+          var _LN = Math.max(mainH.length, subH.length);
+          for (var c = 0; c < _LN; c++) {
+            var _m = String(mainH[c] || '').replace(/\s/g, ''); if (_m) _cur = _m;
+            var _s = String(subH[c] || '').replace(/\s/g, ''); if (_s === '금액') g[_cur] = c;
+          }
+          if (g['재료비'] == null && g['노무비'] == null) {
+            for (var c3 = 0; c3 < mainH.length; c3++) {
+              var _t = String(mainH[c3] || '').replace(/\s/g, '');
+              if (_t === '재료비') g['재료비'] = c3 + 1;
+              if (_t === '노무비') g['노무비'] = c3 + 1;
+              if (_t === '경비') g['경비'] = c3 + 1;
+            }
+          }
+          var matC = g['재료비'], labC = g['노무비'], expC = g['경비'];
+          var dMat=0,dLab=0,dExp=0, sMat=0,sLab=0,sExp=0;
+          for (var i = hRow + 2; i < rows.length; i++) {
+            var row = rows[i] || [], nm = String(row[0] || '').trim();
+            var mv = matC != null ? _amt(row[matC]) : 0, lv = labC != null ? _amt(row[labC]) : 0, ev = expC != null ? _amt(row[expC]) : 0;
+            if (SUBTOTAL_RE.test(nm)) { sMat += mv; sLab += lv; sExp += ev; }
+            else { dMat += mv; dLab += lv; dExp += ev; }
+          }
+          var _useD = (dMat + dLab + dExp) > 0;
+          distribution.material = _useD ? dMat : sMat;
+          distribution.labor    = _useD ? dLab : sLab;
+          distribution.indirect = _useD ? dExp : sExp;
+          realTotal = distribution.material + distribution.labor + distribution.indirect;
         } else {
-          if (window.globalToast) globalToast('✓ 견적서 ' + classified + '행 분석 → 9분류 자동 분배 완료', 'success');
+          // ── 형식 B: 단순 목록 (품명 | 금액) — 키워드 분류 ──
+          mode = '단순목록';
+          var amtCol = -1, hdr = rows[0] || [];
+          for (var h = 0; h < hdr.length; h++) { if (/금\s*액|공급\s*가|합\s*계|총\s*액/.test(String(hdr[h] || ''))) amtCol = h; }
+          for (var k = 1; k < rows.length; k++) {
+            var cols = rows[k] || []; if (!cols.length) continue;
+            var nm2 = String(cols[0] || '').trim();
+            if (SUBTOTAL_RE.test(nm2)) continue;
+            var a;
+            if (amtCol >= 0) a = _amt(cols[amtCol]);
+            else { a = 0; for (var ci = cols.length - 1; ci >= 0; ci--) { var _n = _amt(cols[ci]); if (_n > 0 && _n < 1e10) { a = _n; break; } } }
+            if (a <= 0) continue;
+            var desc = nm2.toLowerCase(), cat = 'subcontract';
+            if (/배관|밸브|덕트|자재|재료/.test(desc)) cat = 'material';
+            else if (/fcu|ahu|완제품|상품|장비/.test(desc)) cat = 'product';
+            else if (/보험|임대|간접/.test(desc)) cat = 'indirect';
+            else if (/인건|일당|노무|일용직/.test(desc)) cat = 'labor';
+            else if (/안전/.test(desc)) cat = 'safety';
+            else if (/직불/.test(desc)) cat = 'direct';
+            else if (/외주|시공|하도급/.test(desc)) cat = 'subcontract';
+            distribution[cat] += a; realTotal += a;
+          }
         }
 
-        // 결과 저장
+        // ── 실제 금액 0 → 가짜 데이터 채우지 않음 (명확히 실패 고지) ──
+        if (realTotal <= 0) {
+          if (window.globalToast) globalToast('⚠ 견적서에서 금액을 읽지 못했습니다 — 양식(재료비/노무비/경비 또는 금액 열)을 확인하세요. 기존 데이터는 변경하지 않았습니다.', 'error', 9000);
+          return;
+        }
+
+        // ── 결과 캐시 ──
         try {
-          localStorage.setItem('mm-budget-distribution', JSON.stringify({
-            contractAmount: contractAmount,
-            distribution: distribution,
-            classified: classified,
-            timestamp: new Date().toISOString()
-          }));
+          localStorage.setItem('mm-budget-distribution', JSON.stringify({ mode: mode, contractAmount: realTotal, distribution: distribution, timestamp: new Date().toISOString() }));
         } catch (e) {}
 
-        // ── [FIX] 현재 프로젝트 p.costs[CAT].contract 에 9분류 분산 기록 ──
+        // ── 현재 프로젝트에 실제 분산 기록 (budgetItems=원본 + p.costs=파생, 일치하게) ──
         try {
-          var DIST_TO_CAT = {
-            subcontract:'outsource', material:'material', product:'product',
-            indirect:'indirect', unverified:'cashexp', labor:'labor',
-            safety:'safety', direct:'direct', labor_direct:'labordirect'
-          };
+          var DIST_TO_CAT = { subcontract:'outsource', material:'material', product:'product', indirect:'indirect', unverified:'cashexp', labor:'labor', safety:'safety', direct:'direct', labor_direct:'labordirect' };
+          var CAT_KO = { outsource:'외주비', material:'자재비', product:'상품비', indirect:'간접비', cashexp:'비증빙경비', labor:'인건비', safety:'안전관리비', direct:'직불금', labordirect:'인건비직불금' };
           var _raw = localStorage.getItem('mm-dash-v4');
           var _ps = _raw ? JSON.parse(_raw) : [];
           if (!Array.isArray(_ps)) _ps = [];
-          var _pid = sessionStorage.getItem('mm-selected-pid');
-          var _idx = _pid ? _ps.findIndex(function(p){return p.id===_pid}) : (_ps.length?0:-1);
-          if (_idx >= 0) {
-            var _p = _ps[_idx];
-            _p.costs = _p.costs || {};
-            Object.keys(DIST_TO_CAT).forEach(function(dk){
-              var ck = DIST_TO_CAT[dk];
-              _p.costs[ck] = _p.costs[ck] || { contract:0, actual:0 };
-              _p.costs[ck].contract = Math.round(distribution[dk] || 0);
-            });
-            _ps[_idx] = _p;
-            localStorage.setItem('mm-dash-v4', JSON.stringify(_ps));
-            try { window.dispatchEvent(new StorageEvent('storage', { key:'mm-dash-v4' })); } catch(e){}
-            try { if (window.pjBudget && window.pjBudget.render) setTimeout(function(){ window.pjBudget.render(); }, 60); } catch(e){}
-            try { if (window.pjDashboard && window.pjDashboard.render) setTimeout(function(){ window.pjDashboard.render(); }, 60); } catch(e){}
-            if (window.globalToast) globalToast('💾 9분류 분산 → 프로젝트 계약(' + _p.id + ')에 반영', 'success');
-          } else {
-            if (window.globalToast) globalToast('⚠ 선택된 프로젝트가 없어 계약 분산을 저장하지 못함', 'warning');
+          var _pid = sessionStorage.getItem('mm-selected-pid') || localStorage.getItem('mm-selected-pid');
+          var _idx = _pid ? _ps.findIndex(function(p){ return p.id === _pid; }) : (_ps.length ? 0 : -1);
+          if (_idx < 0) { if (window.globalToast) globalToast('⚠ 선택된 프로젝트가 없어 계약 분산을 저장하지 못함', 'warning'); return; }
+          var _p = _ps[_idx];
+          _p.costs = _p.costs || {};
+          // 이전 견적서 자동생성 항목만 제거(누적 방지), 수동 입력 항목은 보존
+          _p.budgetItems = (_p.budgetItems || []).filter(function(b){ return !(b && b.src === 'estimate' && (b.mode || 'contract') === 'contract'); });
+          var _seq = 0;
+          Object.keys(DIST_TO_CAT).forEach(function(dk){
+            var ck = DIST_TO_CAT[dk];
+            var _av = Math.round(distribution[dk] || 0);
+            _p.costs[ck] = _p.costs[ck] || { contract:0, actual:0 };
+            // [감사 #6] 분산값이 있는 카테고리만 갱신 — 견적서에 없는 카테고리의 기존 계약분산은 0으로 덮지 않고 보존
+            if (_av > 0) {
+              _p.costs[ck].contract = _av;  // 예산 분석 표용 합계(파생)
+              _p.budgetItems.push({ id: 'bi-est-' + ck + '-' + Date.now() + '-' + (_seq++), type: ck, name: '견적서 ' + (CAT_KO[ck] || ck), amount: _av, mode: 'contract', src: 'estimate' });
+            }
+          });
+          if (!_p.contractOrig || _p.contractOrig <= 0) _p.contractOrig = Math.round(realTotal);
+          _ps[_idx] = _p;
+          localStorage.setItem('mm-dash-v4', JSON.stringify(_ps));
+          try { window.dispatchEvent(new StorageEvent('storage', { key:'mm-dash-v4' })); } catch (e) {}
+          try { if (window.pjBudget && window.pjBudget.render) setTimeout(function(){ window.pjBudget.render(); }, 60); } catch (e) {}
+          try { if (window.pjDashboard && window.pjDashboard.render) setTimeout(function(){ window.pjDashboard.render(); }, 60); } catch (e) {}
+          if (window.globalToast) {
+            var _won = function(n){ return Math.round(n).toLocaleString(); };
+            globalToast('✓ 견적서(' + mode + ') 분석 완료 → 합계 ' + _won(realTotal) + '원 · 자재 ' + _won(distribution.material) + ' / 인건 ' + _won(distribution.labor) + ' / 간접 ' + _won(distribution.indirect), 'success', 9000);
           }
-        } catch (e) { if (window.globalToast) globalToast('⚠ 계약 분산 저장 실패: ' + e.message, 'error'); }
+        } catch (_we) { if (window.globalToast) globalToast('⚠ 계약 분산 저장 실패: ' + _we.message, 'error'); }
 
-        // 결과를 BudgetKanbanModal에 표시 (있으면)
-        showBudgetKanbanResult(distribution, contractAmount);
+        if (typeof showBudgetKanbanResult === 'function') { try { showBudgetKanbanResult(distribution, realTotal); } catch (e) {} }
       };
-      if (/\.xlsx?$/.test((file.name||'').toLowerCase())) reader.readAsArrayBuffer(file); else reader.readAsText(file, 'UTF-8');
+      if (isExcel) reader.readAsArrayBuffer(file); else reader.readAsText(file, 'UTF-8');
     };
 
     function showBudgetKanbanResult(distribution, total) {
@@ -13713,11 +13748,17 @@ CREATE TABLE system_map_activity (
       } else if (type === 'monthly') {
         body = '[월간 자금 흐름]\n· 매출 입금: 280,000,000\n· 매입 출금: 215,000,000\n· 인건비 지급: 54,000,000\n· 4대보험 회사부담: 4,295,074\n· 순현금 흐름: +6,704,926\n\n';
       } else if (type === 'insurance_edi') {
-        body = '[4대보험 EDI 신고 자료]\n' +
-          '· 가입자 수: 12명\n· 과세표준 합계: 32,780,000\n' +
-          '· 회사부담: 4,295,074 (국민 2,950,200 / 건강 1,162,193 / 고용 590,040 / 산재 1,213,140)\n' +
-          '· 근로자공제: 3,082,623 (국민 1,475,100 / 건강 1,162,193 / 고용 590,040)\n' +
-          '· 신고 마감: 2026-06-10 / 자동 송신 가능: 한국정보화진흥원 EDI\n\n';
+        var _ed = (pjId && typeof pjId === 'object') ? pjId : null;
+        if (_ed) {
+          body = '[4대보험 EDI 신고 자료 — ' + (_ed.reportingMonth || '') + ']\n' +
+            '· 가입자 수: ' + (Number(_ed.totalEnrollees) || 0) + '명 (월 8일 이상 출역 일용직)\n' +
+            '· 과세표준 합계: ' + (Number(_ed.taxBase) || 0).toLocaleString() + '\n' +
+            '· 회사부담(약 11.5%): ' + (Number(_ed.companyBurden) || 0).toLocaleString() + '\n' +
+            '· 근로자공제(약 8.5%): ' + (Number(_ed.workerDeduction) || 0).toLocaleString() + '\n' +
+            '· 신고 마감: ' + (_ed.deadline || '') + ' / 송신: 한국정보화진흥원 EDI\n\n';
+        } else {
+          body = '[4대보험 EDI 신고 자료]\n· 신고 대상 데이터가 없습니다 (8일 이상 출역한 일용직 없음). 출역 등록 후 생성하세요.\n\n';
+        }
       }
 
       return head + body + '\n[발주처 합의·확인]\n현장소장: ___________________  발주처 담당: ___________________\n\n* 본 보고서는 v23 통합 관리 대시보드에서 자동 생성됨\n';
@@ -13750,24 +13791,38 @@ CREATE TABLE system_map_activity (
     // 4대보험 EDI 신고 자동화
     // ═══════════════════════════════════════════════════════════════
     window.submitInsuranceEdi = function() {
+      // [감사 #1] 하드코딩 제거 — 실제 출역(mm-attendance)·일용직(mm-workers)으로 산출. 대상 없으면 차단.
+      var prefix = new Date().toISOString().slice(0, 7);  // 신고 월 = 현재 월
+      var attend = []; try { attend = JSON.parse(localStorage.getItem('mm-attendance') || '[]'); } catch (e) {}
+      if (!Array.isArray(attend)) attend = [];
+      var monthly = attend.filter(function(a){ return (a.date || '').indexOf(prefix) === 0; });
+      var workerDays = {};
+      monthly.forEach(function(a){ if (a.workerId) workerDays[a.workerId] = (workerDays[a.workerId] || 0) + 1; });
+      var eligibleIds = Object.keys(workerDays).filter(function(k){ return workerDays[k] >= 8; });  // 월 8일+ 가입 대상
+      var eligibleCount = eligibleIds.length;
+      var baseAmount = monthly.filter(function(a){ return a.workerId && eligibleIds.indexOf(a.workerId) >= 0; })
+                              .reduce(function(s, a){ return s + (Number(a.wage) || 0); }, 0);
+      var companyBurden = Math.round(baseAmount * 0.115);
+      var workerDeduction = Math.round(baseAmount * 0.085);
+      if (eligibleCount === 0 || baseAmount === 0) {
+        if (window.globalToast) globalToast('⚠ ' + prefix + ' 4대보험 신고 대상이 없습니다 (8일 이상 출역 일용직 없음). 출역 등록 후 다시 시도하세요.', 'warning', 7000);
+        return;
+      }
       if (window.globalToast) globalToast('🛡️ 4대보험 EDI 신고 자료 생성 중...', 'info');
       setTimeout(function() {
-        // EDI 자료 생성 (mock)
         var ediData = {
-          reportingMonth: new Date().toISOString().slice(0, 7),
-          totalEnrollees: 12,
-          companyBurden: 4295074,
-          workerDeduction: 3082623,
-          deadline: new Date().toISOString().slice(0, 10).replace(/(\d{4}-\d{2})-\d{2}/, '$1-10'),
+          reportingMonth: prefix,
+          totalEnrollees: eligibleCount,
+          taxBase: baseAmount,
+          companyBurden: companyBurden,
+          workerDeduction: workerDeduction,
+          deadline: prefix + '-10',
           submittedAt: new Date().toISOString()
         };
-        try {
-          localStorage.setItem('mm-insurance-edi-' + ediData.reportingMonth, JSON.stringify(ediData));
-        } catch (e) {}
-        if (window.globalToast) globalToast('✓ EDI 신고 자료 생성 완료 — 한국정보화진흥원 송신 준비', 'success');
-        // 보고서 자동 다운로드
-        window.generateReport('insurance_edi', 'pdf');
-      }, 1500);
+        try { localStorage.setItem('mm-insurance-edi-' + prefix, JSON.stringify(ediData)); } catch (e) {}
+        if (window.globalToast) globalToast('✓ EDI 신고 자료 생성 완료 — 대상 ' + eligibleCount + '명 / 회사부담 ' + companyBurden.toLocaleString() + '원', 'success', 7000);
+        window.generateReport('insurance_edi', 'pdf', ediData);
+      }, 800);
     };
 
     // ═══════════════════════════════════════════════════════════════
@@ -15458,6 +15513,21 @@ CREATE TABLE system_map_activity (
       st.project = currentProject();
       st.project.budgetItems = st.project.budgetItems || [];
       st.items = st.project.budgetItems.filter(function(b){return (b.mode||'contract')===mode});
+      // [동기화 복원] 이 모드 항목이 비었는데 costs에 분산값이 있으면 costs에서 자동 복원
+      // (budgetItems는 클라우드 미동기화 → pull로 유실. costs는 동기화되므로 항상 복원 가능)
+      if (st.items.length === 0 && st.project.costs) {
+        var _restored = [];
+        CATS.forEach(function(c){
+          var _cc = st.project.costs[c.key];
+          var _v = _cc ? num(mode === 'contract' ? _cc.contract : _cc.actual) : 0;
+          if (_v > 0) {
+            var _it = { id:'bi-'+mode+'-'+c.key+'-r'+Math.random().toString(36).slice(2,7), type:c.key, name:(mode==='contract'?'계약 ':'원가 ')+c.label, amount:_v, mode:mode, src:'derived' };
+            st.project.budgetItems.push(_it);
+            _restored.push(_it);
+          }
+        });
+        if (_restored.length) st.items = _restored;
+      }
       st.selected = {};
       st.editingId = null;
       // 분류 select 초기화
@@ -15655,8 +15725,11 @@ CREATE TABLE system_map_activity (
       st.project.costs = st.project.costs || {};
       CATS.forEach(function(c) {
         st.project.costs[c.key] = st.project.costs[c.key] || { contract:0, actual:0 };
+        var items = st.project.budgetItems.filter(function(b){return b.type===c.key && (b.mode||'contract')===mode});
+        // [감사 rank3] 이 카테고리에 항목이 하나도 없으면 기존 costs 값을 0으로 덮지 않고 보존(부분 비움 데이터 손실 방지)
+        if (items.length === 0) return;
         var sum = 0;
-        st.project.budgetItems.filter(function(b){return b.type===c.key && (b.mode||'contract')===mode}).forEach(function(b){sum += num(b.amount)});
+        items.forEach(function(b){sum += num(b.amount)});
         if (mode === 'contract') st.project.costs[c.key].contract = sum;
         else st.project.costs[c.key].actual = sum;
       });
@@ -17447,7 +17520,7 @@ CREATE TABLE system_map_activity (
       p.costItems.push({
         type: r.type, vendor: r.vendor||'', desc: r.desc_text||'',
         supplyAmt: num(r.supply_amt), tax: num(r.tax), total: num(r.total),
-        paidAmount: num(r.paid_amount), date: r.doc_date||'', memo: r.memo||''
+        paidAmount: num(r.paid_amount), date: r.doc_date||'', paidDate: r.doc_date||'', memo: r.memo||''
       });
     });
     (bRows||[]).sort(function(a,b){return (a.round_no||0)-(b.round_no||0)}).forEach(function(r) {
@@ -17483,7 +17556,7 @@ CREATE TABLE system_map_activity (
     var costItems = (p.costItems||[]).filter(function(it){return it.type}).map(function(it) {
       return { project_id: p.id, type: it.type, vendor: it.vendor||null, desc_text: it.desc||null,
         supply_amt: bint(it.supplyAmt), tax: bint(it.tax), total: bint(it.total),
-        paid_amount: bint(it.paidAmount), doc_date: it.date||null, memo: it.memo||null };
+        paid_amount: bint(it.paidAmount), doc_date: it.paidDate||it.createdAt||it.date||null, memo: it.memo||null };
     });
     var billingItems = (p.billingItems||[]).map(function(b, i) {
       return { project_id: p.id, round_no: i+1, apply_date: b.applyDate||null,
@@ -17493,8 +17566,8 @@ CREATE TABLE system_map_activity (
     });
     var otherIncomeItems = (p.otherIncomeItems||[]).map(function(o) {
       return { project_id: p.id, vendor: o.vendor||null, desc_text: o.desc||null,
-        supply_amt: num(o.supplyAmt), tax: num(o.tax), total: num(o.total),
-        received: num(o.received), received_date: o.receivedDate||null, memo: o.memo||null };
+        supply_amt: bint(o.supplyAmt), tax: bint(o.tax), total: bint(o.total),
+        received: bint(o.received), received_date: o.receivedDate||null, memo: o.memo||null };
     });
     return { project: proj, costs: costs, costItems: costItems, billingItems: billingItems, otherIncomeItems: otherIncomeItems };
   }
@@ -17944,7 +18017,7 @@ CREATE TABLE system_map_activity (
       localStorage.setItem('mm-dash-v4', JSON.stringify(arr));
       if (window.ovProjectList && window.ovProjectList.render) window.ovProjectList.render();
       if (window.ovPeriod && window.ovPeriod.applyPeriod) { try { window.ovPeriod.applyPeriod(sessionStorage.getItem('mm-ov-period')||'all'); } catch(e){} }
-      if (window.mmData && window.mmData.pushTable) { try { window.mmData.pushTable('projects'); } catch(e){} }
+      if (window.mmData && window.mmData.push) { try { window.mmData.push(); } catch(e){} }  // [감사 rank5] pushTable 미존재 → push()로 교체(신규 프로젝트 즉시 동기화)
       toast('📁 프로젝트 등록 완료 — ' + name + ' (' + id + ')', 'success');
       audit('데이터', '프로젝트 등록 — ' + id + ' ' + name);
       close('global-project-add');
