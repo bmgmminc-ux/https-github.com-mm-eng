@@ -13444,6 +13444,10 @@ CREATE TABLE system_map_activity (
           }
         } catch(_pe) { if (window.globalToast) globalToast('견적서 파싱 실패: ' + _pe.message, 'error'); rows = []; }
 
+        // 금액 컬럼 식별 — 헤더에서 금액/공급가/합계(사업자번호·전화 오탐 방지)
+        var _amtCol = -1, _hdr = rows[0] || [];
+        for (var _h = 0; _h < _hdr.length; _h++) { if (/금\s*액|공급\s*가|합\s*계|총\s*액/.test(String(_hdr[_h]||''))) { _amtCol = _h; } }
+
         // 견적 항목 자동 분류 (키워드 매칭)
         var distribution = {};
         Object.keys(BUDGET_DISTRIBUTION_DEFAULTS).forEach(function(k) { distribution[k] = 0; });
@@ -13453,7 +13457,8 @@ CREATE TABLE system_map_activity (
           if (!cols || !cols.length) return;
           var desc = String(cols[0] || '').toLowerCase();
           var amount = 0;
-          for (var ci = 0; ci < cols.length; ci++) { var n = normalizeAmount(cols[ci]); if (n > amount) amount = n; }
+          if (_amtCol >= 0) { amount = normalizeAmount(cols[_amtCol]); }
+          else { for (var ci = cols.length - 1; ci >= 0; ci--) { var n = normalizeAmount(cols[ci]); if (n > 0 && n < 10000000000) { amount = n; break; } } }
 
           // 키워드 매칭
           var cat = 'subcontract';  // 기본
@@ -13514,8 +13519,8 @@ CREATE TABLE system_map_activity (
             _ps[_idx] = _p;
             localStorage.setItem('mm-dash-v4', JSON.stringify(_ps));
             try { window.dispatchEvent(new StorageEvent('storage', { key:'mm-dash-v4' })); } catch(e){}
-            try { if (window.pjBudget && window.pjBudget.render) setTimeout(window.pjBudget.render, 50); } catch(e){}
-            try { if (window.pjDashboard && window.pjDashboard.render) setTimeout(window.pjDashboard.render, 50); } catch(e){}
+            try { if (window.pjBudget && window.pjBudget.render) setTimeout(function(){ window.pjBudget.render(); }, 60); } catch(e){}
+            try { if (window.pjDashboard && window.pjDashboard.render) setTimeout(function(){ window.pjDashboard.render(); }, 60); } catch(e){}
             if (window.globalToast) globalToast('💾 9분류 분산 → 프로젝트 계약(' + _p.id + ')에 반영', 'success');
           } else {
             if (window.globalToast) globalToast('⚠ 선택된 프로젝트가 없어 계약 분산을 저장하지 못함', 'warning');
