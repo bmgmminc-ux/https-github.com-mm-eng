@@ -15901,6 +15901,7 @@ CREATE TABLE system_map_activity (
         '</td></tr>';
       return;
     }
+    var esc = function(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };  // [H9] 사용자입력 이스케이프
     tbody.innerHTML = projects.map(function(p) {
       var contract = num(p.contractOrig) + num(p.contractAdd);
       var otherIncome = (p.otherIncomeItems||[]).reduce(function(s,o){ return s + num(o.total||o.supplyAmt||0); }, 0);
@@ -15914,8 +15915,8 @@ CREATE TABLE system_map_activity (
       var profitSign = profit >= 0 ? '+' : '';
       return '<tr data-pid="' + (p.id||'') + '" style="cursor:pointer">' +
         '<td><strong style="color:var(--primary-700)">' + (p.id||'—') + '</strong></td>' +
-        '<td><strong>' + (p.name||'—') + '</strong></td>' +
-        '<td>' + (p.client||'—') + '</td>' +
+        '<td><strong>' + esc(p.name||'—') + '</strong></td>' +
+        '<td>' + esc(p.client||'—') + '</td>' +
         '<td class="right tnum"><strong>' + fmtBil(contract) + '</strong>' +
           '<div class="t-xs">VAT ' + fmtBil(contract*1.1) + '</div></td>' +
         '<td class="right tnum">' + fmtBil(cost) + '</td>' +
@@ -16903,7 +16904,8 @@ CREATE TABLE system_map_activity (
     if (!confirm('이 거래처를 삭제할까요?')) return;
     var _gone = load().find(function(x){ return x.id === id; });
     save(load().filter(function(v){ return v.id !== id }));
-    if (_gone && _gone.name && window.mmData && window.mmData.deleteVendorCloud) window.mmData.deleteVendorCloud(_gone.name);  // [감사 2b] 클라우드 삭제 전파
+    // [감사 2b + 전수조사 H1] 클라우드 삭제 전파 — 실패 시 통지(툼스톤이 부활 차단, autoSync push가 재시도)
+    if (_gone && _gone.name && window.mmData && window.mmData.deleteVendorCloud) window.mmData.deleteVendorCloud(_gone.name).then(function(r){ if(!(r&&r.ok) && window.globalToast) globalToast('⚠️ 거래처 클라우드 삭제 실패('+((r&&r.msg)||'오프라인')+') — 자동 재시도 예정', 'warning', 5000); });
     render();
   }
 
@@ -17172,7 +17174,8 @@ CREATE TABLE system_map_activity (
     if (!confirm('이 인력을 삭제할까요?')) return;
     var _gone = load().find(function(x){ return x.id === id; });
     save(load().filter(function(w){ return w.id !== id }));
-    if (_gone && _gone.name && window.mmData && window.mmData.deleteWorkerCloud) window.mmData.deleteWorkerCloud(_gone.name);  // [감사 2b] 클라우드 삭제 전파(출역 cascade)
+    // [감사 2b + 전수조사 H1] 클라우드 삭제 전파(출역 cascade) — 실패 시 통지(툼스톤이 부활 차단, autoSync push가 재시도)
+    if (_gone && _gone.name && window.mmData && window.mmData.deleteWorkerCloud) window.mmData.deleteWorkerCloud(_gone.name).then(function(r){ if(!(r&&r.ok) && window.globalToast) globalToast('⚠️ 일용직 클라우드 삭제 실패('+((r&&r.msg)||'오프라인')+') — 자동 재시도 예정', 'warning', 5000); });
     render();
   }
 
@@ -17304,11 +17307,12 @@ CREATE TABLE system_map_activity (
     var unpaidList = list.filter(function(v){ return v.unpaid > 0; }).sort(function(a, b){ return b.unpaid - a.unpaid; }).slice(0, 8);
 
     var won = function(n){ return Math.round(n || 0).toLocaleString(); };
+    var esc = function(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };  // [H9] 사용자입력 이스케이프
     var nowd = new Date();
     var ds = nowd.getFullYear() + '-' + ('0' + (nowd.getMonth() + 1)).slice(-2) + '-' + ('0' + nowd.getDate()).slice(-2);
 
     var bodyRows = list.map(function(v){
-      return '<tr><td>' + v.name + (v.isWorker ? ' <span class="muted">(일용직)</span>' : '') + '</td>' +
+      return '<tr><td>' + esc(v.name) + (v.isWorker ? ' <span class="muted">(일용직)</span>' : '') + '</td>' +
         '<td>' + (CAT_LABEL[v.topCat] || '-') + '</td>' +
         '<td>' + v.count + '</td><td>' + v.pjCount + '</td>' +
         '<td>' + won(v.supply) + '</td>' +
@@ -17321,7 +17325,7 @@ CREATE TABLE system_map_activity (
       return '<tr><td>' + (CAT_LABEL[c] || c) + '</td><td>' + won(catTot[c]) + '</td><td>' + pct + '%</td></tr>';
     }).join('');
     var unpaidRows = unpaidList.length ? unpaidList.map(function(v){
-      return '<tr><td>' + v.name + '</td><td class="red">' + won(v.unpaid) + '</td><td>' + (v.avgPay != null ? v.avgPay + '일' : '미정') + '</td></tr>';
+      return '<tr><td>' + esc(v.name) + '</td><td class="red">' + won(v.unpaid) + '</td><td>' + (v.avgPay != null ? v.avgPay + '일' : '미정') + '</td></tr>';
     }).join('') : '<tr><td colspan="3" class="muted">미지급 없음 ✓</td></tr>';
 
     var html = '<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><title>거래처 매입·결제 분석 리포트</title>' +
@@ -17425,16 +17429,17 @@ CREATE TABLE system_map_activity (
       return;
     }
     var sevStyle = { '위험':{bg:'#FECACA',fg:'#991B1B'}, '주의':{bg:'#FED7AA',fg:'#9A3412'}, '정보':{bg:'#DBEAFE',fg:'#1E40AF'} };
+    var esc = function(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };  // [H9] 사용자입력 이스케이프
     var dstr = (today().getMonth()+1) + '-' + today().getDate();
     tbody.innerHTML = alerts.map(function(a) {
       var s = sevStyle[a.sev] || sevStyle['정보'];
       return '<tr>' +
         '<td class="center tnum">' + dstr + '</td>' +
         '<td><strong>' + a.type + '</strong></td>' +
-        '<td>' + a.target + '</td>' +
+        '<td>' + esc(a.target) + '</td>' +
         '<td class="right tnum">' + a.metric + '</td>' +
         '<td class="center"><span class="badge" style="background:' + s.bg + ';color:' + s.fg + '">' + a.sev + '</span></td>' +
-        '<td style="font-size:12px">' + a.msg + '</td>' +
+        '<td style="font-size:12px">' + esc(a.msg) + '</td>' +
         '<td class="right tnum">' + a.age + '</td>' +
         '<td class="center"><button class="btn btn-secondary btn-sm">확인</button></td>' +
         '</tr>';
@@ -17994,20 +17999,26 @@ CREATE TABLE system_map_activity (
       if(vP.length){ var rv=await sb.from('vendors').upsert(vP,{ onConflict:'id' }); if(rv.error) return { ok:false, msg:'거래처: '+rv.error.message }; }
       var wP=_mLoad('mm-workers').filter(function(w){ return w && w.name; }).map(function(w){ return { id:_mCloudId('w',w.name), owner_id:ownerId, name:w.name, jumin_masked:w.rrn||null, phone:w.phone||null, primary_job:w.primaryJob||null, primary_wage:Math.round(w.primaryWage||0), alt_jobs:Array.isArray(w.altJobs)?w.altJobs:[] }; });
       if(wP.length){ var rw=await sb.from('workers').upsert(wP,{ onConflict:'id' }); if(rw.error) return { ok:false, msg:'일용직: '+rw.error.message }; }
+      // [전수조사 H1] 툼스톤 잔존분 클라우드 삭제 재시도 — 삭제 당시 실패(오프라인 등)했어도 autoSync push마다 재시도
+      try{ var _tb=_mTombs(); for(var _i=0;_i<_tb.length;_i++){ var _t=_tb[_i]; await sb.from(_t.k==='v'?'vendors':'workers').delete().eq('id', _mCloudId(_t.k,_t.n)); } }catch(e){}
       return { ok:true, msg:'거래처 '+vP.length+' · 일용직 '+wP.length };
     }catch(e){ return { ok:false, msg:'마스터 push: '+(e.message||e) }; }
   }
+  // ── 마스터 삭제 툼스톤 [전수조사 H2] — 삭제 직후 pull 레이스/클라우드 삭제 실패로 되살아나는 것 방지 (TTL 10분, pushMasters가 재시도) ──
+  function _mTombs(){ try{ var t=JSON.parse(localStorage.getItem('mm-master-tomb')||'[]'); var now=Date.now(); t=Array.isArray(t)?t.filter(function(x){ return x&&x.n&&(now-(x.t||0))<600000; }):[]; return t; }catch(e){ return []; } }
+  function _mTombAdd(kind,name){ try{ var t=_mTombs(); t.push({ k:kind, n:_mNorm(name), t:Date.now() }); localStorage.setItem('mm-master-tomb', JSON.stringify(t)); }catch(e){} }
+  function _mTombHas(kind,name){ var n=_mNorm(name); return _mTombs().some(function(x){ return x.k===kind&&x.n===n; }); }
   async function pullMasters(){
     var sb=sbClient(); if(!sb) return { ok:false, msg:'no-cloud' };
     try{
       var rv=await sb.from('vendors').select('*'); if(rv.error) throw rv.error;
       var rw=await sb.from('workers').select('*'); if(rw.error) throw rw.error;
       var map=_mIdMap();
-      var lv={}; _mLoad('mm-vendors-v2').forEach(function(v){ var nm=((typeof v==='string')?v:(v&&v.name))||''; if(nm) lv[_mNorm(nm)]=(typeof v==='string')?{ id:'V-'+_uuid().slice(0,8), name:nm }:v; });
-      (rv.data||[]).forEach(function(r){ if(r.name){ var n=_mNorm(r.name); map['v:'+n]=r.id; var ex=lv[n]||{}; lv[n]=Object.assign({}, ex, { id:ex.id||('V-'+String(r.id).slice(0,8)), name:r.name, phone:r.phone||ex.phone, category:r.category||ex.category, memo:r.memo||ex.memo }); } });
+      var lv={}; _mLoad('mm-vendors-v2').forEach(function(v){ var nm=((typeof v==='string')?v:(v&&v.name))||''; if(nm&&!_mTombHas('v',nm)) lv[_mNorm(nm)]=(typeof v==='string')?{ id:'V-'+_uuid().slice(0,8), name:nm }:v; });
+      (rv.data||[]).forEach(function(r){ if(r.name&&!_mTombHas('v',r.name)){ var n=_mNorm(r.name); map['v:'+n]=r.id; var ex=lv[n]||{}; lv[n]=Object.assign({}, ex, { id:ex.id||('V-'+String(r.id).slice(0,8)), name:r.name, phone:r.phone||ex.phone, category:r.category||ex.category, memo:r.memo||ex.memo }); } });
       localStorage.setItem('mm-vendors-v2', JSON.stringify(Object.keys(lv).map(function(k){ return lv[k]; })));
-      var lw={}; _mLoad('mm-workers').forEach(function(w){ if(w&&w.name) lw[_mNorm(w.name)]=w; });
-      (rw.data||[]).forEach(function(r){ if(r.name){ var n=_mNorm(r.name); map['w:'+n]=r.id; var ex=lw[n]||{}; lw[n]=Object.assign({}, ex, { id:ex.id||('WK'+String(r.id).slice(0,8)), name:r.name, rrn:ex.rrn||r.jumin_masked||'', phone:ex.phone||r.phone||'', primaryJob:ex.primaryJob||r.primary_job||'일반', primaryWage:ex.primaryWage||r.primary_wage||0, altJobs:(Array.isArray(ex.altJobs)&&ex.altJobs.length)?ex.altJobs:(Array.isArray(r.alt_jobs)?r.alt_jobs:[]), daysWorked:ex.daysWorked||0, totalWage:ex.totalWage||0, createdAt:ex.createdAt||r.created_at }); } });
+      var lw={}; _mLoad('mm-workers').forEach(function(w){ if(w&&w.name&&!_mTombHas('w',w.name)) lw[_mNorm(w.name)]=w; });
+      (rw.data||[]).forEach(function(r){ if(r.name&&!_mTombHas('w',r.name)){ var n=_mNorm(r.name); map['w:'+n]=r.id; var ex=lw[n]||{}; lw[n]=Object.assign({}, ex, { id:ex.id||('WK'+String(r.id).slice(0,8)), name:r.name, rrn:ex.rrn||r.jumin_masked||'', phone:ex.phone||r.phone||'', primaryJob:ex.primaryJob||r.primary_job||'일반', primaryWage:ex.primaryWage||r.primary_wage||0, altJobs:(Array.isArray(ex.altJobs)&&ex.altJobs.length)?ex.altJobs:(Array.isArray(r.alt_jobs)?r.alt_jobs:[]), daysWorked:ex.daysWorked||0, totalWage:ex.totalWage||0, createdAt:ex.createdAt||r.created_at }); } });
       localStorage.setItem('mm-workers', JSON.stringify(Object.keys(lw).map(function(k){ return lw[k]; })));
       _mIdMapSave(map);
       try{ window.dispatchEvent(new StorageEvent('storage',{ key:'mm-vendors-v2' })); }catch(e){}
@@ -18018,8 +18029,9 @@ CREATE TABLE system_map_activity (
   }
 
   // ── 마스터 단건 삭제 전파 [감사 2단계b] — 이름 기준 uuid로 클라우드 행 삭제 ──
-  async function deleteVendorCloud(name){ var sb=sbClient(); if(!sb||!name) return { ok:false }; try{ var r=await sb.from('vendors').delete().eq('id', _mCloudId('v',name)); return { ok:!r.error, msg:r.error&&r.error.message }; }catch(e){ return { ok:false, msg:e.message }; } }
-  async function deleteWorkerCloud(name){ var sb=sbClient(); if(!sb||!name) return { ok:false }; try{ var r=await sb.from('workers').delete().eq('id', _mCloudId('w',name)); return { ok:!r.error, msg:r.error&&r.error.message }; }catch(e){ return { ok:false, msg:e.message }; } }
+  // [전수조사 H1·H2] 호출 즉시 툼스톤 기록(클라우드 삭제 성패 무관) → pull 부활 차단 + pushMasters가 재시도
+  async function deleteVendorCloud(name){ if(!name) return { ok:false }; _mTombAdd('v',name); var sb=sbClient(); if(!sb) return { ok:false, msg:'no-cloud' }; try{ var r=await sb.from('vendors').delete().eq('id', _mCloudId('v',name)); return { ok:!r.error, msg:r.error&&r.error.message }; }catch(e){ return { ok:false, msg:e.message }; } }
+  async function deleteWorkerCloud(name){ if(!name) return { ok:false }; _mTombAdd('w',name); var sb=sbClient(); if(!sb) return { ok:false, msg:'no-cloud' }; try{ var r=await sb.from('workers').delete().eq('id', _mCloudId('w',name)); return { ok:!r.error, msg:r.error&&r.error.message }; }catch(e){ return { ok:false, msg:e.message }; } }
 
   // ── 설정(회사정보·보험요율·임계값) 클라우드 동기화 [감사 4단계] — app_settings 키-값. 테이블 없으면 자동 no-op ──
   var SETTING_KEYS = ['mm-company','mm-insurance-rates','mm-alert-thresholds'];
