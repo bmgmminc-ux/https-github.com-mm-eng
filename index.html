@@ -17894,6 +17894,7 @@ CREATE TABLE system_map_activity (
     if (!sbReady()) return;
     var r = await pull();
     try { await pullMasters(); } catch(e){}   // [감사 2단계] 거래처·일용직도 로그인 시 클라우드에서 복원
+    try { if (window.mmSyncPullPhase1) await window.mmSyncPullPhase1(); } catch(e){}   // [감사 4단계] 4대보험·정산·경보수신자 클라우드 복원
     if (window.globalToast) {
       window.globalToast(r.ok ? '☁️ ' + r.msg : '⚠️ ' + r.msg, r.ok?'success':'error');
     }
@@ -19935,6 +19936,25 @@ CREATE TABLE system_map_activity (
     toast('☁️ Supabase 동기화 완료', 'success');
     audit('시스템', 'Supabase push — '+JSON.stringify(pushed));
     return pushed;
+  };
+
+  // [감사 4단계] Phase1 PULL — 4대보험·정산·경보수신자 클라우드→로컬 (push와 대칭: snake→camel, cloud id 보존)
+  window.mmSyncPullPhase1 = async function() {
+    var c = sb();
+    if (!c) return;
+    function s2c(s){ return String(s).replace(/_([a-z])/g, function(m,x){ return x.toUpperCase(); }); }
+    var tabs = [['insurance_enrollments','mm-insurance-enrollments','INS'],['settlements','mm-settlements','ST'],['alert_recipients','mm-alert-recipients','AR']];
+    for (var i=0;i<tabs.length;i++){
+      var t = tabs[i];
+      try{
+        var r = await c.from(t[0]).select('*');
+        if (r.error || !Array.isArray(r.data)) continue;
+        var arr = r.data.map(function(row){ var o={}; Object.keys(row).forEach(function(k){ o[s2c(k)] = row[k]; }); o.id = t[2] + row.id; return o; });
+        localStorage.setItem(t[1], JSON.stringify(arr));
+      }catch(e){}
+    }
+    try{ if (window.renderInsurancePage) window.renderInsurancePage(); }catch(e){}
+    try{ if (window.mmAlerts && window.mmAlerts.render) window.mmAlerts.render(); }catch(e){}
   };
 
   // 임계값 저장 시 자동 push (이미 있는 mmThresholds.set patch)
