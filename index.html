@@ -6801,8 +6801,8 @@ table.data-table {
         var supply = num(it.supplyAmt||it.supply||it.amount);
         var isDirect = (it.type==='direct'||it.type==='labordirect');
         var tax = (it.type==='labordirect'||it.type==='labor'||it.type==='cashexp') ? 0 : (it.tax!=null?num(it.tax):Math.round(supply*0.1));
-        if (isDirect) directRows.push({ vendor:it.vendor||'—', type:it.type, supply:supply, tax:tax, detail:it.detail||'' });
-        return { type:it.type||'outsource', vendor:it.vendor||'—', detail:it.detail||it.memo||'', supply:supply, tax:tax, paid:num(it.paid), direct:isDirect };
+        if (isDirect) directRows.push({ vendor:it.vendor||'—', type:it.type, supply:supply, tax:tax, detail:it.desc||'' });
+        return { type:it.type||'outsource', vendor:it.vendor||'—', detail:it.desc||it.memo||'', supply:supply, tax:tax, paid:num(it.paidAmount), direct:isDirect };
       });
     } else if (p && p.costs) {
       ORDER.forEach(function(k){
@@ -14812,25 +14812,14 @@ CREATE TABLE system_map_activity (
     if (!Array.isArray(projects)) projects = [];
     var idx = projects.findIndex(function(p){return p.id===state.project.id});
     state.project.costItems = state.items;
-    // costs.{type}.actual 단일 원본 = 매입 명세 costItems 합산 [actual 단일원본 리팩터]
-    var CATS = ['outsource','material','product','indirect','cashexp','labor','safety','direct','labordirect'];
+    // [C1 fallback] 매입 자동반영: 원가분산이 설정 안 한 분류(actual<=0)만 매입(costItems) 합으로 시드. 원가분산 저장값(>0)은 override로 보존.
     state.project.costs = state.project.costs || {};
-    // 1) costItems 합산
-    var sums = {};
-    CATS.forEach(function(t) {
-      state.project.costs[t] = state.project.costs[t] || { contract:0, actual:0 };
-      sums[t] = 0;
-    });
-    state.items.forEach(function(it) {
-      var t = it.type;
-      if (!t || CATS.indexOf(t) < 0) return;
-      var amt = Number(String(it.supplyAmt||it.total||0).replace(/[^0-9.-]/g,'')) || 0;
-      sums[t] += amt;
-    });
-    // 2) actual 단일 원본 = 매입 명세 costItems 합산 (원가칸반/시드와 충돌 제거)
-    CATS.forEach(function(t) {
-      state.project.costs[t].actual = sums[t];
-    });
+    (function(){
+      var _CATS = ['outsource','material','product','indirect','cashexp','labor','safety','direct','labordirect'];
+      var _sum = {};
+      state.items.forEach(function(it){ if (it.type) { var a = Number(String(it.supplyAmt||it.total||0).replace(/[^0-9.-]/g,'')) || 0; _sum[it.type] = (_sum[it.type]||0) + a; } });
+      _CATS.forEach(function(t){ state.project.costs[t] = state.project.costs[t] || { contract:0, actual:0 }; if (!(num(state.project.costs[t].actual) > 0)) state.project.costs[t].actual = _sum[t] || 0; });
+    })();
     if (idx >= 0) projects[idx] = state.project; else projects.push(state.project);
     localStorage.setItem('mm-dash-v4', JSON.stringify(projects));
     // [감사 핫픽스] 매입 저장 즉시 클라우드 push (5.5초 폴링 갭 제거)
@@ -15139,6 +15128,10 @@ CREATE TABLE system_map_activity (
     var idx = ps.findIndex(function(p){return p.id===updated.id});
     if (idx >= 0) ps[idx] = updated; else ps.push(updated);
     saveProjects(ps);
+    // [H1] 저장 후 대시보드 재렌더 + 즉시 클라우드 push (토스트만 뜨고 표/KPI가 옛 값으로 남는 것 방지)
+    try { window.dispatchEvent(new StorageEvent('storage', { key:'mm-dash-v4' })); } catch(e){}
+    try { ['pjDashboard','pjBudget','pjBilling','ovProjectList'].forEach(function(k){ if (window[k] && window[k].render) window[k].render(); }); } catch(e){}
+    try { if (window.mmData && window.mmData.push && window.mmData.mode && window.mmData.mode() === 'supabase') window.mmData.push(); } catch(e){}
     if (window.globalToast) window.globalToast('💾 저장 완료', 'success');
   }
   function watchOpen(modalId, initFn) {
@@ -15562,6 +15555,9 @@ CREATE TABLE system_map_activity (
     var ps = loadProjects(); var i = ps.findIndex(function(x){return x.id===p.id});
     if (i>=0) ps[i]=p; else ps.push(p);
     saveProjects(ps);
+    // [H1] 저장 후 대시보드 재렌더 (토스트만 뜨고 표/KPI가 옛 값으로 남는 것 방지)
+    try { window.dispatchEvent(new StorageEvent('storage', { key:'mm-dash-v4' })); } catch(e){}
+    try { ['pjDashboard','pjBudget','pjBilling','ovProjectList'].forEach(function(k){ if (window[k] && window[k].render) window[k].render(); }); } catch(e){}
     // [감사 핫픽스] 저장 즉시 클라우드 push — 폴링(최대 5.5초) 대기 중 새로고침 시 손실 방지
     try { if (window.mmData && window.mmData.push && window.mmData.mode && window.mmData.mode() === 'supabase') window.mmData.push(); } catch(e){}
     if (window.globalToast) window.globalToast('💾 저장 완료 (예산 반영)', 'success');
@@ -15590,15 +15586,9 @@ CREATE TABLE system_map_activity (
       //  - contract 모드: costs[cat].contract  /  cost 모드: 매입 costItems(type별 공급가 합)=actual 단일원본
       if (st.items.length === 0) {
         var _restored = [];
-        var _ci = (mode === 'cost') ? (st.project.costItems || []) : null;
         CATS.forEach(function(c){
-          var _v = 0;
-          if (mode === 'contract') {
-            var _cc = st.project.costs && st.project.costs[c.key];
-            _v = _cc ? num(_cc.contract) : 0;
-          } else {
-            _ci.forEach(function(it){ if (it.type === c.key) _v += num(it.supplyAmt != null ? it.supplyAmt : it.total); });
-          }
+          var _cc = st.project.costs && st.project.costs[c.key];
+          var _v = _cc ? num(mode === 'contract' ? _cc.contract : _cc.actual) : 0;
           if (_v > 0) {
             var _it = { id:'bi-'+mode+'-'+c.key+'-r'+Math.random().toString(36).slice(2,7), type:c.key, name:(mode==='contract'?'계약 ':'원가 ')+c.label, amount:_v, mode:mode, src:'derived' };
             st.project.budgetItems.push(_it);
@@ -15704,7 +15694,6 @@ CREATE TABLE system_map_activity (
 
     // ── 액션 ──
     function addItem() {
-      if (mode === 'cost') { if (window.globalToast) globalToast('ℹ 원가는 [매입 등록]에서 관리됩니다 — 이 화면은 보기 전용입니다', 'info', 5000); return; }
       var type = document.getElementById(opts.newTypeId).value;
       var name = document.getElementById(opts.newNameId).value.trim();
       var amt = num(document.getElementById(opts.newAmtId).value);
@@ -15816,22 +15805,19 @@ CREATE TABLE system_map_activity (
       }).catch(function(e){alert('클립보드 접근 실패: '+e.message)});
     }
     function save() {
-      // [E7] cost 모드는 보기 전용 — 원가(actual)는 매입 명세(costItems) 단일 원본이므로 칸반은 actual을 쓰지 않는다
-      if (mode === 'cost') {
-        if (window.globalToast) globalToast('ℹ 원가는 [매입 등록]에서 관리됩니다 — 이 화면은 보기 전용입니다', 'info', 5000);
-        return;
-      }
-      // contract 모드: costs[cat].contract = sum of items in that cat
+      // [원가분산 편집 가능] contract 모드→costs.contract, cost 모드→costs.actual = 해당 모드 budgetItems 합. 매입(costItems)과 별개로 원가를 직접 관리.
       st.project.costs = st.project.costs || {};
       CATS.forEach(function(c) {
         st.project.costs[c.key] = st.project.costs[c.key] || { contract:0, actual:0 };
-        var items = st.project.budgetItems.filter(function(b){return b.type===c.key && (b.mode||'contract')==='contract'});
-        // budgetItems 합으로 재계산 — 드래그로 비운 분류는 0 반영(빈 칸반 보호는 load의 costs→budgetItems 복원이 담당)
+        var items = st.project.budgetItems.filter(function(b){return b.type===c.key && (b.mode||'contract')===mode});
         var sum = 0;
         items.forEach(function(b){sum += num(b.amount)});
-        st.project.costs[c.key].contract = sum;
+        if (mode === 'contract') st.project.costs[c.key].contract = sum;
+        else st.project.costs[c.key].actual = sum;
       });
       persistProject(st.project);
+      if (window.globalToast) globalToast('✓ ' + (mode === 'contract' ? '계약' : '원가') + ' 분산 저장됨', 'success');
+      render();
     }
 
     // ── public API ──
@@ -17749,12 +17735,11 @@ CREATE TABLE system_map_activity (
         received: num(r.received), receivedDate: r.received_date||'', memo: r.memo||''
       });
     });
-    // [actual 단일원본] pull 직후 actual을 매입 명세(costItems) 합으로 재계산 — project_costs.actual 캐시 표류 방지(다기기 정합)
-    //  costItems가 하나도 없는 프로젝트는 건드리지 않음(레거시/시드 actual 보존)
-    if (p.costItems.length > 0) {
-      var _ciSum = {};
-      p.costItems.forEach(function(it){ if (it.type) _ciSum[it.type] = (_ciSum[it.type] || 0) + (num(it.supplyAmt) || 0); });
-      Object.keys(p.costs).forEach(function(cat){ if (p.costs[cat]) p.costs[cat].actual = _ciSum[cat] || 0; });
+    // [C1 fallback] pull 후 매입 자동반영: actual<=0인 분류만 매입(costItems) 합으로 시드(원가분산 저장값 >0은 override 보존).
+    if (p.costItems && p.costItems.length) {
+      var _cs = {};
+      p.costItems.forEach(function(it){ if (it.type) _cs[it.type] = (_cs[it.type] || 0) + (num(it.supplyAmt) || 0); });
+      Object.keys(p.costs).forEach(function(cat){ if (p.costs[cat] && !(num(p.costs[cat].actual) > 0)) p.costs[cat].actual = _cs[cat] || 0; });
     }
     return p;
   }
@@ -18722,7 +18707,7 @@ CREATE TABLE system_map_activity (
     projects.forEach(function(p){
       (p.costItems||[]).forEach(function(it){
         var supply = num(it.supplyAmt), tax = num(it.tax || Math.round(supply*0.1));
-        rows.push([p.id||'', it.type||'', it.vendor||'', it.detail||'', supply, tax, supply+tax, num(it.paid)]);
+        rows.push([p.id||'', it.type||'', it.vendor||'', it.desc||'', supply, tax, supply+tax, num(it.paidAmount)]);
       });
     });
     downloadCsv('매입세부내역-' + new Date().toISOString().slice(0,10) + '.csv', rows);
