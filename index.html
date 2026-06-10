@@ -16729,14 +16729,29 @@ CREATE TABLE system_map_activity (
   function fmt(n){ return Math.round(n||0).toLocaleString() }
   function loadWk(){ try{var a=JSON.parse(localStorage.getItem('mm-workers')||'[]');return Array.isArray(a)?a:[]}catch(e){return[]} }
 
-  function calc(base){
-    var pension  = base * (RATE.pension.co  + RATE.pension.emp);
-    var health   = base * (RATE.health.co   + RATE.health.emp);
-    var longterm = base * (RATE.longterm.co + RATE.longterm.emp);
-    var employ   = base * (RATE.employ.co   + RATE.employ.emp);
-    var injury   = base * (RATE.injury.co   + RATE.injury.emp);
-    var coShare  = base * (RATE.pension.co + RATE.health.co + RATE.longterm.co + RATE.employ.co + RATE.injury.co);
-    var empShare = base * (RATE.pension.emp + RATE.health.emp + RATE.longterm.emp + RATE.employ.emp + RATE.injury.emp);
+  // [H5] 편집 요율(mmRates, 합산%) → co/emp 분배. 기본 요율에서 하드코딩 RATE와 정확히 일치(무회귀).
+  //  pension·health: 50/50 / longterm: 건강보험료×요율%, 50/50 / employ: 근로자 0.9% 고정, 회사=요율-0.9+0.25(고용안정) / injury: 회사 100%.
+  function ratesToSplit(r){
+    var h = num(r.health)/100, lt = h * (num(r.longterm)/100);
+    return {
+      pension:  { co:num(r.pension)/200, emp:num(r.pension)/200 },
+      health:   { co:h/2, emp:h/2 },
+      longterm: { co:lt/2, emp:lt/2 },
+      employ:   { co:(Math.max(0,num(r.employ)-0.9)+0.25)/100, emp:0.9/100 },
+      injury:   { co:num(r.injury)/100, emp:0 }
+    };
+  }
+  function calc(base, year){
+    // [H5] 편집 요율 우선 — 없거나 오류 시 하드코딩 RATE fallback
+    var R2 = RATE;
+    try { if (window.mmRates && window.mmRates.get) { var r = window.mmRates.get(year || new Date().getFullYear()); if (r) R2 = ratesToSplit(r); } } catch(e){}
+    var pension  = base * (R2.pension.co  + R2.pension.emp);
+    var health   = base * (R2.health.co   + R2.health.emp);
+    var longterm = base * (R2.longterm.co + R2.longterm.emp);
+    var employ   = base * (R2.employ.co   + R2.employ.emp);
+    var injury   = base * (R2.injury.co   + R2.injury.emp);
+    var coShare  = base * (R2.pension.co + R2.health.co + R2.longterm.co + R2.employ.co + R2.injury.co);
+    var empShare = base * (R2.pension.emp + R2.health.emp + R2.longterm.emp + R2.employ.emp + R2.injury.emp);
     return { pension:pension, healthLong:health+longterm, employ:employ, injury:injury, coShare:coShare, empShare:empShare };
   }
 
