@@ -17869,10 +17869,17 @@ CREATE TABLE system_map_activity (
       });
     }, 2500);
   }
+  // [감사 2단계] 마스터(거래처·일용직) 키 변경 감지 → pushMasters (autoSync 워처가 mm-dash-v4만 보던 한계 보강)
+  function _mastersHash(){ return (localStorage.getItem('mm-vendors-v2')||'') + '|' + (localStorage.getItem('mm-workers')||'') + '|' + (localStorage.getItem('mm-vendors')||'') + '|' + (localStorage.getItem('mm-vendors-v23')||''); }
+  var lastMastersHash = _mastersHash();
+  var mPushTimer = null;
+  function debouncedMasters(){ if (mPushTimer) clearTimeout(mPushTimer); mPushTimer = setTimeout(function(){ pushMasters().then(function(r){ if (r && !r.ok && r.msg && r.msg.indexOf('no-cloud')<0 && r.msg.indexOf('로그인')<0 && window.globalToast) window.globalToast('⚠️ 마스터 동기화: '+r.msg, 'error', 5000); }); }, 2500); }
   setInterval(function() {
     if (!autoSync || !sbReady()) return;
     var cur = localStorage.getItem(DASH_KEY) || '';
     if (cur !== lastHash) { lastHash = cur; debouncedPush(); }
+    var curM = _mastersHash();
+    if (curM !== lastMastersHash) { lastMastersHash = curM; debouncedMasters(); }
   }, 3000);
 
   function setAutoSync(on) { autoSync = !!on; try { localStorage.setItem('mm-autosync', on?'1':'0') } catch(e){} }
@@ -17882,6 +17889,7 @@ CREATE TABLE system_map_activity (
   async function syncOnLogin() {
     if (!sbReady()) return;
     var r = await pull();
+    try { await pullMasters(); } catch(e){}   // [감사 2단계] 거래처·일용직도 로그인 시 클라우드에서 복원
     if (window.globalToast) {
       window.globalToast(r.ok ? '☁️ ' + r.msg : '⚠️ ' + r.msg, r.ok?'success':'error');
     }
@@ -17923,8 +17931,52 @@ CREATE TABLE system_map_activity (
     } catch(e) { return { ok:false, msg:'클라우드 삭제 실패: ' + (e.message||e) } }
   }
 
+  // ── 마스터(거래처·일용직) 클라우드 동기화 [감사 P0 — 2단계] ──
+  //  vendors/workers id는 uuid라 로컬 'V-'/'WK' 문자열과 불일치 → 이름 기준 안정 uuid(mm-cloud-id-map)로 upsert.
+  function _uuid(){ try{ if (crypto && crypto.randomUUID) return crypto.randomUUID(); }catch(e){} var s=''; for(var i=0;i<36;i++){ if(i===8||i===13||i===18||i===23) s+='-'; else if(i===14) s+='4'; else { var r=Math.random()*16|0; if(i===19) r=(r&0x3)|0x8; s+=r.toString(16); } } return s; }
+  function _mNorm(s){ return String(s||'').replace(/\s+/g,'').replace(/[()（）]/g,'').toLowerCase(); }
+  function _mIdMap(){ try{ var m=JSON.parse(localStorage.getItem('mm-cloud-id-map')||'{}'); return (m && typeof m==='object')?m:{}; }catch(e){ return {}; } }
+  function _mIdMapSave(m){ try{ localStorage.setItem('mm-cloud-id-map', JSON.stringify(m)); }catch(e){} }
+  function _mCloudId(kind,name){ var m=_mIdMap(); var k=kind+':'+_mNorm(name); if(!m[k]){ m[k]=_uuid(); _mIdMapSave(m); } return m[k]; }
+  function _mLoad(key){ try{ var a=JSON.parse(localStorage.getItem(key)||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+  function _mVendors(){ var out={}; ['mm-vendors','mm-vendors-v2','mm-vendors-v23'].forEach(function(key){ _mLoad(key).forEach(function(v){ var nm=((typeof v==='string')?v:(v&&v.name))||''; nm=String(nm).trim(); if(nm){ var n=_mNorm(nm); if(!out[n]) out[n]={ name:nm, phone:(v&&v.phone)||null, category:(v&&v.category)||null, memo:(v&&v.memo)||null }; } }); }); return Object.keys(out).map(function(k){ return out[k]; }); }
+
+  async function pushMasters(){
+    var sb=sbClient(); if(!sb) return { ok:false, msg:'no-cloud' };
+    try{
+      var sess=await sb.auth.getSession();
+      var ownerId=sess.data.session && sess.data.session.user && sess.data.session.user.id;
+      if(!ownerId) return { ok:false, msg:'로그인 필요' };
+      var vP=_mVendors().map(function(v){ return { id:_mCloudId('v',v.name), owner_id:ownerId, name:v.name, phone:v.phone, category:v.category, memo:v.memo }; });
+      if(vP.length){ var rv=await sb.from('vendors').upsert(vP,{ onConflict:'id' }); if(rv.error) return { ok:false, msg:'거래처: '+rv.error.message }; }
+      var wP=_mLoad('mm-workers').filter(function(w){ return w && w.name; }).map(function(w){ return { id:_mCloudId('w',w.name), owner_id:ownerId, name:w.name, jumin_masked:w.rrn||null, phone:w.phone||null, primary_job:w.primaryJob||null, primary_wage:Math.round(w.primaryWage||0), alt_jobs:Array.isArray(w.altJobs)?w.altJobs:[] }; });
+      if(wP.length){ var rw=await sb.from('workers').upsert(wP,{ onConflict:'id' }); if(rw.error) return { ok:false, msg:'일용직: '+rw.error.message }; }
+      return { ok:true, msg:'거래처 '+vP.length+' · 일용직 '+wP.length };
+    }catch(e){ return { ok:false, msg:'마스터 push: '+(e.message||e) }; }
+  }
+  async function pullMasters(){
+    var sb=sbClient(); if(!sb) return { ok:false, msg:'no-cloud' };
+    try{
+      var rv=await sb.from('vendors').select('*'); if(rv.error) throw rv.error;
+      var rw=await sb.from('workers').select('*'); if(rw.error) throw rw.error;
+      var map=_mIdMap();
+      var lv={}; _mLoad('mm-vendors-v2').forEach(function(v){ var nm=((typeof v==='string')?v:(v&&v.name))||''; if(nm) lv[_mNorm(nm)]=(typeof v==='string')?{ id:'V-'+_uuid().slice(0,8), name:nm }:v; });
+      (rv.data||[]).forEach(function(r){ if(r.name){ var n=_mNorm(r.name); map['v:'+n]=r.id; var ex=lv[n]||{}; lv[n]=Object.assign({}, ex, { id:ex.id||('V-'+String(r.id).slice(0,8)), name:r.name, phone:r.phone||ex.phone, category:r.category||ex.category, memo:r.memo||ex.memo }); } });
+      localStorage.setItem('mm-vendors-v2', JSON.stringify(Object.keys(lv).map(function(k){ return lv[k]; })));
+      var lw={}; _mLoad('mm-workers').forEach(function(w){ if(w&&w.name) lw[_mNorm(w.name)]=w; });
+      (rw.data||[]).forEach(function(r){ if(r.name){ var n=_mNorm(r.name); map['w:'+n]=r.id; var ex=lw[n]||{}; lw[n]=Object.assign({}, ex, { id:ex.id||('WK'+String(r.id).slice(0,8)), name:r.name, rrn:ex.rrn||r.jumin_masked||'', phone:ex.phone||r.phone||'', primaryJob:ex.primaryJob||r.primary_job||'일반', primaryWage:ex.primaryWage||r.primary_wage||0, altJobs:(Array.isArray(ex.altJobs)&&ex.altJobs.length)?ex.altJobs:(Array.isArray(r.alt_jobs)?r.alt_jobs:[]), daysWorked:ex.daysWorked||0, totalWage:ex.totalWage||0, createdAt:ex.createdAt||r.created_at }); } });
+      localStorage.setItem('mm-workers', JSON.stringify(Object.keys(lw).map(function(k){ return lw[k]; })));
+      _mIdMapSave(map);
+      try{ window.dispatchEvent(new StorageEvent('storage',{ key:'mm-vendors-v2' })); }catch(e){}
+      try{ if(window.mmVendors&&window.mmVendors.render) window.mmVendors.render(); }catch(e){}
+      try{ if(window.mmWorkers&&window.mmWorkers.render) window.mmWorkers.render(); }catch(e){}
+      return { ok:true, msg:'거래처 '+(rv.data||[]).length+' · 일용직 '+(rw.data||[]).length };
+    }catch(e){ return { ok:false, msg:'마스터 pull: '+(e.message||e) }; }
+  }
+
   window.mmData = {
     pull: pull, push: push, syncOnLogin: syncOnLogin, deleteProject: deleteProject,
+    pushMasters: pushMasters, pullMasters: pullMasters,
     setAutoSync: setAutoSync, isAutoSync: function(){ return autoSync },
     mode: function(){ return sbReady() ? 'supabase' : 'local' }
   };
