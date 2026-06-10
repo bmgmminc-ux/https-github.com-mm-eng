@@ -16885,7 +16885,9 @@ CREATE TABLE system_map_activity (
 
   function remove(id){
     if (!confirm('이 거래처를 삭제할까요?')) return;
+    var _gone = load().find(function(x){ return x.id === id; });
     save(load().filter(function(v){ return v.id !== id }));
+    if (_gone && _gone.name && window.mmData && window.mmData.deleteVendorCloud) window.mmData.deleteVendorCloud(_gone.name);  // [감사 2b] 클라우드 삭제 전파
     render();
   }
 
@@ -17152,7 +17154,9 @@ CREATE TABLE system_map_activity (
 
   function remove(id){
     if (!confirm('이 인력을 삭제할까요?')) return;
+    var _gone = load().find(function(x){ return x.id === id; });
     save(load().filter(function(w){ return w.id !== id }));
+    if (_gone && _gone.name && window.mmData && window.mmData.deleteWorkerCloud) window.mmData.deleteWorkerCloud(_gone.name);  // [감사 2b] 클라우드 삭제 전파(출역 cascade)
     render();
   }
 
@@ -17974,9 +17978,14 @@ CREATE TABLE system_map_activity (
     }catch(e){ return { ok:false, msg:'마스터 pull: '+(e.message||e) }; }
   }
 
+  // ── 마스터 단건 삭제 전파 [감사 2단계b] — 이름 기준 uuid로 클라우드 행 삭제 ──
+  async function deleteVendorCloud(name){ var sb=sbClient(); if(!sb||!name) return { ok:false }; try{ var r=await sb.from('vendors').delete().eq('id', _mCloudId('v',name)); return { ok:!r.error, msg:r.error&&r.error.message }; }catch(e){ return { ok:false, msg:e.message }; } }
+  async function deleteWorkerCloud(name){ var sb=sbClient(); if(!sb||!name) return { ok:false }; try{ var r=await sb.from('workers').delete().eq('id', _mCloudId('w',name)); return { ok:!r.error, msg:r.error&&r.error.message }; }catch(e){ return { ok:false, msg:e.message }; } }
+
   window.mmData = {
     pull: pull, push: push, syncOnLogin: syncOnLogin, deleteProject: deleteProject,
     pushMasters: pushMasters, pullMasters: pullMasters,
+    deleteVendorCloud: deleteVendorCloud, deleteWorkerCloud: deleteWorkerCloud,
     setAutoSync: setAutoSync, isAutoSync: function(){ return autoSync },
     mode: function(){ return sbReady() ? 'supabase' : 'local' }
   };
@@ -19903,7 +19912,8 @@ CREATE TABLE system_map_activity (
     var pushTable = async function(localKey, table) {
       try {
         var arr = JSON.parse(localStorage.getItem(localKey)||'[]');
-        if (!Array.isArray(arr) || !arr.length) { pushed[table] = 0; return; }
+        if (!Array.isArray(arr) || !arr.length) { pushed[table] = 0; return; }  // 빈 로컬 → 스킵(클라우드 보존, 오삭제 방지)
+        await c.from(table).delete().gte('id', 0);  // [감사 3단계] 멱등성 — 재삽입 전 전량삭제로 중복 폭증 방지 (id BIGSERIAL, RLS=authenticated 회사공유)
         var payload = arr.map(toSnakeObj);
         var r = await c.from(table).insert(payload);
         if (r.error) { console.warn(table+' push fail:', r.error.message); pushed[table] = 'error'; }
