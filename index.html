@@ -17373,7 +17373,11 @@ CREATE TABLE system_map_activity (
       var billReceived = (p.billingItems||[]).reduce(function(s,b){return s+num(b.billingAmount)},0);
       var billSupply = (p.billingItems||[]).reduce(function(s,b){return s+num(b.applySupply)},0);
       var uncollected = billApplied - billReceived;
-      var billRate = contract > 0 ? billSupply / contract * 100 : 0;
+      // [지표통일 R-2] 기성률 분모 netContract(직불 제외) — overview L15992/프로젝트상세와 동일 공식
+      var directSupply = num(p.costs && p.costs.direct && p.costs.direct.actual) + num(p.costs && p.costs.labordirect && p.costs.labordirect.actual);
+      if (Array.isArray(p.costItems) && p.costItems.length) { directSupply = 0; p.costItems.forEach(function(it){ if (it.type==='direct'||it.type==='labordirect') directSupply += num(it.supplyAmt||it.total||0); }); }
+      var netContract = Math.max(0, contract - directSupply);
+      var billRate = netContract > 0 ? billSupply / netContract * 100 : 0;
       if (rate >= 100) {
         alerts.push({ type:'원가 초과', sev:'위험', target:p.id+' '+(p.name||''),
           metric:Math.round(rate)+'%', msg:'원가율 100% 초과 — 즉시 점검 필요', age:'-' });
@@ -17392,7 +17396,7 @@ CREATE TABLE system_map_activity (
           metric:fmt(uncollected), msg:'미수금 '+fmt(uncollected)+' 회수 필요'+(age?' ('+age+'일 경과)':''),
           age: age?age+'일':'-' });
       }
-      if (contract > 0 && billRate < 80) {
+      if (netContract > 0 && billRate < 80) {
         alerts.push({ type:'기성 신청 가능', sev:'정보', target:p.id+' '+(p.name||''),
           metric:Math.round(billRate)+'%', msg:'기성 신청률 '+Math.round(billRate)+'% — 다음 회차 신청 권장', age:'-' });
       }
@@ -20022,6 +20026,13 @@ CREATE TABLE system_map_activity (
         localStorage.setItem(t[1], JSON.stringify(arr));
       }catch(e){}
     }
+    // [R-1] thresholds 단일 row 복원 — push(L20002)와 대칭. 멀티기기 로그인 시 임계값 복원 누락 수정
+    try{
+      var th = await c.from('thresholds').select('*').limit(1).single();
+      if (th.data) localStorage.setItem('mm-thresholds', JSON.stringify({
+        profitMin: th.data.profit_min, costMax: th.data.cost_max, uncollectMax: th.data.uncollect_max
+      }));
+    }catch(e){}
     try{ if (window.renderInsurancePage) window.renderInsurancePage(); }catch(e){}
     try{ if (window.mmAlerts && window.mmAlerts.render) window.mmAlerts.render(); }catch(e){}
   };
