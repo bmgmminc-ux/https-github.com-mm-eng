@@ -5893,12 +5893,14 @@ table.data-table {
       directSupply = num(p.costs.direct && p.costs.direct.actual) + num(p.costs.labordirect && p.costs.labordirect.actual);
       directTotal  = directSupply;
     }
-    // netContract = 실수금 대상 (정보성 표시 전용 - 발주처 직불금 제외)
+    // netContract = 실수금 대상 (발주처 직불금 제외)
     var netContract = Math.max(0, contract - directSupply);
-    // 이익/원가율은 전체 계약 기준 (직불금은 costActual에 이미 포함 — 이중 차감 금지) [클로드 검토 #5]
-    var profit = contract - costActual;
-    var profitRate = contract>0 ? profit/contract : 0;
-    var costRate = contract>0 ? costActual/contract : 0;
+    // [H7 지표통일] 기타수익 매출 포함 — 매출=계약+기타수익, 이익=매출-원가, 원가율=원가/매출 (전 화면 동일 공식)
+    var otherIncome = (p.otherIncomeItems||[]).reduce(function(s,o){ return s + num(o.total||o.supplyAmt||0); }, 0);
+    var revenue = contract + otherIncome;
+    var profit = revenue - costActual;
+    var profitRate = revenue>0 ? profit/revenue : 0;
+    var costRate = revenue>0 ? costActual/revenue : 0;
     var billingApplied = (p.billingItems||[]).reduce(function(s,b){return s+num(b.applyTotal)},0); // VAT
     var billingAppliedSupply = (p.billingItems||[]).reduce(function(s,b){return s+num(b.applySupply)},0);
     var billingReceived = (p.billingItems||[]).reduce(function(s,b){return s+num(b.billingAmount)},0);
@@ -5913,6 +5915,7 @@ table.data-table {
       contract:contract, contractVAT:Math.round(contract*1.1),
       directSupply:directSupply, directTotal:directTotal,
       netContract:netContract, costContract:costContract, costActual:costActual, costActualVAT:Math.round(costActual*1.1),
+      otherIncome:otherIncome, revenue:revenue,
       profit:profit, profitRate:profitRate, costRate:costRate, remain:remain, burnRate:burnRate,
       billingApplied:billingApplied, billingAppliedSupply:billingAppliedSupply, billingReceived:billingReceived,
       uncollected:uncollected, collectRate:collectRate, billingRate:billingRate,
@@ -15978,22 +15981,30 @@ CREATE TABLE system_map_activity (
     var ratio = Math.min(1, overlapDays / projectDays);
 
     var contract = num(p.contractOrig) + num(p.contractAdd);
+    var otherIncome = (p.otherIncomeItems||[]).reduce(function(s,o){ return s + num(o.total||o.supplyAmt||0); }, 0);
     var cost = 0;
     CATS.forEach(function(c){ if (p.costs && p.costs[c]) cost += num(p.costs[c].actual) });
+    // 직불금(netContract용)
+    var directSupply = num(p.costs && p.costs.direct && p.costs.direct.actual) + num(p.costs && p.costs.labordirect && p.costs.labordirect.actual);
+    if (Array.isArray(p.costItems) && p.costItems.length) { directSupply = 0; p.costItems.forEach(function(it){ if (it.type==='direct'||it.type==='labordirect') directSupply += num(it.supplyAmt||it.total||0); }); }
+    var netContract = Math.max(0, contract - directSupply);
 
-    // 기성: 회차의 applyDate가 기간 안에 들어가는 것만
+    // 기성: 회차의 applyDate가 기간 안에 들어가는 것만 (기성만 날짜 귀속)
     var billSupply = 0, billTotal = 0, billReceived = 0;
     (p.billingItems || []).forEach(function(b) {
-      var bd = new Date(b.applyDate || p.startDate || p.createdAt || '2024-01-01'); // [#153] 신청일 미입력 시 프로젝트 일자로 fallback → 전체현황 KPI 누락 방지
+      var bd = new Date(b.applyDate || p.startDate || p.createdAt || '2024-01-01');
       if (isNaN(bd) || bd < start || bd > end) return;
       billSupply   += num(b.applySupply);
       billTotal    += num(b.applyTotal);
       billReceived += num(b.billingAmount);
     });
 
+    // [H6 지표통일] 계약·원가·기타수익은 기간 안분(ratio) 하지 않음 — 겹치는 프로젝트는 전액 포함(프로젝트상세와 동일).
     return {
-      contract:    contract * ratio,
-      cost:        cost * ratio,
+      contract:    contract,
+      otherIncome: otherIncome,
+      cost:        cost,
+      netContract: netContract,
       billSupply:  billSupply,
       billTotal:   billTotal,
       billReceived: billReceived,
@@ -16004,21 +16015,26 @@ CREATE TABLE system_map_activity (
   // 기간 → KPI 집계
   function aggregateRange(start, end) {
     var projects = loadProjects();
-    var totals = { contract:0, cost:0, billSupply:0, billTotal:0, billReceived:0, count:0 };
+    var totals = { contract:0, otherIncome:0, cost:0, netContract:0, billSupply:0, billTotal:0, billReceived:0, count:0 };
     projects.forEach(function(p) {
       var a = aggregateProject(p, start, end);
       if (!a) return;
       totals.contract     += a.contract;
+      totals.otherIncome  += a.otherIncome;
       totals.cost         += a.cost;
+      totals.netContract  += a.netContract;
       totals.billSupply   += a.billSupply;
       totals.billTotal    += a.billTotal;
       totals.billReceived += a.billReceived;
       totals.count++;
     });
-    totals.profit = totals.contract - totals.cost;
-    totals.profitRate = totals.contract > 0 ? totals.profit / totals.contract * 100 : 0;
-    totals.costRate   = totals.contract > 0 ? totals.cost   / totals.contract * 100 : 0;
-    totals.billRate   = totals.contract > 0 ? totals.billSupply / totals.contract * 100 : 0;
+    // [H7·M6 지표통일] 매출=계약+기타수익, 이익=매출-원가, 원가율=원가/매출, 기성률=기성공급/netContract(직불 제외) — 프로젝트상세와 동일 공식.
+    var revenue = totals.contract + totals.otherIncome;
+    totals.revenue = revenue;
+    totals.profit = revenue - totals.cost;
+    totals.profitRate = revenue > 0 ? totals.profit / revenue * 100 : 0;
+    totals.costRate   = revenue > 0 ? totals.cost   / revenue * 100 : 0;
+    totals.billRate   = totals.netContract > 0 ? totals.billSupply / totals.netContract * 100 : 0;
     totals.collectRate = totals.billTotal > 0 ? totals.billReceived / totals.billTotal * 100 : 0;
     return totals;
   }
