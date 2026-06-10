@@ -13146,33 +13146,8 @@ CREATE TABLE system_map_activity (
 
     window.processOcrImage = function(file) {
       if (!file) return;
-      if (window.globalToast) globalToast('📸 이미지 분석 중... (3초)', 'info');
-
-      // mock 응답 — 실제 영수증에서 추출되었을 법한 데이터
-      setTimeout(function() {
-        var mockExtracted = {
-          date: new Date().toISOString().slice(0, 10),
-          vendor: '대한설비(주)',
-          category: 'material',
-          desc: '강관 100A × 6m + 부속',
-          supply: 1250000,
-          vat: 125000,
-          total: 1375000,
-          confidence: 0.92
-        };
-
-        // 추출 결과를 paste 영역에 자동 삽입 (Tab 형식)
-        var ta = document.getElementById('paste-input-area');
-        if (ta) {
-          var headers = ['거래일', '거래처', '분류', '내용', '공급가', '부가세', '합계'];
-          var row = [mockExtracted.date, mockExtracted.vendor, '자재', mockExtracted.desc,
-                     mockExtracted.supply, mockExtracted.vat, mockExtracted.total];
-          ta.value = headers.join('\t') + '\n' + row.join('\t');
-          ta.dispatchEvent(new Event('input', { bubbles: true }));
-        }
-
-        if (window.globalToast) globalToast('✓ AI OCR 추출 완료 (신뢰도 ' + Math.round(mockExtracted.confidence * 100) + '%)', 'success');
-      }, 3000);
+      // [감사 H10] 실제 OCR 미연동 — 가짜 추출 데이터(대한설비/강관 92%)를 진짜처럼 삽입하던 것 제거. 허위 거래 장부 유입 방지.
+      if (window.globalToast) globalToast('🚧 영수증 OCR 자동추출은 준비 중입니다 — 아래 양식에 직접 입력하거나 엑셀/표 붙여넣기를 사용하세요', 'info', 7000);
     };
 
     // ═══════════════════════════════════════════════════════════════
@@ -14507,11 +14482,12 @@ CREATE TABLE system_map_activity (
 
         // 일괄 알림 / 처리
         if (text.includes('일괄 알림') || text === '📧 일괄 알림') {
-          btn.onclick = function() { globalToast('📧 일괄 알림 메일 + 문자 발송', 'success'); };
+          // [감사 H11] 실제 메일/문자 발송 미연동 — '발송 완료' 거짓 피드백 제거. 외부 연동 후 실발송 배선 예정.
+          btn.onclick = function() { globalToast('⚠️ 일괄 알림은 외부 메일/문자 연동 후 발송됩니다 (현재 미연동 — 실제 발송되지 않음)', 'warning', 6000); };
           return;
         }
         if (text.includes('일괄 처리')) {
-          btn.onclick = function() { globalToast('✓ 일괄 처리 완료', 'success'); };
+          btn.onclick = function() { globalToast('⚠️ 일괄 처리는 준비 중입니다 (현재 동작하지 않음)', 'warning', 5000); };
           return;
         }
 
@@ -15317,7 +15293,7 @@ CREATE TABLE system_map_activity (
     watchOpen(modalId, init);
     return api;
   }
-  window.mmContractDist = makeDist('contract', 'modal-contract-dist', 'mm-cd-pid', 'mm-cd-summary', 'mm-cd-kanban', '#2563EB');
+  // [감사 M2] 구버전 makeDist('contract') 인스턴스 제거 — 죽은 watchOpen 옵저버가 모달 열 때 mm-cd-summary(부재)에 접근해 TypeError 내던 것 차단. 아래 makeKanban('contract')가 mmContractDist를 정식 등록.
   // [정리] 구버전 makeDist('cost') 인스턴스 제거 — 이후 makeKanban('cost')가 mmCostDist를 재할당(보기전용·actual 단일원본).
   //        구버전은 actual을 직접 덮어쓰는 죽은 코드 + watchOpen 이중 옵저버라 부활 위험 제거.
 
