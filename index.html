@@ -5878,9 +5878,10 @@ table.data-table {
     var pid = sessionStorage.getItem('mm-selected-pid');
     var p = pid?ps.find(function(x){return x.id===pid}):ps[0]; if (!p) return null;
     var contract = num(p.contractOrig) + num(p.contractAdd);
-    var costContract = 0, costActual = 0, directSupply = 0, directTotal = 0;
+    var costContract = 0, costActual = 0, costActualVAT = 0, directSupply = 0, directTotal = 0;
     var cats = ['outsource','material','product','indirect','cashexp','labor','safety','direct','labordirect'];
-    cats.forEach(function(c) { if (p.costs && p.costs[c]) { costContract += num(p.costs[c].contract); costActual += num(p.costs[c].actual) } });
+    var VAT_FREE = { labor:1, cashexp:1, labordirect:1 };  // [H6] 면세 — 매입 세부표(6809/6818)와 동일. 면세분은 ×1.1 안 함
+    cats.forEach(function(c) { if (p.costs && p.costs[c]) { var _a = num(p.costs[c].actual); costContract += num(p.costs[c].contract); costActual += _a; costActualVAT += (VAT_FREE[c] ? _a : Math.round(_a*1.1)); } });
     // 직불금: costItems 우선, 없으면 costs.{direct,labordirect}.actual fallback (GPT 검토 #110)
     if (Array.isArray(p.costItems) && p.costItems.length) {
       p.costItems.forEach(function(it) {
@@ -5914,7 +5915,7 @@ table.data-table {
       id:p.id, name:p.name, type:p.type, client:p.client, startDate:p.startDate, memo:p.memo,
       contract:contract, contractVAT:Math.round(contract*1.1),
       directSupply:directSupply, directTotal:directTotal,
-      netContract:netContract, costContract:costContract, costActual:costActual, costActualVAT:Math.round(costActual*1.1),
+      netContract:netContract, costContract:costContract, costActual:costActual, costActualVAT:costActualVAT,
       otherIncome:otherIncome, revenue:revenue,
       profit:profit, profitRate:profitRate, costRate:costRate, remain:remain, burnRate:burnRate,
       billingApplied:billingApplied, billingAppliedSupply:billingAppliedSupply, billingReceived:billingReceived,
@@ -15902,10 +15903,12 @@ CREATE TABLE system_map_activity (
     }
     tbody.innerHTML = projects.map(function(p) {
       var contract = num(p.contractOrig) + num(p.contractAdd);
+      var otherIncome = (p.otherIncomeItems||[]).reduce(function(s,o){ return s + num(o.total||o.supplyAmt||0); }, 0);
+      var revenue = contract + otherIncome;  // [H7 지표통일] 매출=계약+기타수익 — computeKpi/aggregate/alerts와 동일
       var cost = 0;
       CATS.forEach(function(c){ if (p.costs && p.costs[c]) cost += num(p.costs[c].actual) });
-      var profit = contract - cost;
-      var rate = contract > 0 ? cost / contract * 100 : 0;
+      var profit = revenue - cost;
+      var rate = revenue > 0 ? cost / revenue * 100 : 0;
       var s = statusInfo(rate);
       var profitColor = profit >= 0 ? 'var(--success-700)' : 'var(--danger-700)';
       var profitSign = profit >= 0 ? '+' : '';
@@ -15983,7 +15986,9 @@ CREATE TABLE system_map_activity (
   function aggregateProject(p, start, end) {
     var ps = new Date(p.startDate || '2024-01-01');
     var pe = new Date(p.endDate   || '2030-12-31');
-    if (isNaN(ps) || isNaN(pe)) return null;
+    // [H8] 무효 날짜(비어있지 않은 잘못된 값: '2026-13-45','미정' 등)도 기본범위로 방어 — 현장이 집계에서 통째 누락되는 것 방지
+    if (isNaN(ps)) ps = new Date('2024-01-01');
+    if (isNaN(pe)) pe = new Date('2030-12-31');
     if (pe < start || ps > end) return null; // 안 겹침
 
     // 겹침 비율 (선형 분배 가정)
@@ -18836,13 +18841,15 @@ CREATE TABLE system_map_activity (
     var alerts = [];
     projects.forEach(function(p) {
       var contract = num(p.contractOrig) + num(p.contractAdd);
+      var otherIncome = (p.otherIncomeItems||[]).reduce(function(s,o){ return s + num(o.total||o.supplyAmt||0); }, 0);
+      var revenue = contract + otherIncome;  // [지표통일] 매출=계약+기타수익 — computeKpi/전체현황/경보표와 동일
       var costActual = 0;
       ['outsource','material','product','indirect','cashexp','labor','safety','direct','labordirect'].forEach(function(c){
         if (p.costs && p.costs[c]) costActual += num(p.costs[c].actual);
       });
-      var profit = contract - costActual;
-      var pRate = contract>0 ? profit/contract*100 : 0;
-      var cRate = contract>0 ? costActual/contract*100 : 0;
+      var profit = revenue - costActual;
+      var pRate = revenue>0 ? profit/revenue*100 : 0;
+      var cRate = revenue>0 ? costActual/revenue*100 : 0;
       // 미수금
       var billingApplied = (p.billingItems||[]).reduce(function(s,b){return s+num(b.applyTotal)},0);
       var billingReceived = (p.billingItems||[]).reduce(function(s,b){return s+num(b.billingAmount)},0);
