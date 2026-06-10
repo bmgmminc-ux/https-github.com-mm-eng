@@ -6285,9 +6285,12 @@ table.data-table {
     GENERAL.forEach(function(c){ var k = (p.costs&&p.costs[c.key])?p.costs[c.key]:{contract:0,actual:0}; genC += num(k.contract); genA += num(k.actual) });
     DIRECT.forEach(function(c){ var k = (p.costs&&p.costs[c.key])?p.costs[c.key]:{contract:0,actual:0}; dirC += num(k.contract); dirA += num(k.actual) });
     var allActual = genA + dirA;
-    var profit = totalContract - allActual;
-    var profitRate = totalContract>0 ? (profit/totalContract*100) : 0;
-    var burnRate = totalContract>0 ? (allActual/totalContract*100) : 0;
+    var allContract = genC + dirC;  // 계약분산 합 = 원가예산
+    var otherIncome = (p.otherIncomeItems||[]).reduce(function(s,o){ return s + num(o.total||o.supplyAmt||0); }, 0);
+    var revenue = totalContract + otherIncome;
+    var profit = revenue - allActual;  // [지표통일] 이익=매출-원가
+    var profitRate = revenue>0 ? (profit/revenue*100) : 0;
+    var burnRate = allContract>0 ? (allActual/allContract*100) : 0;  // [H8] 소진율=원가/계약분산합(원가예산), 총계약 아님
     var burnStat = statusOf(burnRate);
 
     setT('pjbx-pid', '일반 7분류 + 직불 2분류 · 실제 원가 · 예상 이윤 · ' + (p.id||'—'));
@@ -17344,10 +17347,12 @@ CREATE TABLE system_map_activity (
     var alerts = [];
     projects.forEach(function(p) {
       var contract = num(p.contractOrig) + num(p.contractAdd);
+      var otherIncome = (p.otherIncomeItems||[]).reduce(function(s,o){ return s + num(o.total||o.supplyAmt||0); }, 0);
+      var revenue = contract + otherIncome;
       var cost = 0;
       CATS.forEach(function(c){ if (p.costs && p.costs[c]) cost += num(p.costs[c].actual) });
-      var rate = contract > 0 ? cost / contract * 100 : 0;
-      var profit = contract - cost;
+      var rate = revenue > 0 ? cost / revenue * 100 : 0;  // [지표통일] 원가율=원가/매출(계약+기타수익)
+      var profit = revenue - cost;  // [지표통일] 이익=매출-원가
       var billApplied = (p.billingItems||[]).reduce(function(s,b){return s+num(b.applyTotal)},0);
       var billReceived = (p.billingItems||[]).reduce(function(s,b){return s+num(b.billingAmount)},0);
       var billSupply = (p.billingItems||[]).reduce(function(s,b){return s+num(b.applySupply)},0);
