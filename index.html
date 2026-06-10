@@ -14844,6 +14844,7 @@ CREATE TABLE system_map_activity (
       contractAmt:0, deduction:0,
       supplyAmt:0, tax:0, total:0, paidAmount:0,
       memo:'',
+      date: new Date().toISOString().substring(0,10),  // [감사 L5] 거래일 — 거래처 '최근거래일' 공란 방지
       createdAt: new Date().toISOString().substring(0,10),
       paidDate:'',
     });
@@ -15782,7 +15783,7 @@ CREATE TABLE system_map_activity (
           var ni = { id: genId(), type: t2, name: name, amount: amt, mode: mode };
           st.project.budgetItems.push(ni); st.items.push(ni); added++;
         });
-        render();
+        save(true);  // [H12] 붙여넣기도 즉시 자동저장
         alert('✅ ' + added + '건 자동 분류 추가 완료');
       }).catch(function(e){alert('클립보드 접근 실패: '+e.message)});
     }
