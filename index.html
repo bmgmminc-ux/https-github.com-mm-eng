@@ -17875,15 +17875,23 @@ CREATE TABLE system_map_activity (
   }
   // [감사 2단계] 마스터(거래처·일용직) 키 변경 감지 → pushMasters (autoSync 워처가 mm-dash-v4만 보던 한계 보강)
   function _mastersHash(){ return (localStorage.getItem('mm-vendors-v2')||'') + '|' + (localStorage.getItem('mm-workers')||'') + '|' + (localStorage.getItem('mm-vendors')||'') + '|' + (localStorage.getItem('mm-vendors-v23')||''); }
-  var lastMastersHash = _mastersHash();
-  var mPushTimer = null;
+  function _settingsHash(){ return ['mm-company','mm-insurance-rates','mm-alert-thresholds'].map(function(k){ return localStorage.getItem(k)||''; }).join('|'); }
+  function _attendHash(){ return localStorage.getItem('mm-attendance')||''; }
+  var lastMastersHash = _mastersHash(), lastSettingsHash = _settingsHash(), lastAttendHash = _attendHash();
+  var mPushTimer = null, sPushTimer = null, aPushTimer = null;
   function debouncedMasters(){ if (mPushTimer) clearTimeout(mPushTimer); mPushTimer = setTimeout(function(){ pushMasters().then(function(r){ if (r && !r.ok && r.msg && r.msg.indexOf('no-cloud')<0 && r.msg.indexOf('로그인')<0 && window.globalToast) window.globalToast('⚠️ 마스터 동기화: '+r.msg, 'error', 5000); }); }, 2500); }
+  function debouncedSettings(){ if (sPushTimer) clearTimeout(sPushTimer); sPushTimer = setTimeout(function(){ pushSettings(); }, 2500); }
+  function debouncedAttend(){ if (aPushTimer) clearTimeout(aPushTimer); aPushTimer = setTimeout(function(){ pushAttendance(); }, 2500); }
   setInterval(function() {
     if (!autoSync || !sbReady()) return;
     var cur = localStorage.getItem(DASH_KEY) || '';
     if (cur !== lastHash) { lastHash = cur; debouncedPush(); }
     var curM = _mastersHash();
     if (curM !== lastMastersHash) { lastMastersHash = curM; debouncedMasters(); }
+    var curS = _settingsHash();
+    if (curS !== lastSettingsHash) { lastSettingsHash = curS; debouncedSettings(); }
+    var curA = _attendHash();
+    if (curA !== lastAttendHash) { lastAttendHash = curA; debouncedAttend(); }
   }, 3000);
 
   function setAutoSync(on) { autoSync = !!on; try { localStorage.setItem('mm-autosync', on?'1':'0') } catch(e){} }
@@ -17895,6 +17903,8 @@ CREATE TABLE system_map_activity (
     var r = await pull();
     try { await pullMasters(); } catch(e){}   // [감사 2단계] 거래처·일용직도 로그인 시 클라우드에서 복원
     try { if (window.mmSyncPullPhase1) await window.mmSyncPullPhase1(); } catch(e){}   // [감사 4단계] 4대보험·정산·경보수신자 클라우드 복원
+    try { await pullSettings(); } catch(e){}   // [감사 4단계] 회사정보·요율·임계값 복원
+    try { await pullAttendance(); } catch(e){}   // [감사 4단계] 출역 복원(일용직 pull 후)
     if (window.globalToast) {
       window.globalToast(r.ok ? '☁️ ' + r.msg : '⚠️ ' + r.msg, r.ok?'success':'error');
     }
@@ -17983,10 +17993,66 @@ CREATE TABLE system_map_activity (
   async function deleteVendorCloud(name){ var sb=sbClient(); if(!sb||!name) return { ok:false }; try{ var r=await sb.from('vendors').delete().eq('id', _mCloudId('v',name)); return { ok:!r.error, msg:r.error&&r.error.message }; }catch(e){ return { ok:false, msg:e.message }; } }
   async function deleteWorkerCloud(name){ var sb=sbClient(); if(!sb||!name) return { ok:false }; try{ var r=await sb.from('workers').delete().eq('id', _mCloudId('w',name)); return { ok:!r.error, msg:r.error&&r.error.message }; }catch(e){ return { ok:false, msg:e.message }; } }
 
+  // ── 설정(회사정보·보험요율·임계값) 클라우드 동기화 [감사 4단계] — app_settings 키-값. 테이블 없으면 자동 no-op ──
+  var SETTING_KEYS = ['mm-company','mm-insurance-rates','mm-alert-thresholds'];
+  async function pushSettings(){
+    var sb=sbClient(); if(!sb) return { ok:false, msg:'no-cloud' };
+    try{
+      var sess=await sb.auth.getSession();
+      var ownerId=sess.data.session && sess.data.session.user && sess.data.session.user.id;
+      if(!ownerId) return { ok:false, msg:'로그인 필요' };
+      var rows=[];
+      SETTING_KEYS.forEach(function(k){ var v=localStorage.getItem(k); if(v!=null){ var val; try{ val=JSON.parse(v); }catch(e){ val=v; } rows.push({ owner_id:ownerId, key:k, value:val }); } });
+      if(rows.length){ var r=await sb.from('app_settings').upsert(rows,{ onConflict:'owner_id,key' }); if(r.error) return { ok:false, msg:r.error.message }; }
+      return { ok:true, msg:'설정 '+rows.length };
+    }catch(e){ return { ok:false, msg:'설정 push: '+(e.message||e) }; }
+  }
+  async function pullSettings(){
+    var sb=sbClient(); if(!sb) return { ok:false };
+    try{
+      var r=await sb.from('app_settings').select('key,value'); if(r.error) throw r.error;
+      (r.data||[]).forEach(function(row){ try{ localStorage.setItem(row.key, typeof row.value==='string'?row.value:JSON.stringify(row.value)); }catch(e){} });
+      return { ok:true, msg:'설정 '+(r.data||[]).length };
+    }catch(e){ return { ok:false, msg:'설정 pull: '+(e.message||e) }; }
+  }
+
+  // ── 출역(attendance) 클라우드 동기화 [감사 4단계] — worker_id는 일용직 이름 기준 uuid(FK) ──
+  async function pushAttendance(){
+    var sb=sbClient(); if(!sb) return { ok:false, msg:'no-cloud' };
+    try{
+      var sess=await sb.auth.getSession();
+      var ownerId=sess.data.session && sess.data.session.user && sess.data.session.user.id;
+      if(!ownerId) return { ok:false, msg:'로그인 필요' };
+      var at=_mLoad('mm-attendance').filter(function(a){ return a && a.workerName && a.date; });
+      if(!at.length) return { ok:true, msg:'출역 0' };
+      await pushMasters();   // worker FK 보장(일용직 먼저 upsert)
+      var payload=at.map(function(a){ return { id:_mCloudId('a', a.id||(a.workerName+'|'+a.date)), worker_id:_mCloudId('w', a.workerName), project_id:null, work_date:a.date, job_type:a.jobType||null, wage:Math.round(a.wage||0), memo:a.projectLabel||null }; });
+      var r=await sb.from('attendance').upsert(payload,{ onConflict:'id' });
+      if(r.error) return { ok:false, msg:r.error.message };
+      return { ok:true, msg:'출역 '+payload.length };
+    }catch(e){ return { ok:false, msg:'출역 push: '+(e.message||e) }; }
+  }
+  async function pullAttendance(){
+    var sb=sbClient(); if(!sb) return { ok:false };
+    try{
+      var r=await sb.from('attendance').select('*'); if(r.error) throw r.error;
+      var workers=_mLoad('mm-workers');
+      function wByCid(cid){ for(var i=0;i<workers.length;i++){ if(_mCloudId('w', workers[i].name)===cid) return workers[i]; } return null; }
+      var arr=(r.data||[]).map(function(row){ var w=wByCid(row.worker_id); return { id:'AT'+row.id, date:row.work_date, workerId:w?w.id:row.worker_id, workerName:w?w.name:'(미상)', jobType:row.job_type||'일반', wage:row.wage||0, projectLabel:row.memo||'', createdAt:row.created_at }; });
+      localStorage.setItem('mm-attendance', JSON.stringify(arr));
+      try{ if(window.mmAttend&&window.mmAttend.recalcWorkers) window.mmAttend.recalcWorkers(); }catch(e){}
+      try{ if(window.mmAttend&&window.mmAttend.render) window.mmAttend.render(); }catch(e){}
+      try{ if(window.renderAttendancePage) window.renderAttendancePage(); }catch(e){}
+      return { ok:true, msg:'출역 '+arr.length };
+    }catch(e){ return { ok:false, msg:'출역 pull: '+(e.message||e) }; }
+  }
+
   window.mmData = {
     pull: pull, push: push, syncOnLogin: syncOnLogin, deleteProject: deleteProject,
     pushMasters: pushMasters, pullMasters: pullMasters,
     deleteVendorCloud: deleteVendorCloud, deleteWorkerCloud: deleteWorkerCloud,
+    pushSettings: pushSettings, pullSettings: pullSettings,
+    pushAttendance: pushAttendance, pullAttendance: pullAttendance,
     setAutoSync: setAutoSync, isAutoSync: function(){ return autoSync },
     mode: function(){ return sbReady() ? 'supabase' : 'local' }
   };
