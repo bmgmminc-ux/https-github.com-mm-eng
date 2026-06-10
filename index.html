@@ -15682,14 +15682,14 @@ CREATE TABLE system_map_activity (
       document.getElementById(opts.newNameId).value = '';
       document.getElementById(opts.newAmtId).value = '';
       document.getElementById(opts.newTypeId).value = '';
-      render();
+      save(true);  // [H12] 즉시 자동저장
     }
     function remove(id) {
       if (!confirm('이 항목을 삭제하시겠습니까?')) return;
       st.items = st.items.filter(function(b){return b.id!==id});
       st.project.budgetItems = st.project.budgetItems.filter(function(b){return b.id!==id});
       delete st.selected[id];
-      render();
+      save(true);  // [H12] 즉시 자동저장
     }
     function toggle(id) {
       st.selected[id] = !st.selected[id];
@@ -15709,7 +15709,7 @@ CREATE TABLE system_map_activity (
         if (bi) bi.type = newType;
       });
       st.selected = {};
-      render();
+      save(true);  // [H12] 즉시 자동저장
     }
     function removeSelected() {
       var sel = Object.keys(st.selected).filter(function(k){return st.selected[k]});
@@ -15718,7 +15718,7 @@ CREATE TABLE system_map_activity (
       st.items = st.items.filter(function(b){return !st.selected[b.id]});
       st.project.budgetItems = st.project.budgetItems.filter(function(b){return !st.selected[b.id]});
       st.selected = {};
-      render();
+      save(true);  // [H12] 즉시 자동저장
     }
     function clearSelection() { st.selected = {}; render() }
     function clearAll() {
@@ -15746,7 +15746,7 @@ CREATE TABLE system_map_activity (
       if (it) { it.name = n; it.amount = a }
       if (bi) { bi.name = n; bi.amount = a }
       st.editingId = null;
-      render();
+      save(true);  // [H12] 즉시 자동저장
     }
     // 드래그 앤 드롭
     function onDragStart(e, id) { e.dataTransfer.setData('text/plain', id) }
@@ -15758,7 +15758,7 @@ CREATE TABLE system_map_activity (
       var bi = st.project.budgetItems.find(function(x){return x.id===id});
       if (it) it.type = targetCat;
       if (bi) bi.type = targetCat;
-      render();
+      save(true);  // [H12] 즉시 자동저장
     }
     // 클립보드 paste (Tab/Enter 구분: name<TAB>amount)
     function readPaste() {
@@ -15780,7 +15780,7 @@ CREATE TABLE system_map_activity (
         alert('✅ ' + added + '건 자동 분류 추가 완료');
       }).catch(function(e){alert('클립보드 접근 실패: '+e.message)});
     }
-    function save() {
+    function save(quiet) {
       // [원가분산 편집 가능] contract 모드→costs.contract, cost 모드→costs.actual = 해당 모드 budgetItems 합. 매입(costItems)과 별개로 원가를 직접 관리.
       st.project.costs = st.project.costs || {};
       CATS.forEach(function(c) {
@@ -15791,8 +15791,13 @@ CREATE TABLE system_map_activity (
         if (mode === 'contract') st.project.costs[c.key].contract = sum;
         else st.project.costs[c.key].actual = sum;
       });
-      persistProject(st.project);
-      if (window.globalToast) globalToast('✓ ' + (mode === 'contract' ? '계약' : '원가') + ' 분산 저장됨', 'success');
+      if (quiet) {
+        // [H12] 자동저장 — 카드 추가/삭제/이동/편집 즉시 로컬 영속(저장 안 누르고 닫아도 손실 없음). 클라우드는 autoSync가 반영.
+        try { var _ps = loadProjects(); var _i = _ps.findIndex(function(x){ return x.id === st.project.id; }); if (_i >= 0) _ps[_i] = st.project; else _ps.push(st.project); saveProjects(_ps); } catch(e){}
+      } else {
+        persistProject(st.project);
+        if (window.globalToast) globalToast('✓ ' + (mode === 'contract' ? '계약' : '원가') + ' 분산 저장됨', 'success');
+      }
       render();
     }
 
