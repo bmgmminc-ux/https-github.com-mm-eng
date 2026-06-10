@@ -14800,7 +14800,16 @@ CREATE TABLE system_map_activity (
       var _CATS = ['outsource','material','product','indirect','cashexp','labor','safety','direct','labordirect'];
       var _sum = {};
       state.items.forEach(function(it){ if (it.type) { var a = Number(String(it.supplyAmt||it.total||0).replace(/[^0-9.-]/g,'')) || 0; _sum[it.type] = (_sum[it.type]||0) + a; } });
-      _CATS.forEach(function(t){ state.project.costs[t] = state.project.costs[t] || { contract:0, actual:0 }; if (!(num(state.project.costs[t].actual) > 0)) state.project.costs[t].actual = _sum[t] || 0; });
+      _CATS.forEach(function(t){
+        var c = state.project.costs[t] = state.project.costs[t] || { contract:0, actual:0 };
+        var seedVal = _sum[t] || 0;
+        var prevSeed = c._seedActual;
+        // [C1-fix] 레거시 부트스트랩: actual>0 && ≠매입 → override로 잠금, 그 외 → 추종 baseline
+        if (prevSeed === undefined || prevSeed === null) prevSeed = (num(c.actual) > 0 && num(c.actual) !== seedVal) ? seedVal : num(c.actual);
+        // 사용자 미override(actual==직전 매입시드)일 때만 매입 반영 — 삭제(0)·커스텀 override는 보존
+        if (num(c.actual) === num(prevSeed)) c.actual = seedVal;
+        c._seedActual = seedVal;
+      });
     })();
     if (idx >= 0) projects[idx] = state.project; else projects.push(state.project);
     localStorage.setItem('mm-dash-v4', JSON.stringify(projects));
@@ -17733,7 +17742,7 @@ CREATE TABLE system_map_activity (
       memo: pr.memo || '', costs: {}, costItems: [], billingItems: [], otherIncomeItems: []
     };
     (costRows||[]).forEach(function(r) {
-      p.costs[r.category] = { contract: num(r.contract), actual: num(r.actual) };  // [정리] _seedActual 죽은 캐시 로드 제거(actual 단일원본)
+      p.costs[r.category] = { contract: num(r.contract), actual: num(r.actual), _seedActual: (r.seed_actual === null || r.seed_actual === undefined) ? undefined : num(r.seed_actual) };  // [C1-fix] seed_actual 부활 — 매입 시드 미러(override 판별용, 멀티기기 정합)
     });
     (ciRows||[]).forEach(function(r) {
       p.costItems.push({
@@ -17761,7 +17770,14 @@ CREATE TABLE system_map_activity (
     if (p.costItems && p.costItems.length) {
       var _cs = {};
       p.costItems.forEach(function(it){ if (it.type) _cs[it.type] = (_cs[it.type] || 0) + (num(it.supplyAmt) || 0); });
-      Object.keys(p.costs).forEach(function(cat){ if (p.costs[cat] && !(num(p.costs[cat].actual) > 0)) p.costs[cat].actual = _cs[cat] || 0; });
+      Object.keys(p.costs).forEach(function(cat){
+        var c = p.costs[cat]; if (!c) return;
+        var seedVal = _cs[cat] || 0;
+        var prevSeed = c._seedActual;
+        if (prevSeed === undefined || prevSeed === null) prevSeed = (num(c.actual) > 0 && num(c.actual) !== seedVal) ? seedVal : num(c.actual);
+        if (num(c.actual) === num(prevSeed)) c.actual = seedVal;  // [C1-fix] 미override만 매입 반영 — 삭제(0)·override 보존
+        c._seedActual = seedVal;
+      });
     }
     return p;
   }
