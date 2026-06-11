@@ -5978,8 +5978,9 @@ table.data-table {
     setT('pjd-fl-contract-vat', 'VAT포함 ' + fmtFull(k.contractVAT));
     setH('pjd-fl-direct', '−' + fmt(k.directSupply).replace('−',''));
     setH('pjd-fl-net', fmt(k.netContract));
-    setH('pjd-fl-cost', fmt(k.costActual));
-    setT('pjd-fl-cost-meta', '예산 ' + fmtFull(k.costContract));
+    // [흐름 정합 — 대표 지적] 사슬이 직불을 뺀 실수금 기준이므로 투입도 직불 제외 — 실수금(6,896) − 투입(직불 제외) = 이익이 수식대로 떨어짐
+    setH('pjd-fl-cost', fmt(k.costActual - k.directSupply));
+    setT('pjd-fl-cost-meta', '직불 제외 · 총투입 ' + fmtFull(k.costActual));
     setH('pjd-fl-profit', (k.profit>=0?'+':'') + fmt(k.profit));
     setT('pjd-fl-profit-rate', (k.profitRate>=0?'+':'') + pct(k.profitRate));
     setH('pjd-flc-applied', fmt(k.billingApplied));
@@ -6234,14 +6235,7 @@ table.data-table {
     <tfoot id="pjbx-tfoot"></tfoot>
   </table>
 
-  <div class="pjbx-direct" id="pjbx-direct">
-    <div class="pjbx-direct-hd">
-      <span class="ico">📌</span>
-      <strong>직불금 분리 영역</strong>
-      <span class="meta">CASHFLOW EXCLUDED</span>
-    </div>
-    <div class="pjbx-direct-rows" id="pjbx-direct-rows"></div>
-  </div>
+  <!-- [예산표 정합 — 대표 지적] 직불금 분리 영역 폐지 — 직불 2분류는 본 표 행으로 편입(분리 시 합계 이윤이 직불 집행만큼 부풀던 왜곡 제거) -->
 </section>
 
 <script id="pjb-script">
@@ -6257,8 +6251,8 @@ table.data-table {
     {key:'safety',    label:'안전관리비', color:'#EAB308'},
   ];
   var DIRECT = [
-    {key:'direct',      label:'직불금',       sub:'발주처 직접지급'},
-    {key:'labordirect', label:'인건비직불금', sub:'노무 직지급 · VAT 0'},
+    {key:'direct',      label:'직불금',       sub:'발주처 직접지급',      color:'#C026D3'},
+    {key:'labordirect', label:'인건비직불금', sub:'노무 직지급 · VAT 0', color:'#A855F7'},
   ];
   function num(v) { return Number(String(v||'0').replace(/[^0-9.-]/g,'')) || 0 }
   function fmt(n) {
@@ -6336,49 +6330,55 @@ table.data-table {
         +   '<td class="col-status"><span class="badge ' + stat + '">' + statusLabel(stat) + '</span></td>'
         + '</tr>';
     }).join('');
+    // [예산표 정합 — 대표 지적] 직불 2분류를 본 표에 편입 — 분리해 두면 합계 이윤이 직불 집행만큼 부풀어 실제 이익과 어긋남.
+    // 캐시플로우 제외 구분은 행 태그로 표시. 계약 미배정(계약 0·집행>0)은 '미배정'으로 안내.
+    rowsHtml += DIRECT.map(function(c){
+      var k = (p.costs&&p.costs[c.key])?p.costs[c.key]:{contract:0,actual:0};
+      var contract = num(k.contract), actual = num(k.actual);
+      var unalloc = contract<=0 && actual>0;
+      var rate = contract>0 ? (actual/contract*100) : 0;
+      var stat = unalloc ? 'warn' : statusOf(rate); var pf = contract - actual;
+      var fillW = Math.min(100, rate);
+      var barCls = unalloc ? 'warn' : ((rate===0 && actual===0) ? 'zero' : stat);
+      var tag = '<span style="margin-left:6px;font-size:10px;font-weight:700;color:#7C3AED;background:#F5F3FF;border:1px solid #DDD6FE;border-radius:6px;padding:1px 6px;white-space:nowrap;vertical-align:1px">직불 · 캐시 제외</span>';
+      var badge = unalloc ? '<span class="badge warn">미배정</span>' : '<span class="badge ' + stat + '">' + statusLabel(stat) + '</span>';
+      return ''
+        + '<tr>'
+        +   '<td class="col-cat"><span class="dot" style="background:' + c.color + '"></span>' + c.label + tag + '</td>'
+        +   '<td class="col-bar"><div class="bar-row">'
+        +     '<div class="bar-wrap"><div class="bar-fill ' + barCls + '" style="width:' + fillW + '%"></div></div>'
+        +     '<div class="bar-pct ' + barCls + '">' + (unalloc ? '—' : Math.round(rate) + '%') + '</div>'
+        +   '</div></td>'
+        +   '<td class="col-num contract">' + fmt(contract) + '</td>'
+        +   '<td class="col-num">' + fmt(actual) + '</td>'
+        +   '<td class="col-profit ' + (pf>=0?'pos':'neg') + '">' + (pf>=0?'+':'') + fmt(pf) + '</td>'
+        +   '<td class="col-status">' + badge + '</td>'
+        + '</tr>';
+    }).join('');
     var rowsEl = document.getElementById('pjbx-rows');
     if (rowsEl) rowsEl.innerHTML = rowsHtml;
 
-    // tfoot 합계 행
-    var sumRate = genC>0 ? (genA/genC*100) : (genA>0 ? 150 : 0);
+    // tfoot 합계 행 — [예산표 정합 — 대표 지적] 직불 포함 전체 합계: 이윤이 상단 예상 이윤·이익 KPI(+434만)와 일치, 소진율도 상단 95.1%와 동일 기준
+    var sumRate = allContract>0 ? (allActual/allContract*100) : (allActual>0 ? 150 : 0);
     var sumStat = statusOf(sumRate);
-    var sumProfit = genC - genA;
+    var sumProfit = allContract - allActual;
     var sumFillW = Math.min(100, sumRate);
-    var sumBarCls = (sumRate===0 && genA===0) ? 'zero' : sumStat;
+    var sumBarCls = (sumRate===0 && allActual===0) ? 'zero' : sumStat;
     var tfootEl = document.getElementById('pjbx-tfoot');
     if (tfootEl) {
       tfootEl.innerHTML = ''
         + '<tr>'
-        +   '<td class="label">합계 (일반 7분류)</td>'
+        +   '<td class="label">합계 (직불 포함)</td>'
         +   '<td class="col-bar"><div class="bar-row">'
         +     '<div class="bar-wrap"><div class="bar-fill ' + sumBarCls + '" style="width:' + sumFillW + '%"></div></div>'
         +     '<div class="bar-pct ' + sumBarCls + '">' + Math.round(sumRate) + '%</div>'
         +   '</div></td>'
-        +   '<td class="num">' + fmt(genC) + '</td>'
-        +   '<td class="num">' + fmt(genA) + '</td>'
+        +   '<td class="num">' + fmt(allContract) + '</td>'
+        +   '<td class="num">' + fmt(allActual) + '</td>'
         +   '<td class="num" style="color:' + (sumProfit>=0?'#059669':'#DC2626') + '">' + (sumProfit>=0?'+':'') + fmt(sumProfit) + '</td>'
         +   '<td></td>'
         + '</tr>';
     }
-
-    // 직불금 분리
-    var directHtml = DIRECT.map(function(c){
-      var k = (p.costs&&p.costs[c.key])?p.costs[c.key]:{contract:0,actual:0};
-      var contract = num(k.contract), actual = num(k.actual);
-      var over = actual > contract && contract > 0;
-      var rate = contract>0 ? Math.round(actual/contract*100) : 0;
-      return ''
-        + '<div class="pjbx-direct-card">'
-        +   '<div class="left"><strong>' + c.label + '</strong><span class="sub">' + c.sub + '</span></div>'
-        +   '<div class="nums">'
-        +     '<div><span class="l">계약</span><span class="v">' + fmt(contract) + '</span></div>'
-        +     '<div><span class="l">집행</span><span class="v ' + (over?'over':'') + '">' + fmt(actual) + '</span></div>'
-        +     '<div><span class="l">소진</span><span class="v ' + (over?'over':'') + '">' + rate + '%</span></div>'
-        +   '</div>'
-        + '</div>';
-    }).join('');
-    var dEl = document.getElementById('pjbx-direct-rows');
-    if (dEl) dEl.innerHTML = directHtml;
   }
 
   function maybeRender() {
