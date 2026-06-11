@@ -17012,7 +17012,10 @@ CREATE TABLE system_map_activity (
     var msg = '선택 ' + ids.length + '건 중 삭제 가능 ' + ok.length + '건';
     if (blocked.length) msg += '\n\n🚫 연계 데이터로 차단 ' + blocked.length + '건:\n' + blocked.join('\n') + '\n→ 해당 매입을 먼저 삭제해야 삭제할 수 있습니다.';
     if (!ok.length) { alert(msg); return; }
-    if (!confirm(msg + '\n\n삭제 가능 ' + ok.length + '건을 삭제할까요? (되돌릴 수 없음)')) return;
+    // [실수 방지 — 대표 요청] '삭제' 직접 입력 요구 — Enter 한 번에 지워지지 않도록
+    var _typed = prompt(msg + '\n\n⚠️ 되돌릴 수 없습니다. 삭제 가능 ' + ok.length + '건(' + ok.map(function(v){return v.name;}).join(', ') + ')을 지우려면 "삭제"라고 입력하세요:');
+    if (_typed === null) return;
+    if (String(_typed).trim() !== '삭제') { alert('"삭제"를 입력하지 않아 취소되었습니다.'); return; }
     ok.forEach(function(v){
       purgeKeys(v.id, v.name);
       if (v.name && window.mmData && window.mmData.deleteVendorCloud) window.mmData.deleteVendorCloud(v.name).then(function(r){ if(!(r&&r.ok) && window.globalToast) globalToast('⚠️ ' + v.name + ' 클라우드 삭제 실패 — 자동 재시도 예정', 'warning', 5000); });
@@ -17063,7 +17066,10 @@ CREATE TABLE system_map_activity (
         return;
       }
     }
-    if (!confirm('이 거래처를 삭제할까요?')) return;
+    // [실수 방지 — 대표 요청] Enter 한 번에 지워지지 않도록 업체명 직접 입력 요구 (되돌릴 수 없는 작업)
+    var _typed = prompt('⚠️ 거래처 삭제 — 되돌릴 수 없습니다.\n삭제하려면 업체명을 정확히 입력하세요:\n\n' + ((_gone && _gone.name) || ''));
+    if (_typed === null) return;
+    if (vNorm(_typed) !== vNorm(_gone && _gone.name)) { alert('업체명이 일치하지 않아 삭제가 취소되었습니다.'); return; }
     // [거래처 삭제 수정] 3키 전부에서 id+정규화이름 제거 — 한 키만 지우면 병합 읽기가 되살리던 결함
     purgeKeys(id, _gone && _gone.name);
     // [감사 2b + 전수조사 H1] 클라우드 삭제 전파 — 실패 시 통지(툼스톤이 부활 차단, autoSync push가 재시도)
