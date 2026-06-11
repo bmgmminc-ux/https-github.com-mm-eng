@@ -4078,10 +4078,6 @@ table.data-table {
         <span class="icon-wrap"><svg class="icon"><use href="#i-attendance"/></svg></span>
         <span class="nav-text">일용직 관리</span>
       </button>
-      <button class="nav-item" data-nav="insurance">
-        <span class="icon-wrap"><svg class="icon"><use href="#i-insurance"/></svg></span>
-        <span class="nav-text">4대보험 정산</span>
-      </button>
     </div>
 
     <div class="sidebar-section">
@@ -7956,7 +7952,6 @@ table.data-table {
           <button class="btn btn-secondary btn-sm" data-act-filter="기성" style="background:#FEF3C7;color:#92400E;border-color:#FCD34D">📋 기성 (0)</button>
           <button class="btn btn-secondary btn-sm" data-act-filter="수금" style="background:#D1FAE5;color:#065F46;border-color:#86EFAC">💰 수금 (0)</button>
           <button class="btn btn-secondary btn-sm" data-act-filter="출역" style="background:#FED7AA;color:#9A3412;border-color:#FDBA74">⏰ 출역 (0)</button>
-          <button class="btn btn-secondary btn-sm" data-act-filter="4대보험" style="background:#FEE2E2;color:#991B1B;border-color:#FCA5A5">🛡️ 4대보험 (0)</button>
           <button class="btn btn-secondary btn-sm" data-act-filter="거래처" style="background:#E0E7FF;color:#3730A3;border-color:#A5B4FC">🏢 거래처 (0)</button>
           <button class="btn btn-secondary btn-sm" data-act-filter="설정" style="background:#CFFAFE;color:#155E75;border-color:#67E8F9">⚙️ 설정 (0)</button>
         </div>
@@ -8184,7 +8179,7 @@ table.data-table {
         <div class="t-xs" style="line-height:1.7;color:var(--text-secondary)">
           · Supabase activity_log 테이블에 영구 보존 — 회계 감사 / 분쟁 대응 근거자료<br/>
           · X+Z 진입 패턴: 사이드바 메뉴 OR 전체현황의 활동 피드 "전체 보기" 버튼<br/>
-          · 8가지 액션 타입: 프로젝트·매입·기성·수금·출역·4대보험·거래처·설정<br/>
+          · 8가지 액션 타입: 프로젝트·매입·기성·수금·출역·거래처·설정<br/>
           · 사용자 권한 기반 가시성 — 일반 사용자는 본인 활동만, 관리자/CEO는 전체 활동<br/>
           · 페이지당 50건 페이지네이션 (현재 12건 표시 · UI 검증용 목업)<br/>
           · 모든 액션은 자동 로깅 — Supabase trigger + RLS로 무결성 보장
@@ -8370,7 +8365,7 @@ table.data-table {
 
       <!-- ═════ KPI ═════ -->
       <div class="section-title">📊 출역 KPI — <span id="pj-label">전체 현장</span> · <span data-month-tpl="{Y}년 {M}월">2026년 5월</span></div>
-      <div class="section-desc">PJ 필터에 따라 KPI · 캘린더 · 도넛이 동기화됩니다. 4대보험 대상자(8일 이상)는 자동 검출.</div>
+      <div class="section-desc">PJ 필터에 따라 KPI · 캘린더 · 도넛이 동기화됩니다. 자동 검출.</div>
 
       <div class="kpi-grid mb-7">
         <!-- KPI 1: 이번 달 총 출역 (인-일) -->
@@ -8457,31 +8452,6 @@ table.data-table {
           </svg>
         </div>
 
-        <!-- KPI 4: 4대보험 대상자 -->
-        <div class="kpi-card animate-scale delay-4"
-             style="--accent:#D97706; --accent-end:#B45309; --accent-bg:#FFFBEB; --accent-glow:rgba(217,119,6,0.18); --accent-shadow:0 20px 40px -12px rgba(217,119,6,0.3)">
-          <div class="kpi-icon-wrap" style="background:#FFFBEB">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2" stroke-linecap="round">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-              <path d="M9 12l2 2 4-4"/>
-            </svg>
-          </div>
-          <div class="kpi-label">4대보험 대상자 <span class="t-xs" style="color:var(--text-muted)">8일 이상</span></div>
-          <div class="kpi-value t-num"><span class="pj-num" data-kpi="att-insurance8">0</span><span style="font-size:18px;font-weight:700">명</span></div><!-- [전수조사 H5] 가짜 12명·현장별 가짜값 제거 — data-kpi 실산출 연결 -->
-          <div class="kpi-meta">
-            
-          </div>
-          <svg class="kpi-spark" viewBox="0 0 100 40" preserveAspectRatio="none">
-            <defs>
-              <linearGradient id="sp-att-4" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0%" stop-color="#D97706" stop-opacity="0.4"/>
-                <stop offset="100%" stop-color="#D97706" stop-opacity="0"/>
-              </linearGradient>
-            </defs>
-            <path d="M0,30 Q15,28 25,24 T50,20 T75,16 T100,14 L100,40 L0,40 Z" fill="url(#sp-att-4)"/>
-            <polyline points="0,30 25,24 50,20 75,16 100,14" fill="none" stroke="#D97706" stroke-width="2.5" stroke-linecap="round"/>
-          </svg>
-        </div>
       </div>
 
       <!-- ═════ 메인 그리드: 캘린더 + 사이드 패널 ═════ -->
@@ -8715,7 +8685,7 @@ table.data-table {
         <div class="table-header">
           <div>
             <div class="table-title">📋 전체 작업자 명세</div>
-            <div class="t-xs">출역일 내림차순 정렬 · 4대보험 대상자 자동 검출(8일+) · 총 인건비 집계</div>
+            <div class="t-xs">출역일 내림차순 정렬 · 총 인건비 집계</div>
           </div>
           <div class="row gap-2 flex-wrap">
             <button class="btn btn-secondary btn-sm">📋 양식</button>
@@ -8729,15 +8699,15 @@ table.data-table {
           <colgroup>
             <col style="width:10%"><col style="width:12%"><col style="width:16%">
             <col style="width:10%"><col style="width:12%"><col style="width:14%">
-            <col style="width:14%"><col style="width:12%">
+            <col style="width:26%">
           </colgroup>
           <thead><tr>
             <th>이름</th><th>직종</th><th>현장</th>
             <th class="right">출역일</th><th class="right">평균 일당</th>
             <th class="right">누적 인건비</th>
-            <th class="center">4대보험</th><th class="center">액션</th>
+            <th class="center">액션</th>
           </tr></thead>
-          <tbody><tr><td colspan="8" style="text-align:center;padding:40px;color:#94a3b8">등록된 일용직이 없습니다 — 일용직 마스터에서 먼저 등록하세요</td></tr></tbody>
+          <tbody><tr><td colspan="7" style="text-align:center;padding:40px;color:#94a3b8">등록된 일용직이 없습니다 — 일용직 마스터에서 먼저 등록하세요</td></tr></tbody>
         </table>
 </div>
       </div>
@@ -8749,7 +8719,6 @@ table.data-table {
           · 작업자: <strong>0명</strong><br/>
           · 누적 출역: <strong>0인-일</strong><br/>
           · 인건비 합계: <strong>0원</strong> (공급가 기준 / VAT 0)<br/>
-          · 4대보험 가입 대상: <strong>0명</strong> (8일 이상 출역)
         </div>
       </div>
 
@@ -8804,32 +8773,16 @@ table.data-table {
           </div>
 
           <div style="margin-top:14px;padding:10px 14px;background:var(--bg-subtle);border-radius:8px;font-size:12px;color:var(--text-secondary)">
-            💡 연속 등록: 같은 작업자의 다음 날을 한 번에 추가. 5일 연속 등록 시 4대보험 가입 안내 자동 표시.
+            💡 연속 등록: 같은 작업자의 다음 날을 한 번에 추가.
           </div>
         </div>
 
-        <!-- 4대보험 알림 카드 -->
-        <div class="card-base" style="border-left:4px solid #D97706;background:linear-gradient(135deg,#FFFBEB 0%,#FEF3C7 100%)">
-          <div class="card-base-header">
-            <div>
-              <h3 class="t-h4" style="color:#92400E">⚠️ 4대보험 가입 안내</h3>
-              <div class="t-xs" style="color:#B45309">8일 이상 출역자 자동 검출 — 회계 보고에 반영</div>
-            </div>
-          </div>
-
-          <div class="col gap-3" id="at-insurance-list">
-            <div style="padding:30px 20px;text-align:center;color:#94a3b8;font-size:13px;font-weight:600">
-              <div style="font-size:26px;margin-bottom:6px">🛡️</div>8일 이상 출역자가 없습니다 — 출역 누적 시 자동 검출
-            </div>
-          </div>
-        </div>
       </div>
 
       <!-- 도메인 룰 안내 -->
       <div style="padding:14px 18px;background:var(--bg-subtle);border-radius:10px;border-left:4px solid var(--primary-500);margin-bottom:24px">
         <div style="font-size:13px;font-weight:800;color:var(--text-primary);margin-bottom:6px">📌 출역 관리 도메인 룰</div>
         <div class="t-xs" style="line-height:1.7;color:var(--text-secondary)">
-          · 4대보험 의무 가입: 1개월간 8일 이상 근로 OR 60시간 이상 근로 시 자동 검출 (산업재해보상보험법 시행령 제2조)<br/>
           · 인건비/인건비직불금 매입에는 부가세 0원 자동 적용 (도메인 룰 5)<br/>
           · 일당 기본값은 작업자 프로필 마스터에서 자동 채움 — 일용직 메뉴에서 관리<br/>
           · 인건비직불금은 발주처 직접지급 — 명문이엔지 캐시플로우에서 제외 (도메인 룰 1)
@@ -8923,487 +8876,6 @@ table.data-table {
           window.addEventListener('hashchange', function() {
             if ((window.location.hash || '').slice(1) === 'attendance') {
               setTimeout(function() { window.setAttendancePjFilter('all'); }, 150);
-            }
-          });
-        }
-      })();
-      </script>
-
-  </main>
-<main class="main-area" data-screen="insurance">
-
-    <div class="topbar">
-      <div>
-        <div class="breadcrumb">대시보드 / 현장 관리 / <span>4대보험 정산</span></div>
-        <div class="topbar-title">4대보험 정산</div>
-      </div>
-      <div class="search-bar">
-        <svg class="icon icon-sm"><use href="#i-search"/></svg>
-        <input placeholder="가입자·직종·프로젝트 검색...">
-        <kbd>⌘K</kbd>
-      </div>
-      <div class="topbar-actions">
-        <span class="realtime-banner">
-          <span class="dot-status live"></span>
-          실시간 동기화
-        </span>
-        <div class="presence-stack">
-          <div class="avatar a-1">김</div>
-          <div class="avatar a-2">이</div>
-          <div class="avatar a-3">박</div>
-          <div class="avatar a-4">최</div>
-          <div class="avatar more">+8</div>
-        </div>
-        <div class="theme-pill">
-          <button class="active" data-theme="light" title="라이트 모드">☀</button>
-          <button data-theme="dark" title="다크 모드">🌙</button>
-        </div>
-        <button class="icon-btn" title="알림 (3)">
-          <svg class="icon"><use href="#i-bell"/></svg>
-          <span class="dot"></span>
-        </button>
-      </div>
-    </div>
-
-    <div class="preview-section">
-
-      <!-- HERO -->
-      <div class="hero animate-slide">
-        <div class="hero-grid">
-          <div>
-            <div class="hero-eyebrow">현장 관리 · 4대보험 자동 정산 (산재보험법 시행령 §2)</div>
-            <div class="hero-title"><span data-month-tpl="{Y}년 {M}월">2026년 5월</span><br/>4대보험 정산</div>
-            <div class="hero-meta">
-              <span>📅 신고 마감: 2026-06-10 (37일 남음)</span>
-              <span><span class="dot-status live"></span>출역 데이터 자동 연동</span>
-              <span>⚡ 마지막 동기화: 1시간 전</span>
-            </div>
-          </div>
-          <div class="hero-stats">
-            <div class="hero-stat">
-              <div class="hero-stat-label">가입 대상</div>
-              <div class="hero-stat-value t-num">0명</div>
-              <div class="hero-stat-trend"></div>
-            </div>
-            <div class="hero-stat accent">
-              <div class="hero-stat-label">회사 부담</div>
-              <div class="hero-stat-value t-num">658만</div>
-              <div class="hero-stat-trend"></div>
-            </div>
-            <div class="hero-stat success">
-              <div class="hero-stat-label">근로자 공제</div>
-              <div class="hero-stat-value t-num">472만</div>
-              <div class="hero-stat-trend"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- KPI -->
-      <!-- ═════ PJ 필터 + 연/월 선택 바 ═════ -->
-      <div class="filter-bar">
-        <div class="row" style="align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px">
-          <div class="row gap-2 flex-wrap" style="align-items:center">
-            <span class="filter-bar-label">현장</span>
-            <button class="pj-chip active" data-pj="all" onclick="setInsurancePjFilter('all')">📊 전체</button><!-- [전수조사 H5] 가짜 현장 칩(988/985/981/991 ○○현장) 제거 -->
-          </div>
-          <div class="row gap-2" style="align-items:center">
-            <span class="filter-bar-label">신고 기준월</span>
-            <select class="form-input" style="width:90px;margin:0;padding:6px 10px;font-size:13px">
-              <option>2024</option>
-              <option>2025</option>
-              <option selected>2026</option>
-            </select>
-            <button class="btn btn-secondary btn-sm" onclick="window.monthNavStep(this,-1)">◀</button>
-            <select class="form-input" style="width:80px;margin:0;padding:6px 10px;font-size:13px">
-              <option>1월</option><option>2월</option><option>3월</option><option>4월</option>
-              <option selected>5월</option>
-              <option>6월</option><option>7월</option><option>8월</option><option>9월</option>
-              <option>10월</option><option>11월</option><option>12월</option>
-            </select>
-            <button class="btn btn-secondary btn-sm" onclick="window.monthNavStep(this,1)">▶</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="section-title">📊 4대보험 KPI — <span id="ins-pj-label">전체 현장</span> · <span data-month-tpl="{Y}년 {M}월 신고분">2026년 5월 신고분</span></div>
-      <div class="section-desc">출역 데이터 기반 자동 계산. 5월 신고는 6/10까지 (1개월 후행). 산재보험은 회사 100% 부담.</div>
-
-      <div class="kpi-grid mb-7">
-        <div class="kpi-card animate-scale delay-1"
-             style="--accent:var(--primary-500); --accent-end:var(--primary-700); --accent-bg:var(--primary-50); --accent-glow:rgba(59,104,246,0.15); --accent-shadow:0 20px 40px -12px rgba(59,104,246,0.25)">
-          <div class="kpi-icon-wrap" style="background:var(--primary-50)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="var(--primary-600)" stroke-width="2" stroke-linecap="round">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-              <path d="M9 12l2 2 4-4"/>
-            </svg>
-          </div>
-          <div class="kpi-label">가입 대상자</div>
-          <div class="kpi-value t-num"><span class="ins-pj-num" data-kpi="ins-eligible">0</span><span style="font-size:18px;font-weight:700">명</span></div><!-- [전수조사 H5] 가짜 12명 제거 — renderInsurancePage 실산출 연결 -->
-          <div class="kpi-meta">
-            <span class="kpi-trend up"></span>
-            <span></span>
-          </div>
-          <svg class="kpi-spark" viewBox="0 0 100 40" preserveAspectRatio="none">
-            <defs><linearGradient id="sp-ins-1" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#3B68F6" stop-opacity="0.4"/><stop offset="100%" stop-color="#3B68F6" stop-opacity="0"/></linearGradient></defs>
-            <path d="M0,30 Q15,28 25,24 T50,20 T75,16 T100,12 L100,40 L0,40 Z" fill="url(#sp-ins-1)"/>
-            <polyline points="0,30 25,24 50,20 75,16 100,12" fill="none" stroke="#3B68F6" stroke-width="2.5" stroke-linecap="round"/>
-          </svg>
-        </div>
-
-        <div class="kpi-card animate-scale delay-2"
-             style="--accent:#7C3AED; --accent-end:#5B21B6; --accent-bg:#FAF5FF; --accent-glow:rgba(124,58,237,0.15); --accent-shadow:0 20px 40px -12px rgba(124,58,237,0.25)">
-          <div class="kpi-icon-wrap" style="background:#FAF5FF">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2" stroke-linecap="round">
-              <line x1="12" y1="1" x2="12" y2="23"/>
-              <path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>
-            </svg>
-          </div>
-          <div class="kpi-label">회사 부담 합계 <span class="t-xs" style="color:var(--text-muted)">5월</span></div>
-          <div class="kpi-value t-num"><span class="ins-pj-num" data-kpi="ins-co-share">0</span><span style="font-size:18px;font-weight:700">만</span></div><!-- [전수조사 H5] 가짜 6,580천 제거 — 실산출(만원 단위) 연결 -->
-          <div class="kpi-meta">
-            <span class="kpi-trend up"></span>
-            <span></span>
-          </div>
-          <svg class="kpi-spark" viewBox="0 0 100 40" preserveAspectRatio="none">
-            <defs><linearGradient id="sp-ins-2" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#7C3AED" stop-opacity="0.4"/><stop offset="100%" stop-color="#7C3AED" stop-opacity="0"/></linearGradient></defs>
-            <path d="M0,32 Q15,28 25,22 T50,18 T75,14 T100,10 L100,40 L0,40 Z" fill="url(#sp-ins-2)"/>
-            <polyline points="0,32 25,22 50,18 75,14 100,10" fill="none" stroke="#7C3AED" stroke-width="2.5" stroke-linecap="round"/>
-          </svg>
-        </div>
-
-        <div class="kpi-card animate-scale delay-3"
-             style="--accent:var(--success-500); --accent-end:var(--success-700); --accent-bg:var(--success-50); --accent-glow:rgba(16,185,129,0.18); --accent-shadow:0 20px 40px -12px rgba(16,185,129,0.3)">
-          <div class="kpi-icon-wrap" style="background:var(--success-50)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="var(--success-700)" stroke-width="2" stroke-linecap="round">
-              <polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/>
-            </svg>
-          </div>
-          <div class="kpi-label">근로자 공제 합계</div>
-          <div class="kpi-value t-num"><span class="ins-pj-num" data-kpi="ins-emp-share">0</span><span style="font-size:18px;font-weight:700">만</span></div><!-- [전수조사 H5] 가짜 4,720천 제거 — 실산출(만원 단위) 연결 -->
-          <div class="kpi-meta">
-            <span>급여 차감액</span>
-          </div>
-          <svg class="kpi-spark" viewBox="0 0 100 40" preserveAspectRatio="none">
-            <defs><linearGradient id="sp-ins-3" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#10B981" stop-opacity="0.4"/><stop offset="100%" stop-color="#10B981" stop-opacity="0"/></linearGradient></defs>
-            <path d="M0,32 Q15,28 25,22 T50,20 T75,16 T100,12 L100,40 L0,40 Z" fill="url(#sp-ins-3)"/>
-            <polyline points="0,32 25,22 50,20 75,16 100,12" fill="none" stroke="#10B981" stroke-width="2.5" stroke-linecap="round"/>
-          </svg>
-        </div>
-
-        <div class="kpi-card animate-scale delay-4"
-             style="--accent:#DC2626; --accent-end:#991B1B; --accent-bg:#FEF2F2; --accent-glow:rgba(220,38,38,0.18); --accent-shadow:0 20px 40px -12px rgba(220,38,38,0.3)">
-          <div class="kpi-icon-wrap" style="background:#FEF2F2">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2" stroke-linecap="round">
-              <rect x="3" y="4" width="18" height="18" rx="2"/>
-              <line x1="16" y1="2" x2="16" y2="6"/>
-              <line x1="8" y1="2" x2="8" y2="6"/>
-              <line x1="3" y1="10" x2="21" y2="10"/>
-            </svg>
-          </div>
-          <div class="kpi-label">신고 마감</div>
-          <div class="kpi-value t-num" style="font-size:24px">매월 10일<span style="font-size:14px;font-weight:700">까지</span></div><!-- [전수조사 H5] 고정 날짜·가짜 여유일 제거 -->
-          <div class="kpi-meta">
-            <span class="badge badge-success">다음달 10일 신고</span>
-          </div>
-          <svg class="kpi-spark" viewBox="0 0 100 40" preserveAspectRatio="none">
-            <defs><linearGradient id="sp-ins-4" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#DC2626" stop-opacity="0.3"/><stop offset="100%" stop-color="#DC2626" stop-opacity="0"/></linearGradient></defs>
-            <path d="M0,8 L100,32 L100,40 L0,40 Z" fill="url(#sp-ins-4)"/>
-            <polyline points="0,8 100,32" fill="none" stroke="#DC2626" stroke-width="2.5" stroke-linecap="round"/>
-          </svg>
-        </div>
-      </div>
-
-      <!-- ═════ 보험 요율 안내 카드 (5종) ═════ -->
-      <div class="section-title">📋 4대보험 요율 (<span id="ins-rate-year">2026</span>년 기준)</div>
-      <div class="section-desc">국민연금/건강/고용은 노사 반반 부담, 산재는 회사 100% 부담. 장기요양은 건강보험료의 12.95%.</div>
-
-      <div class="grid-3col mb-7" style="grid-template-columns:repeat(5,1fr)">
-        <div class="card-base" style="border-top:3px solid #2563EB;padding:14px 16px">
-          <div style="font-size:11px;font-weight:800;color:#2563EB;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:6px">국민연금</div>
-          <div style="font-size:24px;font-weight:900;color:var(--text-primary)" class="t-num">9.0%</div>
-          <div class="t-xs" style="margin-top:4px;color:var(--text-secondary)">
-            회사 4.5% + 근로자 4.5%
-          </div>
-          <div style="margin-top:8px;height:8px;border-radius:4px;background:#DBEAFE;display:flex;overflow:hidden">
-            <div style="width:50%;background:#2563EB"></div>
-            <div style="width:50%;background:#93C5FD"></div>
-          </div>
-        </div>
-
-        <div class="card-base" style="border-top:3px solid #DC2626;padding:14px 16px">
-          <div style="font-size:11px;font-weight:800;color:#DC2626;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:6px">건강보험</div>
-          <div style="font-size:24px;font-weight:900;color:var(--text-primary)" class="t-num">7.09%</div>
-          <div class="t-xs" style="margin-top:4px;color:var(--text-secondary)">
-            회사 3.545% + 근로자 3.545%
-          </div>
-          <div style="margin-top:8px;height:8px;border-radius:4px;background:#FEE2E2;display:flex;overflow:hidden">
-            <div style="width:50%;background:#DC2626"></div>
-            <div style="width:50%;background:#FCA5A5"></div>
-          </div>
-        </div>
-
-        <div class="card-base" style="border-top:3px solid #D97706;padding:14px 16px">
-          <div style="font-size:11px;font-weight:800;color:#D97706;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:6px">장기요양</div>
-          <div style="font-size:24px;font-weight:900;color:var(--text-primary)" class="t-num">12.95%</div>
-          <div class="t-xs" style="margin-top:4px;color:var(--text-secondary)">
-            건강보험료의 12.95% (반반)
-          </div>
-          <div style="margin-top:8px;height:8px;border-radius:4px;background:#FEF3C7;display:flex;overflow:hidden">
-            <div style="width:50%;background:#D97706"></div>
-            <div style="width:50%;background:#FCD34D"></div>
-          </div>
-        </div>
-
-        <div class="card-base" style="border-top:3px solid #7C3AED;padding:14px 16px">
-          <div style="font-size:11px;font-weight:800;color:#7C3AED;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:6px">고용보험</div>
-          <div style="font-size:24px;font-weight:900;color:var(--text-primary)" class="t-num">1.8%</div>
-          <div class="t-xs" style="margin-top:4px;color:var(--text-secondary)">
-            회사 0.9% + 근로자 0.9%
-          </div>
-          <div style="margin-top:8px;height:8px;border-radius:4px;background:#EDE9FE;display:flex;overflow:hidden">
-            <div style="width:50%;background:#7C3AED"></div>
-            <div style="width:50%;background:#C4B5FD"></div>
-          </div>
-        </div>
-
-        <div class="card-base" style="border-top:3px solid #059669;padding:14px 16px;background:linear-gradient(135deg,#ECFDF5 0%,#FFFFFF 100%)">
-          <div style="font-size:11px;font-weight:800;color:#059669;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:6px">산재보험 <span class="badge badge-success" style="font-size:9px">건설업</span></div>
-          <div style="font-size:24px;font-weight:900;color:var(--text-primary)" class="t-num">3.7%</div>
-          <div class="t-xs" style="margin-top:4px;color:var(--text-secondary)">
-            <strong>회사 100%</strong> 부담
-          </div>
-          <div style="margin-top:8px;height:8px;border-radius:4px;background:#D1FAE5;overflow:hidden">
-            <div style="width:100%;background:#059669"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ═════ 현장별 4대보험 가입자 명세 (PJ 그룹화) ═════ -->
-      <!-- ═════ 표 영역: 동적 섹션 타이틀 ═════ -->
-      <div class="section-title">📋 <span id="insurance-table-section-title">전체 가입자 통합 명세 (0명)</span></div>
-      <div class="section-desc"><span id="insurance-table-section-desc">전체 가입자 통합 표. 특정 현장만 보려면 상단 PJ 필터 클릭.</span></div>
-
-      <!-- ═════ "전체" 모드 통합 표 (12명) ═════ -->
-      <div class="table-wrap mb-7" id="insurance-unified-table">
-        <div class="table-header">
-          <div>
-            <div class="table-title">📋 전체 가입자 명세</div>
-            <div class="t-xs">출역일 내림차순 · 월 8일 이상 출역 일용직 기준 · 합계는 상단 KPI 참조</div><!-- [전수조사 H5] 가짜 합계 제거 -->
-          </div>
-          <div class="row gap-2 flex-wrap">
-            <button class="btn btn-secondary btn-sm">🔄 재계산</button>
-            <button class="btn btn-secondary btn-sm" onclick="window.submitInsuranceEdi()">📤 EDI 신고 자동화</button>
-            <button class="btn btn-secondary btn-sm">📊 엑셀</button>
-            <button class="btn btn-primary btn-sm">📤 4대보험 신고</button>
-          </div>
-        </div>
-        <div class="table-scroll">
-<table class="data-table">
-          <colgroup>
-            <col style="width:8%"><col style="width:8%"><col style="width:11%"><col style="width:6%"><col style="width:11%">
-            <col style="width:8%"><col style="width:8%"><col style="width:7%"><col style="width:7%">
-            <col style="width:9%"><col style="width:9%"><col style="width:8%">
-          </colgroup>
-          <thead>
-            <tr>
-              <th rowspan="2">이름</th>
-              <th rowspan="2">직종</th>
-              <th rowspan="2">현장</th>
-              <th rowspan="2" class="right">출역</th>
-              <th rowspan="2" class="right">과세표준</th>
-              <th colspan="4" class="center" style="background:#F1F5F9">보험료 (회사+근로자 합산)</th>
-              <th rowspan="2" class="right" style="background:#FAF5FF;color:#7C3AED">회사 부담</th>
-              <th rowspan="2" class="right" style="background:#ECFDF5;color:var(--success-700)">근로자 공제</th>
-              <th rowspan="2" class="center">액션</th>
-            </tr>
-            <tr>
-              <th class="right" style="font-size:10px;background:#F1F5F9">국민연금</th>
-              <th class="right" style="font-size:10px;background:#F1F5F9">건강+장기</th>
-              <th class="right" style="font-size:10px;background:#F1F5F9">고용</th>
-              <th class="right" style="font-size:10px;background:#F1F5F9">산재</th>
-            </tr>
-          </thead>
-          <tbody id="insurance-tbody">
-            <tr><td colspan="11" style="text-align:center;padding:44px 20px;color:#94a3b8;font-weight:600"><div style="font-size:30px;margin-bottom:6px">🛡️</div><div style="font-size:13px;font-weight:800;color:#475569">4대보험 명세 데이터 없음</div><div style="font-size:11px;margin-top:3px">일용직 등록 + 출역 기록이 누적되면 자동 산출됩니다</div></td></tr>
-          </tbody>
-        </table>
-</div>
-      </div>
-
-      <!-- 전체 현장 합산 안내 -->
-      <div style="padding:14px 18px;background:linear-gradient(135deg,#FAF5FF 0%,#fff 100%);border-radius:10px;border-left:4px solid #7C3AED;margin-bottom:24px">
-        <div style="font-size:13px;font-weight:800;color:var(--text-primary);margin-bottom:6px">📊 전체 현장 4대보험 합산</div>
-        <div class="t-xs" id="ins-summary-box" style="line-height:1.7;color:var(--text-secondary)">
-          · 가입 대상: <strong>0명</strong> (8일 이상 출역)<br/>
-          · 과세표준 합계: <strong>0원</strong><br/>
-          · 회사 부담 합계: <strong>0원</strong><br/>
-          · 근로자 공제 합계: <strong>0원</strong>
-        </div>
-      </div>
-
-      <!-- ═════ 직종별 집계 + 신고 자동화 ═════ -->
-      <div class="grid-2col-1-1 mb-7">
-        <!-- 직종별 보험료 집계 -->
-        <div class="card-base">
-          <div class="card-base-header">
-            <h3 class="t-h4">📊 직종별 보험료 집계</h3>
-            <span class="t-xs">5월 회사+근로자 합산</span>
-          </div>
-
-          <table class="data-table" style="margin-top:8px">
-            <colgroup>
-              <col style="width:30%">
-              <col style="width:18%">
-              <col style="width:24%">
-              <col style="width:28%">
-            </colgroup>
-            <thead><tr>
-              <th>직종</th>
-              <th class="right">인원</th>
-              <th class="right">과세표준</th>
-              <th class="right">보험료 합계</th>
-            </tr></thead>
-            <tbody id="ins-job-tbody">
-              <tr><td colspan="4" style="text-align:center;padding:30px;color:#94a3b8;font-size:13px">직종별 집계 데이터 없음 — 출역 8일 이상 누적 시 자동 산출</td></tr>
-            </tbody>
-          </table>
-
-          <div style="margin-top:10px;padding:10px 14px;background:var(--bg-subtle);border-radius:8px;font-size:12px;color:var(--text-secondary);line-height:1.7">
-            💡 회사 부담·근로자 공제 합계는 상단 KPI에서 자동 산출됩니다 (월 8일 이상 출역 일용직 기준, 장기요양 별도 합산)<!-- [전수조사 H5] 가짜 합계 제거 -->
-          </div>
-        </div>
-
-        <!-- 신고 자동화 -->
-        <div class="card-base" style="border-left:4px solid var(--primary-500)">
-          <div class="card-base-header">
-            <div>
-              <h3 class="t-h4">📤 신고 자동화 워크플로우</h3>
-              <div class="t-xs">국민연금공단 EDI · 건강보험공단 사이트별 신고 양식 자동 생성</div>
-            </div>
-          </div>
-
-          <div class="col gap-3">
-            <!-- 단계별 진행 -->
-            <div style="display:flex;gap:6px;align-items:center;padding:12px 14px;background:#ECFDF5;border-radius:8px;border-left:3px solid var(--success-700)">
-              <span style="width:24px;height:24px;border-radius:50%;background:var(--success-700);color:#fff;font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center">✓</span>
-              <div style="flex:1">
-                <div style="font-size:13px;font-weight:800;color:var(--success-700)">출역 데이터 자동 집계</div>
-                <div class="t-xs">가입 대상 자동 식별 (8일 이상 출역)</div>
-              </div>
-            </div>
-
-            <div style="display:flex;gap:6px;align-items:center;padding:12px 14px;background:#ECFDF5;border-radius:8px;border-left:3px solid var(--success-700)">
-              <span style="width:24px;height:24px;border-radius:50%;background:var(--success-700);color:#fff;font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center">✓</span>
-              <div style="flex:1">
-                <div style="font-size:13px;font-weight:800;color:var(--success-700)">보험료 자동 계산</div>
-                <div class="t-xs">5종 보험 요율 적용 · 회사/근로자 분리</div>
-              </div>
-            </div>
-
-            <div style="display:flex;gap:6px;align-items:center;padding:12px 14px;background:#FFFBEB;border-radius:8px;border-left:3px solid #D97706">
-              <span style="width:24px;height:24px;border-radius:50%;background:#D97706;color:#fff;font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center">3</span>
-              <div style="flex:1">
-                <div style="font-size:13px;font-weight:800;color:#92400E">미가입자 가입 처리</div>
-                <div class="t-xs">강·한·윤 3명 EDI 신규 가입</div>
-              </div>
-              <button class="btn btn-primary btn-sm">처리</button>
-            </div>
-
-            <div style="display:flex;gap:6px;align-items:center;padding:12px 14px;background:var(--bg-subtle);border-radius:8px;border-left:3px solid var(--text-tertiary)">
-              <span style="width:24px;height:24px;border-radius:50%;background:var(--text-tertiary);color:#fff;font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center">4</span>
-              <div style="flex:1">
-                <div style="font-size:13px;font-weight:800;color:var(--text-primary)">EDI 양식 생성</div>
-                <div class="t-xs">국민연금·건강·고용·산재 4개 파일</div>
-              </div>
-              <button class="btn btn-secondary btn-sm">대기</button>
-            </div>
-
-            <div style="display:flex;gap:6px;align-items:center;padding:12px 14px;background:var(--bg-subtle);border-radius:8px;border-left:3px solid var(--text-tertiary)">
-              <span style="width:24px;height:24px;border-radius:50%;background:var(--text-tertiary);color:#fff;font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center">5</span>
-              <div style="flex:1">
-                <div style="font-size:13px;font-weight:800;color:var(--text-primary)">기관 제출 (수동)</div>
-                <div class="t-xs">EDI 사이트 또는 경리나라 연동</div>
-              </div>
-            </div>
-
-            <button class="btn btn-primary" style="width:100%;margin-top:6px;padding:14px">
-              <svg class="icon icon-sm"><use href="#i-download"/></svg>
-              📤 EDI 신고 양식 일괄 다운로드 (4개 파일)
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- 도메인 룰 안내 -->
-      <div style="padding:14px 18px;background:var(--bg-subtle);border-radius:10px;border-left:4px solid var(--primary-500);margin-bottom:24px">
-        <div style="font-size:13px;font-weight:800;color:var(--text-primary);margin-bottom:6px">📌 4대보험 정산 도메인 룰</div>
-        <div class="t-xs" style="line-height:1.7;color:var(--text-secondary)">
-          · 가입 의무 기준 (산재보험법 시행령 제2조): 1개월간 8일 이상 OR 60시간 이상 근로 시<br/>
-          · 과세표준 = 5월 출역일 × 일당 (출역 관리 데이터 자동 연동)<br/>
-          · 인건비 매입 부가세 0원 자동 적용 (도메인 룰 5)<br/>
-          · 산재보험은 회사 100% 부담, 나머지 4종은 노사 반반 부담<br/>
-          · 신고 마감: 매월 10일 (전월 분) — 늦으면 가산세 발생<br/>
-          · 인건비직불금 (발주처 직접지급) 시 명문이엔지 4대보험 대상에서 제외 (도메인 룰 1)
-        </div>
-      </div>
-
-    </div>
-      <!-- ═════ 4대보험 PJ 필터 JS ═════ -->
-      <script>
-      (function() {
-        var screen = document.querySelector('[data-screen="insurance"]') || document.body;
-
-        var pjLabels = {
-          'all': '전체 현장', '988': '현장 ○○현장',
-          '985': '현장 ○○현장', '981': '현장 ○○현장', '991': '현장 ○○현장'
-        };
-
-        window.setInsurancePjFilter = function(pj) {
-          var ctx = screen.querySelector ? screen : document;
-
-          // 칩 active 토글 (4대보험 화면 안에서만)
-          ctx.querySelectorAll('.pj-chip[data-pj]').forEach(function(c) {
-            c.classList.toggle('active', c.dataset.pj === pj);
-          });
-
-          // PJ 라벨 swap
-          var labelEl = ctx.querySelector('#ins-pj-label');
-          if (labelEl) labelEl.textContent = pjLabels[pj];
-
-          // [전수조사 H5] 가짜 KPI 숫자 swap 제거 — 실산출(renderInsurancePage)이 KPI 관리
-          try { if (window.renderInsurancePage) window.renderInsurancePage(); } catch(e) {}
-
-          // 표 토글
-          var unified = ctx.querySelector('#insurance-unified-table');
-          var pjCards = ctx.querySelectorAll('.ins-pj-card[data-pj]');
-          if (pj === 'all') {
-            if (unified) unified.style.display = '';
-            pjCards.forEach(function(c) { c.style.display = 'none'; });
-          } else {
-            if (unified) unified.style.display = 'none';
-            pjCards.forEach(function(c) {
-              c.style.display = (c.dataset.pj === pj) ? '' : 'none';
-            });
-          }
-
-          // 섹션 타이틀 swap
-          var titleEl = ctx.querySelector('#insurance-table-section-title');
-          var descEl = ctx.querySelector('#insurance-table-section-desc');
-          if (pj === 'all') {
-            var _ic = 0; try { _ic = (JSON.parse(localStorage.getItem('mm-workers')||'[]')||[]).length; } catch(e){}
-            if (titleEl) titleEl.textContent = '전체 가입자 통합 명세 (' + _ic + '명)';
-            if (descEl) descEl.textContent = '전체 가입자 통합 표. 특정 현장만 보려면 상단 PJ 필터 클릭.';
-          } else {
-            if (titleEl) titleEl.textContent = pjLabels[pj] + ' 4대보험 가입자 명세';
-            if (descEl) descEl.textContent = '해당 현장의 가입자만 표시. 전체 보기는 상단 "📊 전체" 클릭.';
-          }
-        };
-
-        if (typeof window !== 'undefined') {
-          window.addEventListener('hashchange', function() {
-            if ((window.location.hash || '').slice(1) === 'insurance') {
-              setTimeout(function() { window.setInsurancePjFilter('all'); }, 150);
             }
           });
         }
@@ -10429,7 +9901,7 @@ table.data-table {
 
       <!-- KPI -->
       <div class="section-title">📊 일용직 KPI — 누적 통계</div>
-      <div class="section-desc">출역 관리와 자동 연동. 4대보험 가입 추적은 8일 이상 출역자 기준 (산재보험법 시행령 제2조).</div>
+      <div class="section-desc">출역 관리와 자동 연동.</div>
 
       <div class="kpi-grid mb-7">
         <div class="kpi-card animate-scale delay-1"
@@ -10473,26 +9945,6 @@ table.data-table {
           </svg>
         </div>
 
-        <div class="kpi-card animate-scale delay-3"
-             style="--accent:#7C3AED; --accent-end:#5B21B6; --accent-bg:#FAF5FF; --accent-glow:rgba(124,58,237,0.15); --accent-shadow:0 20px 40px -12px rgba(124,58,237,0.25)">
-          <div class="kpi-icon-wrap" style="background:#FAF5FF">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2" stroke-linecap="round">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-              <path d="M9 12l2 2 4-4"/>
-            </svg>
-          </div>
-          <div class="kpi-label">4대보험 가입</div>
-          <div class="kpi-value t-num">12<span style="font-size:18px;font-weight:700">명</span></div>
-          <div class="kpi-meta">
-            
-            <span>대상자 15명</span>
-          </div>
-          <svg class="kpi-spark" viewBox="0 0 100 40" preserveAspectRatio="none">
-            <defs><linearGradient id="sp-wk-3" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#7C3AED" stop-opacity="0.4"/><stop offset="100%" stop-color="#7C3AED" stop-opacity="0"/></linearGradient></defs>
-            <path d="M0,30 Q15,28 25,24 T50,20 T75,18 T100,16 L100,40 L0,40 Z" fill="url(#sp-wk-3)"/>
-            <polyline points="0,30 25,24 50,20 75,18 100,16" fill="none" stroke="#7C3AED" stroke-width="2.5" stroke-linecap="round"/>
-          </svg>
-        </div>
 
         <div class="kpi-card animate-scale delay-4"
              style="--accent:#D97706; --accent-end:#B45309; --accent-bg:#FFFBEB; --accent-glow:rgba(217,119,6,0.18); --accent-shadow:0 20px 40px -12px rgba(217,119,6,0.3)">
@@ -10547,7 +9999,7 @@ table.data-table {
           <div class="table-header">
             <div>
               <div class="table-title">📋 일용직 인력 마스터 (<span id="workers-count">0</span>명) <span style="font-size:11px;color:#D97706;font-weight:800;margin-left:8px">⚡ 다기능 7명</span></div>
-              <div class="t-xs">활동 0명 · 4대보험 가입 0명 · 다기능자(⚡)는 여러 직종 가능 · 주민번호 7자리 마스킹</div>
+              <div class="t-xs">활동 0명 · 다기능자(⚡)는 여러 직종 가능 · 주민번호 7자리 마스킹</div>
             </div>
             <div class="row gap-2 flex-wrap">
               <button class="btn btn-secondary btn-sm">
@@ -10584,7 +10036,6 @@ table.data-table {
               <col style="width:8%">    <!-- 누적 출역일 -->
               <col style="width:13%">   <!-- 누적 인건비 -->
               <col style="width:11%">   <!-- 전화번호 -->
-              <col style="width:11%">   <!-- 4대보험 -->
               <col style="width:8%">    <!-- 마지막 출역 -->
               <col style="width:8%">    <!-- 액션 -->
             </colgroup>
@@ -10596,7 +10047,6 @@ table.data-table {
               <th class="right">누적 일</th>
               <th class="right">누적 인건비</th>
               <th>전화번호</th>
-              <th class="center">4대보험</th>
               <th class="center">최근 출역</th>
               <th class="center">액션</th>
             </tr></thead>
@@ -10619,7 +10069,7 @@ table.data-table {
             <div class="card-base-header">
               <div>
                 <h3 class="t-h4">⚡ 신규 인력 빠른 등록</h3>
-                <div class="t-xs">다기능자는 직종 +버튼으로 추가. 주민번호는 4대보험 가입 시 필수.</div>
+                <div class="t-xs">다기능자는 직종 +버튼으로 추가.</div>
               </div>
             </div>
 
@@ -10784,64 +10234,15 @@ table.data-table {
           </div>
         </div>
 
-        <!-- 4대보험 미가입 알림 -->
-        <div class="card-base" style="border-left:4px solid #D97706;background:linear-gradient(135deg,#FFFBEB 0%,#FEF3C7 100%)">
-          <div class="card-base-header">
-            <div>
-              <h3 class="t-h4" style="color:#92400E">⚠️ 4대보험 미가입 (3명)</h3>
-              <div class="t-xs" style="color:#B45309">8일 이상 출역 — 의무 가입 대상 (산재보험법 시행령 §2)</div>
-            </div>
-          </div>
-
-          <div class="col gap-3">
-            <div style="padding:14px 16px;background:#fff;border-radius:10px;border:1px solid #FCD34D">
-              <div class="row" style="justify-content:space-between;align-items:flex-start;margin-bottom:8px">
-                <div>
-                  <div style="font-size:14px;font-weight:800">○○○ <span class="badge" style="background:#DBEAFE;color:#1E40AF;font-size:10px">배관공</span></div>
-                  <div class="t-xs">출역 11일 · 누적 2,420,000원 · 입사 5/1</div>
-                </div>
-                
-              </div>
-              <button class="btn btn-primary btn-sm" style="width:100%">📋 4대보험 가입 처리</button>
-            </div>
-
-            <div style="padding:14px 16px;background:#fff;border-radius:10px;border:1px solid #FCD34D">
-              <div class="row" style="justify-content:space-between;align-items:flex-start;margin-bottom:8px">
-                <div>
-                  <div style="font-size:14px;font-weight:800">○○○ <span class="badge" style="background:#EDE9FE;color:#5B21B6;font-size:10px">덕트공</span></div>
-                  <div class="t-xs">출역 10일 · 누적 2,200,000원 · 입사 4/28</div>
-                </div>
-                
-              </div>
-              <button class="btn btn-primary btn-sm" style="width:100%">📋 4대보험 가입 처리</button>
-            </div>
-
-            <div style="padding:14px 16px;background:#fff;border-radius:10px;border:1px solid #FCD34D">
-              <div class="row" style="justify-content:space-between;align-items:flex-start;margin-bottom:8px">
-                <div>
-                  <div style="font-size:14px;font-weight:800">○○○ <span class="badge" style="background:#D1FAE5;color:#065F46;font-size:10px">보온공</span></div>
-                  <div class="t-xs">출역 9일 · 누적 1,980,000원 · 입사 5/1</div>
-                </div>
-                
-              </div>
-              <button class="btn btn-primary btn-sm" style="width:100%">📋 4대보험 가입 처리</button>
-            </div>
-
-            <div style="padding:10px 14px;background:rgba(217,119,6,0.08);border-radius:8px;font-size:12px;color:#92400E;font-weight:600">
-              💡 가입 처리 후 자동으로 4대보험 정산 메뉴에 반영됩니다.
-            </div>
-          </div>
-        </div>
       </div>
 
       <!-- 도메인 룰 안내 -->
       <div style="padding:14px 18px;background:var(--bg-subtle);border-radius:10px;border-left:4px solid var(--primary-500);margin-bottom:24px">
         <div style="font-size:13px;font-weight:800;color:var(--text-primary);margin-bottom:6px">📌 일용직 인력 관리 도메인 룰</div>
         <div class="t-xs" style="line-height:1.7;color:var(--text-secondary)">
-          · 4대보험 의무 가입 (산재보험법 시행령 제2조): 1개월간 8일 이상 OR 60시간 이상 근로 시<br/>
           · 인건비 매입 부가세 0원 자동 적용 (도메인 룰 5)<br/>
           · 인건비직불금 (발주처 직접지급) 시 명문이엔지 캐시플로우에서 제외 (도메인 룰 1)<br/>
-          · 주민등록번호는 마지막 7자리 마스킹 처리 — 가입 처리 시에만 풀 노출<br/>
+          · 주민등록번호는 마지막 7자리 마스킹 처리<br/>
           · 출역 등록 시 작업자 자동완성 검색의 데이터 소스
         </div>
       </div>
@@ -11192,9 +10593,6 @@ table.data-table {
                   <tr><td><strong>출역 등록</strong></td>
                     <td class="center">✅</td><td class="center">✅</td><td class="center">✅</td>
                     <td class="center">✅</td><td class="center">❌</td></tr>
-                  <tr><td><strong>4대보험 신고</strong></td>
-                    <td class="center">✅</td><td class="center">✅</td><td class="center">❌</td>
-                    <td class="center">❌</td><td class="center">❌</td></tr>
                   <tr><td><strong>경보 임계값 변경</strong></td>
                     <td class="center">✅</td><td class="center">❌</td><td class="center">❌</td>
                     <td class="center">❌</td><td class="center">❌</td></tr>
@@ -11423,7 +10821,7 @@ table.data-table {
             <div class="card-base-header">
               <div>
                 <h3 class="t-h4">⚙️ 시스템 설정</h3>
-                <div class="t-xs">부가세율, 4대보험 요율, 도메인 룰 — 매년 변경되는 값.</div>
+                <div class="t-xs">부가세율, 도메인 룰 — 매년 변경되는 값.</div>
               </div>
             </div>
 
@@ -11450,33 +10848,6 @@ table.data-table {
               </select>
             </div>
 
-            <div style="margin:16px 0;padding-top:16px;border-top:1px solid var(--border-subtle)" id="mm-rate-editor">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-                <div style="font-size:13px;font-weight:800">📋 4대보험 요율 — 연도별 편집</div>
-                <div style="display:flex;align-items:center;gap:6px">
-                  <span class="t-xs">적용 연도</span>
-                  <select id="rate-year" class="form-input" style="width:90px;margin:0;padding:5px 8px;font-size:13px">
-                    <option>2024</option><option>2025</option><option selected>2026</option><option>2027</option><option>2028</option>
-                  </select>
-                </div>
-              </div>
-              <div class="t-xs" style="color:#64748b;margin-bottom:10px">연도 선택 → 값 수정 → 💾 저장. 연도별로 따로 보관됩니다. (각 칸은 % 숫자만 입력: 회사+근로자 합산)</div>
-              <div class="form-grid">
-                <label class="form-label">국민연금 (%)</label>
-                <input type="number" step="0.01" class="form-input" id="rate-pension" value="9.0" />
-                <label class="form-label">건강보험 (%)</label>
-                <input type="number" step="0.01" class="form-input" id="rate-health" value="7.09" />
-                <label class="form-label">장기요양 (건강보험의 %)</label>
-                <input type="number" step="0.01" class="form-input" id="rate-longterm" value="12.95" />
-                <label class="form-label">고용보험 (%)</label>
-                <input type="number" step="0.01" class="form-input" id="rate-employ" value="1.8" />
-                <label class="form-label">산재보험 (회사 부담 %)</label>
-                <input type="number" step="0.01" class="form-input" id="rate-injury" value="3.7" />
-              </div>
-              <div style="text-align:right;margin-top:10px">
-                <button class="btn btn-primary btn-sm" onclick="window.mmRates&&window.mmRates.saveFromForm()">💾 요율 저장</button>
-              </div>
-            </div>
 
             <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border-subtle)">
               <div style="font-size:13px;font-weight:800;margin-bottom:10px">📌 도메인 룰 활성화 (디버그용 — 실무에서는 모두 ON)</div>
@@ -11754,7 +11125,7 @@ CREATE TABLE system_map_activity (
             <div style="margin-top:14px;padding:12px 16px;background:var(--bg-subtle);border-radius:8px;font-size:11px;color:var(--text-secondary);line-height:1.7">
               ⚠️ <strong>법적 안내:</strong>
               <br/>· 개인정보 처리방침 (PII 마스킹·암호화 적용 — 룰 5)
-              <br/>· 이용약관 (4대보험·세금계산서 등 회계 신고 책임은 회사 본인)
+              <br/>· 이용약관 (세금계산서 등 회계 신고 책임은 회사 본인)
               <br/>· 라이선스: MIT / Apache 2.0 (오픈소스 의존성)
               <br/>· 데이터 보관: Supabase (한국 region) · Anthropic 데이터 보존 정책 준수
             </div>
@@ -12165,104 +11536,6 @@ CREATE TABLE system_map_activity (
         <button class="btn btn-ghost" onclick="closeModal('global-paste')">취소</button>
         <button class="btn btn-secondary" onclick="resetPasteData()">🗑️ 초기화</button>
         <button class="btn btn-primary" id="paste-submit-btn" onclick="submitPasteData()" disabled>📋 일괄 등록 (0건)</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 글로벌 모달: 4대보험 가입 처리 -->
-  <div class="modal-overlay" id="global-insurance-enroll">
-    <div class="modal-container modal-sm">
-      <div class="modal-header">
-        <div>
-          <div class="modal-title">🛡️ 4대보험 가입 처리</div>
-          <div class="modal-subtitle">국민연금·건강보험·고용보험·산재보험 동시 가입</div>
-        </div>
-        <button class="modal-close" onclick="closeModal('global-insurance-enroll')">✕</button>
-      </div>
-      <div class="modal-body">
-        <div class="modal-info-banner success">
-          ✓ 산재보험법 시행령 §2 자동 적용 — 1개월 8일+ OR 60시간+ 기준 충족
-        </div>
-
-        <div class="form-grid">
-          <label class="form-label">👤 작업자</label>
-          <select class="form-input" id="ins-worker-select">
-            <option value="">— 일용직을 먼저 등록하세요 —</option>
-          </select>
-
-          <label class="form-label">📅 가입일</label>
-          <input type="date" class="form-input"/>
-
-          <label class="form-label">📋 주민등록번호</label>
-          <input type="text" class="form-input" placeholder="000000-0000000"/>
-
-          <label class="form-label">🏠 주소</label>
-          <input type="text" class="form-input" placeholder="대구광역시..."/>
-
-          <label class="form-label">💰 신고 일당</label>
-          <input type="text" class="form-input" value="220,000"/>
-        </div>
-
-        <div class="modal-info-banner warning" style="margin-top:14px">
-          ⚠️ 가입 후 회사 부담 약 547,750원 + 근로자 공제 약 393,090원 (월 11일 출역 기준)
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-ghost" onclick="closeModal('global-insurance-enroll')">취소</button>
-        <button class="btn btn-primary" onclick="window.submitGlobalInsuranceEnroll && window.submitGlobalInsuranceEnroll()">
-          <svg class="icon icon-sm"><use href="#i-check"/></svg> 가입 처리
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 글로벌 모달: 일괄 정산 처리 -->
-  <div class="modal-overlay" id="global-settle">
-    <div class="modal-container">
-      <div class="modal-header">
-        <div>
-          <div class="modal-title">💰 정산 처리</div>
-          <div class="modal-subtitle">선택된 미지급 항목 일괄 정산 (계좌이체 / 어음 / 수표)</div>
-        </div>
-        <button class="modal-close" onclick="closeModal('global-settle')">✕</button>
-      </div>
-      <div class="modal-body">
-        <div class="form-grid">
-          <label class="form-label">📅 정산일</label>
-          <input type="date" class="form-input" value="2026-05-03"/>
-
-          <label class="form-label">💳 결제 방식</label>
-          <select class="form-input">
-            <option>계좌이체</option>
-            <option>전자어음 (60일)</option>
-            <option>전자어음 (90일)</option>
-            <option>수표</option>
-            <option>현금</option>
-          </select>
-
-          <label class="form-label">🏦 출금 계좌</label>
-          <select class="form-input">
-            <option>주거래 계좌 (1234-5678-9012)</option>
-            <option>운영 계좌 (5678-1234-9876)</option>
-          </select>
-
-          <label class="form-label">💰 정산 금액</label>
-          <input type="text" class="form-input" value="99,620,000"/>
-
-          <label class="form-label">📝 정산 메모</label>
-          <input type="text" class="form-input" placeholder="2026년 5월 일괄 정산"/>
-        </div>
-
-        <div class="modal-info-banner success" style="margin-top:14px">
-          ✓ 정산 완료 시 미지급 잔액 자동 0 처리 + 캐시플로우 갱신 + 거래처별 결제 행태 업데이트
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-ghost" onclick="closeModal('global-settle')">취소</button>
-        <button class="btn btn-secondary" onclick="globalToast('📑 정산 명세서 미리보기','info')">📑 미리보기</button>
-        <button class="btn btn-primary" onclick="window.submitGlobalSettle && window.submitGlobalSettle()">
-          <svg class="icon icon-sm"><use href="#i-check"/></svg> 정산 실행
-        </button>
       </div>
     </div>
   </div>
@@ -13265,27 +12538,6 @@ CREATE TABLE system_map_activity (
       reader.readAsText(file, 'UTF-8');
     };
 
-    // ═══════════════════════════════════════════════════════════════
-    // 8일+ 출역 시 4대보험 자동 알림 (룰 + 산재보험법 §2)
-    // ═══════════════════════════════════════════════════════════════
-    window.checkInsuranceEligibility = function(workerId, attendDays) {
-      // 산재보험법 시행령 §2: 1개월 8일+ 또는 60시간+ 근로 시 가입 의무
-      if (attendDays >= 8) {
-        var msg = '🛡️ 4대보험 가입 대상: ' + attendDays + '일 출역 (8일 이상 - 산재보험법 §2)';
-        if (window.globalToast) globalToast(msg, 'warning');
-        // 활동 로그
-        if (window.SystemMapActivityLog) {
-          window.SystemMapActivityLog.add({
-            type: 'insurance_alert',
-            worker_id: workerId,
-            days: attendDays,
-            timestamp: new Date().toISOString()
-          });
-        }
-        return true;
-      }
-      return false;
-    };
 
     // ═══════════════════════════════════════════════════════════════
     // ☁️ Cloud 저장 (Phase 3 Supabase mock) + 🔧 집계 재계산
@@ -13714,13 +12966,12 @@ CREATE TABLE system_map_activity (
     // 보고서 PDF/Excel 자동 생성
     // ═══════════════════════════════════════════════════════════════
     window.generateReport = function(type, format, projectId) {
-      // type: 'project_detail' | 'monthly' | 'annual' | 'insurance_edi'
+      // type: 'project_detail' | 'monthly' | 'annual'
       // format: 'pdf' | 'excel'
       var typeLabel = {
         project_detail: 'PJ 상세 보고서',
         monthly: '월간 종합',
         annual: '연간 비교 분석',
-        insurance_edi: '4대보험 EDI 신고용'
       }[type] || type;
 
       var fmtLabel = format === 'pdf' ? 'PDF' : 'Excel';
@@ -13792,18 +13043,6 @@ CREATE TABLE system_map_activity (
           '· 매출(계약+기타수익): ' + _f(T.rev) + '\n· 원가: ' + _f(T.cost) + ' (원가율 ' + (T.rev>0?(T.cost/T.rev*100).toFixed(1):'0.0') + '%)\n' +
           '· 이익: ' + (T.profit>=0?'+':'') + _f(T.profit) + '\n' +
           '· 기성 신청(VAT포함): ' + _f(T.applied) + ' / 수금: ' + _f(T.recv) + ' / 미수금: ' + _f(Math.max(0,T.applied-T.recv)) + '\n\n';
-      } else if (type === 'insurance_edi') {
-        var _ed = (pjId && typeof pjId === 'object') ? pjId : null;
-        if (_ed) {
-          body = '[4대보험 EDI 신고 자료 — ' + (_ed.reportingMonth || '') + ']\n' +
-            '· 가입자 수: ' + (Number(_ed.totalEnrollees) || 0) + '명 (월 8일 이상 출역 일용직)\n' +
-            '· 과세표준 합계: ' + (Number(_ed.taxBase) || 0).toLocaleString() + '\n' +
-            '· 회사부담(약 11.5%): ' + (Number(_ed.companyBurden) || 0).toLocaleString() + '\n' +
-            '· 근로자공제(약 8.5%): ' + (Number(_ed.workerDeduction) || 0).toLocaleString() + '\n' +
-            '· 신고 마감: ' + (_ed.deadline || '') + ' / 송신: 한국정보화진흥원 EDI\n\n';
-        } else {
-          body = '[4대보험 EDI 신고 자료]\n· 신고 대상 데이터가 없습니다 (8일 이상 출역한 일용직 없음). 출역 등록 후 생성하세요.\n\n';
-        }
       }
 
       return head + body + '\n[발주처 합의·확인]\n현장소장: ___________________  발주처 담당: ___________________\n\n* 본 보고서는 v23 통합 관리 대시보드에서 자동 생성됨\n';
@@ -13832,43 +13071,6 @@ CREATE TABLE system_map_activity (
       }, 1000);
     };
 
-    // ═══════════════════════════════════════════════════════════════
-    // 4대보험 EDI 신고 자동화
-    // ═══════════════════════════════════════════════════════════════
-    window.submitInsuranceEdi = function() {
-      // [감사 #1] 하드코딩 제거 — 실제 출역(mm-attendance)·일용직(mm-workers)으로 산출. 대상 없으면 차단.
-      var prefix = new Date().toISOString().slice(0, 7);  // 신고 월 = 현재 월
-      var attend = []; try { attend = JSON.parse(localStorage.getItem('mm-attendance') || '[]'); } catch (e) {}
-      if (!Array.isArray(attend)) attend = [];
-      var monthly = attend.filter(function(a){ return (a.date || '').indexOf(prefix) === 0; });
-      var workerDays = {};
-      monthly.forEach(function(a){ if (a.workerId) workerDays[a.workerId] = (workerDays[a.workerId] || 0) + 1; });
-      var eligibleIds = Object.keys(workerDays).filter(function(k){ return workerDays[k] >= 8; });  // 월 8일+ 가입 대상
-      var eligibleCount = eligibleIds.length;
-      var baseAmount = monthly.filter(function(a){ return a.workerId && eligibleIds.indexOf(a.workerId) >= 0; })
-                              .reduce(function(s, a){ return s + (Number(a.wage) || 0); }, 0);
-      var companyBurden = Math.round(baseAmount * 0.115);
-      var workerDeduction = Math.round(baseAmount * 0.085);
-      if (eligibleCount === 0 || baseAmount === 0) {
-        if (window.globalToast) globalToast('⚠ ' + prefix + ' 4대보험 신고 대상이 없습니다 (8일 이상 출역 일용직 없음). 출역 등록 후 다시 시도하세요.', 'warning', 7000);
-        return;
-      }
-      if (window.globalToast) globalToast('🛡️ 4대보험 EDI 신고 자료 생성 중...', 'info');
-      setTimeout(function() {
-        var ediData = {
-          reportingMonth: prefix,
-          totalEnrollees: eligibleCount,
-          taxBase: baseAmount,
-          companyBurden: companyBurden,
-          workerDeduction: workerDeduction,
-          deadline: prefix + '-10',
-          submittedAt: new Date().toISOString()
-        };
-        try { localStorage.setItem('mm-insurance-edi-' + prefix, JSON.stringify(ediData)); } catch (e) {}
-        if (window.globalToast) globalToast('✓ EDI 신고 자료 생성 완료 — 대상 ' + eligibleCount + '명 / 회사부담 ' + companyBurden.toLocaleString() + '원', 'success', 7000);
-        window.generateReport('insurance_edi', 'pdf', ediData);
-      }, 800);
-    };
 
     // ═══════════════════════════════════════════════════════════════
     // 인증 — 비밀번호 SHA-256 해시 + 세션 관리 + 2FA mock
@@ -13963,10 +13165,6 @@ CREATE TABLE system_map_activity (
       } catch (e) {}
       if (window.globalToast) globalToast('✓ 연속 출역 ' + entries.length + '일 등록 (주말 자동 제외)', 'success');
 
-      // 8일+ 시 4대보험 자동 알림
-      if (entries.length >= 8 && window.checkInsuranceEligibility) {
-        window.checkInsuranceEligibility(workerId, entries.length);
-      }
       return entries;
     };
 
@@ -14281,8 +13479,6 @@ CREATE TABLE system_map_activity (
       var workersMap = {};
       monthly.forEach(function(a) { if (a.workerId) workersMap[a.workerId] = (workersMap[a.workerId] || 0) + 1; });
       var activeWorkers = Object.keys(workersMap).length;
-      var insurance8 = 0;
-      Object.keys(workersMap).forEach(function(k) { if (workersMap[k] >= 8) insurance8++; });
       var setKpi = function(key, val) {
         var el = rootEl.querySelector('[data-kpi="' + key + '"]');
         if (el) el.textContent = (val || 0).toLocaleString();
@@ -14290,7 +13486,6 @@ CREATE TABLE system_map_activity (
       setKpi('att-days', totalDays);
       setKpi('att-wage', Math.round(totalWage / 10000));
       setKpi('att-workers', activeWorkers);
-      setKpi('att-insurance8', insurance8);
       // 캘린더 동적 생성
       var grid = rootEl.querySelector('.cal-grid');
       if (grid) {
@@ -14417,10 +13612,6 @@ CREATE TABLE system_map_activity (
           };
           return;
         }
-        if (text.includes('EDI')) {
-          btn.onclick = function() { globalToast('🚧 EDI 신고 양식 일괄 생성은 준비 중 — 4대보험 화면의 EDI 신고 자동화를 이용하세요', 'warning'); };
-          return;
-        }
         if (text.includes('보고서') && !text.includes('분석')) {
           btn.onclick = function() { if (window.generateReport) window.generateReport('project_detail', 'pdf', sessionStorage.getItem('mm-selected-pid') || undefined); else globalToast('🚧 보고서 생성은 프로젝트 상세 화면에서 이용하세요', 'warning'); };
           return;
@@ -14430,7 +13621,7 @@ CREATE TABLE system_map_activity (
           return;
         }
         if (text.includes('재계산') || text.includes('집계 재계산')) {
-          btn.onclick = function() { try { if (window.renderInsurancePage) renderInsurancePage(); if (window.pjDashboard && pjDashboard.render) pjDashboard.render(); if (window.ovProjectList && ovProjectList.render) ovProjectList.render(); globalToast('🔄 화면 재집계 완료 (저장 데이터 기준)', 'success'); } catch(e) { globalToast('재계산 실패: ' + e.message, 'error'); } };
+          btn.onclick = function() { try { if (window.pjDashboard && pjDashboard.render) pjDashboard.render(); if (window.ovProjectList && ovProjectList.render) ovProjectList.render(); globalToast('🔄 화면 재집계 완료 (저장 데이터 기준)', 'success'); } catch(e) { globalToast('재계산 실패: ' + e.message, 'error'); } };
           return;
         }
         if (text.includes('미리보기')) {
@@ -14488,23 +13679,10 @@ CREATE TABLE system_map_activity (
           return;
         }
 
-        // 4대보험 가입
-        if (text.includes('4대보험') && (text.includes('가입') || text.includes('처리'))) {
-          btn.onclick = function() { openModal('global-insurance-enroll'); };
-          return;
-        }
-        if (text === '가입' || text === '가입처리' || text === '📋 4대보험 가입 처리' || text === '📋 4대보험 자동 가입 처리') {
-          btn.onclick = function() { openModal('global-insurance-enroll'); };
-          return;
-        }
-        if (text === '🛡️ 신고') {
-          btn.onclick = function() { globalToast('🚧 신고 자동 전송은 준비 중 — EDI 신고 자동화(자료 생성)를 이용하세요', 'warning'); };
-          return;
-        }
 
         // 정산 류
         if (text === '정산' || text.includes('일괄 정산') || text === '📋 일괄 정산')  {
-          btn.onclick = function() { openModal('global-settle'); };
+          btn.onclick = function() { globalToast('💡 지급 처리는 프로젝트 상세 → 매입 등록의 지급 버튼으로 진행하세요','info'); };
           return;
         }
 
@@ -14583,7 +13761,7 @@ CREATE TABLE system_map_activity (
                   titleEl.textContent = '📋 ' + (firstCell.textContent || '').trim().split('\n')[0];
                   bodyEl.innerHTML = '<div class="t-xs" style="color:var(--text-secondary);line-height:1.8">' +
                     '실제 React 구현 시 Supabase에서 해당 항목의 전체 데이터를 조회하여 상세 정보를 표시합니다.<br/>' +
-                    '연관 데이터 (출역 이력 / 매입 거래 / 4대보험 / 평가 등) 함께 노출.</div>';
+                    '연관 데이터 (출역 이력 / 매입 거래 / 평가 등) 함께 노출.</div>';
                   openModal('global-detail');
                 }
               }
@@ -14662,7 +13840,7 @@ CREATE TABLE system_map_activity (
 // 통합 데모 라우터 — Hash 기반 화면 전환
 // ═══════════════════════════════════════════════════════════════
 (function() {
-  const screens = ['overview', 'project-detail', 'alerts', 'activity', 'attendance', 'insurance', 'vendor-status', 'vendors', 'workers', 'settings', 'tools', 'cloud'];
+  const screens = ['overview', 'project-detail', 'alerts', 'activity', 'attendance', 'vendor-status', 'vendors', 'workers', 'settings', 'tools', 'cloud'];
 
   function showScreen(id) {
     if (!id || !screens.includes(id)) id = 'overview';
@@ -16898,99 +16076,6 @@ CREATE TABLE system_map_activity (
 })();
 </script>
 
-<script id="mm-insurance-script">
-// 4대보험 정산 [#133] — workers 기반 가입 대상·보험료 자동 산출
-(function() {
-  'use strict';
-  var RATE = {
-    pension:  { co:0.045,   emp:0.045   },
-    health:   { co:0.03545, emp:0.03545 },
-    longterm: { co:0.004591,emp:0.004591},
-    employ:   { co:0.0115,  emp:0.009   },
-    injury:   { co:0.037,   emp:0       }
-  };
-  var JOB_COLOR = {
-    '배관공':{bg:'#DBEAFE',fg:'#1E40AF'}, '덕트공':{bg:'#EDE9FE',fg:'#5B21B6'},
-    '보온공':{bg:'#D1FAE5',fg:'#065F46'}, '용접공':{bg:'#FEF3C7',fg:'#92400E'},
-    'TAB':{bg:'#FCE7F3',fg:'#9D174D'}, '일반':{bg:'#F1F5F9',fg:'#475569'}
-  };
-  function num(v){ return Number(String(v||'0').replace(/[^0-9.-]/g,'')) || 0 }
-  function fmt(n){ return Math.round(n||0).toLocaleString() }
-  function loadWk(){ try{var a=JSON.parse(localStorage.getItem('mm-workers')||'[]');return Array.isArray(a)?a:[]}catch(e){return[]} }
-
-  // [H5] 편집 요율(mmRates, 합산%) → co/emp 분배. 기본 요율에서 하드코딩 RATE와 정확히 일치(무회귀).
-  //  pension·health: 50/50 / longterm: 건강보험료×요율%, 50/50 / employ: 근로자 0.9% 고정, 회사=요율-0.9+0.25(고용안정) / injury: 회사 100%.
-  function ratesToSplit(r){
-    var h = num(r.health)/100, lt = h * (num(r.longterm)/100);
-    return {
-      pension:  { co:num(r.pension)/200, emp:num(r.pension)/200 },
-      health:   { co:h/2, emp:h/2 },
-      longterm: { co:lt/2, emp:lt/2 },
-      employ:   { co:(Math.max(0,num(r.employ)-0.9)+0.25)/100, emp:0.9/100 },
-      injury:   { co:num(r.injury)/100, emp:0 }
-    };
-  }
-  function calc(base, year){
-    // [H5] 편집 요율 우선 — 없거나 오류 시 하드코딩 RATE fallback
-    var R2 = RATE;
-    try { if (window.mmRates && window.mmRates.get) { var r = window.mmRates.get(year || new Date().getFullYear()); if (r) R2 = ratesToSplit(r); } } catch(e){}
-    var pension  = base * (R2.pension.co  + R2.pension.emp);
-    var health   = base * (R2.health.co   + R2.health.emp);
-    var longterm = base * (R2.longterm.co + R2.longterm.emp);
-    var employ   = base * (R2.employ.co   + R2.employ.emp);
-    var injury   = base * (R2.injury.co   + R2.injury.emp);
-    var coShare  = base * (R2.pension.co + R2.health.co + R2.longterm.co + R2.employ.co + R2.injury.co);
-    var empShare = base * (R2.pension.emp + R2.health.emp + R2.longterm.emp + R2.employ.emp + R2.injury.emp);
-    return { pension:pension, healthLong:health+longterm, employ:employ, injury:injury, coShare:coShare, empShare:empShare };
-  }
-
-  function render(){
-    var tbody = document.getElementById('insurance-tbody');
-    if (!tbody) return;
-    var workers = loadWk();
-    var titleEl = document.querySelector('[data-screen="insurance"] .table-title');
-    if (!workers.length){
-      tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:44px 20px;color:#94a3b8;font-weight:600">' +
-        '<div style="font-size:30px;margin-bottom:6px">🛡️</div>' +
-        '<div style="font-size:13px;font-weight:800;color:#475569">4대보험 명세 데이터 없음</div>' +
-        '<div style="font-size:11px;margin-top:3px">일용직 등록 + 출역 기록이 누적되면 자동 산출됩니다</div></td></tr>';
-      if (titleEl) titleEl.textContent = '📋 전체 가입자 명세 (0명)';
-      return;
-    }
-    var totCo = 0, totEmp = 0;
-    tbody.innerHTML = workers.map(function(w){
-      var base = num(w.totalWage);
-      var c = calc(base);
-      totCo += c.coShare; totEmp += c.empShare;
-      var jc = JOB_COLOR[w.primaryJob] || JOB_COLOR['일반'];
-      return '<tr>' +
-        '<td><strong>' + w.name + '</strong></td>' +
-        '<td><span class="badge" style="background:' + jc.bg + ';color:' + jc.fg + '">' + (w.primaryJob||'—') + '</span></td>' +
-        '<td class="t-xs">—</td>' +
-        '<td class="right tnum">' + (w.daysWorked||0) + '일</td>' +
-        '<td class="right tnum"><strong>' + fmt(base) + '</strong></td>' +
-        '<td class="right tnum">' + fmt(c.pension) + '</td>' +
-        '<td class="right tnum">' + fmt(c.healthLong) + '</td>' +
-        '<td class="right tnum">' + fmt(c.employ) + '</td>' +
-        '<td class="right tnum">' + fmt(c.injury) + '</td>' +
-        '<td class="right tnum" style="background:#FAF5FF;color:#7C3AED;font-weight:800">' + fmt(c.coShare) + '</td>' +
-        '<td class="right tnum" style="background:#ECFDF5;color:var(--success-700);font-weight:800">' + fmt(c.empShare) + '</td>' +
-        '</tr>';
-    }).join('');
-    if (titleEl) {
-      titleEl.textContent = '📋 전체 가입자 명세 (' + workers.length + '명) — 회사부담 ' +
-        fmt(totCo) + '원 · 근로자공제 ' + fmt(totEmp) + '원';
-    }
-  }
-
-  window.mmInsurance = { render: render };
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', render);
-  else render();
-  window.addEventListener('hashchange', function(){
-    if (location.hash === '#insurance') setTimeout(render, 100);
-  });
-})();
-</script>
 
 <script id="mm-vendors-script">
 // 거래처(vendors) 마스터 [#132] — 등록 + 표 hydration
@@ -17043,7 +16128,8 @@ CREATE TABLE system_map_activity (
           if ((it.vendor||'').trim() === name){
             pj[p.id] = 1;
             total += num(it.supplyAmt||it.total);
-            unpaid += Math.max(0, num(it.total) - num(it.paidAmount));
+            // [직불 — 대표 기준] 직불 계열은 발주처 직접지급 — 자사 지급·미지급 대상 아님
+            if (it.type !== 'direct' && it.type !== 'labordirect') unpaid += Math.max(0, num(it.total) - num(it.paidAmount));
             if (it.date && it.date > lastDate) lastDate = it.date;
           }
         });
@@ -17505,7 +16591,7 @@ CREATE TABLE system_map_activity (
     var worker = {
       id: 'W' + Date.now(),
       name: name.trim(),
-      jumin: (document.getElementById('wk-jumin')||{}).value || '',
+      rrn: (document.getElementById('wk-jumin')||{}).value || '', // [주민번호 통일 — 전수감사] jumin→rrn 표준화: push(jumin_masked:w.rrn)·CSV(w.rrn)가 이 경로 등록분만 null/공백으로 내보내던 결함
       address: (document.getElementById('wk-addr')||{}).value || '',
       phone: (document.getElementById('wk-phone')||{}).value || '',
       primaryJob: pjob,
@@ -17513,7 +16599,6 @@ CREATE TABLE system_map_activity (
       altJobs: altJobs,
       daysWorked: 0,
       totalWage: 0,
-      insuranceOk: false,
       lastWork: '',
       createdAt: new Date().toISOString()
     };
@@ -17569,18 +16654,14 @@ CREATE TABLE system_map_activity (
           return a.type.replace('공','') + ' ' + fmt(a.wage);
         }).join(' / ') + '</span>';
       }
-      var insBadge = w.insuranceOk
-        ? '<span class="badge badge-success">✓ 가입</span>'
-        : '';
       return '<tr' + (isMulti?' class="multi-job"':'') + '>' +
         '<td><strong>' + w.name + '</strong></td>' +
-        '<td class="tnum">' + maskJumin(w.jumin) + '</td>' +
+        '<td class="tnum">' + maskJumin(w.rrn || w.jumin) + '</td>' + // [주민번호 통일 — 전수감사] rrn 표준 + 구버전 jumin 레거시 행 폴백 (pull 행이 rrn만 보유해 '—'로 비던 결함)
         '<td><div class="job-chips">' + chips + '</div></td>' +
         '<td class="right"><div class="wage-multi">' + wageCell + '</div></td>' +
         '<td class="right tnum"><strong>' + (w.daysWorked||0) + '일</strong></td>' +
         '<td class="right tnum"><strong>' + fmt(w.totalWage) + '</strong></td>' +
         '<td class="tnum">' + (w.phone||'—') + '</td>' +
-        '<td class="center">' + insBadge + '</td>' +
         '<td class="center tnum">' + (w.lastWork||'—') + '</td>' +
         '<td class="center"><button class="btn btn-secondary btn-sm" onclick="window.mmWorkers.remove(\'' + w.id + '\')">삭제</button></td>' +
         '</tr>';
@@ -17819,7 +16900,8 @@ CREATE TABLE system_map_activity (
         var rec = vmap[v];
         rec.count++;
         rec.supply += num(it.supplyAmt||it.total);
-        rec.unpaid += Math.max(0, num(it.total) - num(it.paidAmount));
+        // [직불 — 대표 기준] 직불금·인건비직불금은 발주처 직접지급 — 자사 지급·미지급 대상 아님
+        if (it.type !== 'direct' && it.type !== 'labordirect') rec.unpaid += Math.max(0, num(it.total) - num(it.paidAmount));
         if (it.type) rec.cats[it.type] = true;
         rec.projects[p.id] = true;
         if (it.date && it.date > rec.lastDate) rec.lastDate = it.date;
@@ -18293,7 +17375,7 @@ CREATE TABLE system_map_activity (
   }
   // [감사 2단계] 마스터(거래처·일용직) 키 변경 감지 → pushMasters (autoSync 워처가 mm-dash-v4만 보던 한계 보강)
   function _mastersHash(){ return (localStorage.getItem('mm-vendors-v2')||'') + '|' + (localStorage.getItem('mm-workers')||'') + '|' + (localStorage.getItem('mm-vendors')||'') + '|' + (localStorage.getItem('mm-vendors-v23')||''); }
-  function _settingsHash(){ return ['mm-company','mm-insurance-rates','mm-alert-thresholds'].map(function(k){ return localStorage.getItem(k)||''; }).join('|'); }
+  function _settingsHash(){ return ['mm-company','mm-alert-thresholds'].map(function(k){ return localStorage.getItem(k)||''; }).join('|'); }
   function _attendHash(){ return localStorage.getItem('mm-attendance')||''; }
   var lastMastersHash = _mastersHash(), lastSettingsHash = _settingsHash(), lastAttendHash = _attendHash();
   var mPushTimer = null, sPushTimer = null, aPushTimer = null;
@@ -18321,7 +17403,7 @@ CREATE TABLE system_map_activity (
     var r = await pull();
     try { if (localStorage.getItem('mm-masters-dirty')==='1') await pushMasters(); } catch(e){}   // [번호증발 수정] 미전송 마스터 변경 선push — 디바운스 중 새로고침/개명 레이스로 클라우드가 로컬을 역덮어쓰던 결함 봉쇄
     try { await pullMasters(); } catch(e){}   // [감사 2단계] 거래처·일용직도 로그인 시 클라우드에서 복원
-    try { if (window.mmSyncPullPhase1) await window.mmSyncPullPhase1(); } catch(e){}   // [감사 4단계] 4대보험·정산·경보수신자 클라우드 복원
+    try { if (window.mmSyncPullPhase1) await window.mmSyncPullPhase1(); } catch(e){}   // [감사 4단계] 경보수신자·독촉 클라우드 복원
     try { await pullSettings(); } catch(e){}   // [감사 4단계] 회사정보·요율·임계값 복원
     try { await pullAttendance(); } catch(e){}   // [감사 4단계] 출역 복원(일용직 pull 후)
     if (window.globalToast) {
@@ -18385,7 +17467,8 @@ CREATE TABLE system_map_activity (
       if(!ownerId) return { ok:false, msg:'로그인 필요' };
       var vP=_mVendors().map(function(v){ return { id:_mCloudId('v',v.name), owner_id:ownerId, name:v.name, business_no:v.bizNo, phone:v.phone, category:v.category, memo:v.memo, email:v.email, address:v.addr, ceo:v.ceo }; });
       if(vP.length){ var rv=await sb.from('vendors').upsert(vP,{ onConflict:'id' }); if(rv.error&&/ceo/i.test(rv.error.message||'')){ vP.forEach(function(x){ delete x.ceo; }); rv=await sb.from('vendors').upsert(vP,{ onConflict:'id' }); } if(rv.error) return { ok:false, msg:'거래처: '+rv.error.message }; }
-      var wP=_mLoad('mm-workers').filter(function(w){ return w && w.name; }).map(function(w){ return { id:_mCloudId('w',w.name), owner_id:ownerId, name:w.name, jumin_masked:w.rrn||null, phone:w.phone||null, primary_job:w.primaryJob||null, primary_wage:Math.round(w.primaryWage||0), alt_jobs:Array.isArray(w.altJobs)?w.altJobs:[] }; });
+      // [주민번호 통일 — 전수감사] rrn 표준 + jumin 레거시 폴백 — 구(舊) add() 등록분(jumin만 보유)이 항상 null로 push되어 주민번호가 클라우드에 미도달하던 결함 (push 화이트리스트 누락과 동급)
+      var wP=_mLoad('mm-workers').filter(function(w){ return w && w.name; }).map(function(w){ return { id:_mCloudId('w',w.name), owner_id:ownerId, name:w.name, jumin_masked:w.rrn||w.jumin||null, phone:w.phone||null, primary_job:w.primaryJob||null, primary_wage:Math.round(w.primaryWage||0), alt_jobs:Array.isArray(w.altJobs)?w.altJobs:[] }; });
       if(wP.length){ var rw=await sb.from('workers').upsert(wP,{ onConflict:'id' }); if(rw.error) return { ok:false, msg:'일용직: '+rw.error.message }; }
       // [전수조사 H1] 툼스톤 잔존분 클라우드 삭제 재시도 — 삭제 당시 실패(오프라인 등)했어도 autoSync push마다 재시도
       // [재등록 보호 — 전수감사] 로컬에 다시 존재하는 이름은 툼스톤 해제: 삭제·개명 후 10분 내 재등록한 행을 push가 클라우드에서 반복 삭제하던 결함
@@ -18416,7 +17499,8 @@ CREATE TABLE system_map_activity (
       (rv.data||[]).forEach(function(r){ if(r.name&&!_mTombHas('v',r.name)){ var n=_mNorm(r.name); map['v:'+n]=r.id; var ex=lv[n]||{}; lv[n]=Object.assign({}, ex, { id:ex.id||('V-'+String(r.id).slice(0,8)), name:ex.name||r.name, bizNo:ex.bizNo||String(r.business_no||'').replace(/[^0-9]/g,''), ceo:ex.ceo||r.ceo||'', email:ex.email||r.email||'', addr:ex.addr||r.address||'', phone:r.phone||ex.phone, category:r.category||ex.category, memo:r.memo||ex.memo }); } });
       localStorage.setItem('mm-vendors-v2', JSON.stringify(Object.keys(lv).map(function(k){ return lv[k]; })));
       var lw={}; _mLoad('mm-workers').forEach(function(w){ if(w&&w.name&&!_mTombHas('w',w.name)) lw[_mNorm(w.name)]=w; });
-      (rw.data||[]).forEach(function(r){ if(r.name&&!_mTombHas('w',r.name)){ var n=_mNorm(r.name); map['w:'+n]=r.id; var ex=lw[n]||{}; lw[n]=Object.assign({}, ex, { id:ex.id||('WK'+String(r.id).slice(0,8)), name:r.name, rrn:ex.rrn||r.jumin_masked||'', phone:ex.phone||r.phone||'', primaryJob:ex.primaryJob||r.primary_job||'일반', primaryWage:ex.primaryWage||r.primary_wage||0, altJobs:(Array.isArray(ex.altJobs)&&ex.altJobs.length)?ex.altJobs:(Array.isArray(r.alt_jobs)?r.alt_jobs:[]), daysWorked:ex.daysWorked||0, totalWage:ex.totalWage||0, createdAt:ex.createdAt||r.created_at }); } });
+      // [주민번호 통일 — 전수감사] rrn 폴백 체인에 ex.jumin 추가 — pull 1회로 레거시 jumin 행이 rrn 표준으로 이행
+      (rw.data||[]).forEach(function(r){ if(r.name&&!_mTombHas('w',r.name)){ var n=_mNorm(r.name); map['w:'+n]=r.id; var ex=lw[n]||{}; lw[n]=Object.assign({}, ex, { id:ex.id||('WK'+String(r.id).slice(0,8)), name:r.name, rrn:ex.rrn||ex.jumin||r.jumin_masked||'', phone:ex.phone||r.phone||'', primaryJob:ex.primaryJob||r.primary_job||'일반', primaryWage:ex.primaryWage||r.primary_wage||0, altJobs:(Array.isArray(ex.altJobs)&&ex.altJobs.length)?ex.altJobs:(Array.isArray(r.alt_jobs)?r.alt_jobs:[]), daysWorked:ex.daysWorked||0, totalWage:ex.totalWage||0, createdAt:ex.createdAt||r.created_at }); } });
       localStorage.setItem('mm-workers', JSON.stringify(Object.keys(lw).map(function(k){ return lw[k]; })));
       _mIdMapSave(map);
       try{ window.dispatchEvent(new StorageEvent('storage',{ key:'mm-vendors-v2' })); }catch(e){}
@@ -18432,7 +17516,7 @@ CREATE TABLE system_map_activity (
   async function deleteWorkerCloud(name){ if(!name) return { ok:false }; _mTombAdd('w',name); var sb=sbClient(); if(!sb) return { ok:false, msg:'no-cloud' }; try{ var r=await sb.from('workers').delete().eq('id', _mCloudId('w',name)); return { ok:!r.error, msg:r.error&&r.error.message }; }catch(e){ return { ok:false, msg:e.message }; } }
 
   // ── 설정(회사정보·보험요율·임계값) 클라우드 동기화 [감사 4단계] — app_settings 키-값. 테이블 없으면 자동 no-op ──
-  var SETTING_KEYS = ['mm-company','mm-insurance-rates','mm-alert-thresholds'];
+  var SETTING_KEYS = ['mm-company','mm-alert-thresholds'];
   async function pushSettings(){
     var sb=sbClient(); if(!sb) return { ok:false, msg:'no-cloud' };
     try{
@@ -18760,7 +17844,7 @@ CREATE TABLE system_map_activity (
 </script>
 
 <script id="modal-submit-handlers">
-// 글로벌 모달 제출 핸들러 + 백업/복원 + 4대보험 KPI 실데이터 [#139]
+// 글로벌 모달 제출 핸들러 + 백업/복원 [#139]
 (function() {
   'use strict';
   function num(v) { return Number(String(v||'0').replace(/[^0-9.-]/g,'')) || 0 }
@@ -18926,7 +18010,7 @@ CREATE TABLE system_map_activity (
     } catch(e) { alert('출역 저장 실패 — ' + e.message); }
   };
 
-  // ─── [#153] 출역·4대보험 모달 드롭다운 실데이터 hydration (정적 가짜 옵션 제거) ───
+  // ─── [#153] 출역 모달 드롭다운 실데이터 hydration (정적 가짜 옵션 제거) ───
   function mmFillModalSelects(id) {
     var workers = []; try { workers = JSON.parse(localStorage.getItem('mm-workers') || '[]'); } catch(e){}
     if (!Array.isArray(workers)) workers = [];
@@ -18943,51 +18027,18 @@ CREATE TABLE system_map_activity (
       var ws = document.getElementById('att-worker-select'); if (ws) ws.innerHTML = wOpts + '<option>+ 신규 등록...</option>';
       var ps = document.getElementById('att-project-select'); if (ps) ps.innerHTML = pOpts;
       var dt = document.querySelector('#global-attendance-add input[type="date"]'); if (dt) dt.value = today;
-    } else if (id === 'global-insurance-enroll') {
-      var iw = document.getElementById('ins-worker-select'); if (iw) iw.innerHTML = wOpts;
-      var idt = document.querySelector('#global-insurance-enroll input[type="date"]'); if (idt) idt.value = today;
+    }
     }
   }
   var _mmOpenModalOrig = window.openModal;
   window.openModal = function(id) {
     var r = _mmOpenModalOrig ? _mmOpenModalOrig.apply(this, arguments) : undefined;
-    if (id === 'global-attendance-add' || id === 'global-insurance-enroll') { try { mmFillModalSelects(id); } catch(e){} }
+    if (id === 'global-attendance-add') { try { mmFillModalSelects(id); } catch(e){} }
     return r;
   };
   window.mmFillModalSelects = mmFillModalSelects;
 
-  // ─── 4대보험 가입 처리 ─── [#139.4]
-  window.submitGlobalInsuranceEnroll = function() {
-    var f = inputs('global-insurance-enroll');
-    var workerName = (getVal(f, 0) || '').split(' (')[0].trim();   // [#153] 작업자=f[0]
-    if (!workerName) { alert('가입 대상자를 선택하세요'); return; }
-    var date = getVal(f, 1) || new Date().toISOString().slice(0,10);  // 가입일=f[1]
-    try {
-      var arr = JSON.parse(localStorage.getItem('mm-insurance-enrollments') || '[]');
-      if (!Array.isArray(arr)) arr = [];
-      arr.unshift({ id:'INS'+Date.now(), enrollDate:date, workerName:workerName, types:['국민','건강','고용','산재'], status:'신고 완료', createdAt:new Date().toISOString() });
-      localStorage.setItem('mm-insurance-enrollments', JSON.stringify(arr));
-      if (window.renderInsurancePage) window.renderInsurancePage();
-      toast('🛡️ 4대보험 가입 처리 완료 — ' + workerName, 'success');
-      audit('데이터', '4대보험 가입 — ' + workerName);
-      close('global-insurance-enroll');
-    } catch(e) { alert('4대보험 저장 실패 — ' + e.message); }
-  };
 
-  // ─── 정산 처리 ─── [#139.5]
-  window.submitGlobalSettle = function() {
-    var f = inputs('global-settle');
-    var label = getVal(f, 0) || ('정산 ' + new Date().toISOString().slice(0,7));
-    try {
-      var arr = JSON.parse(localStorage.getItem('mm-settlements') || '[]');
-      if (!Array.isArray(arr)) arr = [];
-      arr.unshift({ id:'ST'+Date.now(), label:label, month:new Date().toISOString().slice(0,7), processedAt:new Date().toISOString() });
-      localStorage.setItem('mm-settlements', JSON.stringify(arr));
-      toast('💰 정산 처리 완료 — ' + label, 'success');
-      audit('데이터', '정산 처리 — ' + label);
-      close('global-settle');
-    } catch(e) { alert('정산 저장 실패 — ' + e.message); }
-  };
 
   // ─── 독촉 (외부 API 발급 전까지 큐 저장) ─── [#139.6]
   window.submitGlobalDunning = function() {
@@ -19029,7 +18080,7 @@ CREATE TABLE system_map_activity (
   var BACKUP_KEYS = [
     'mm-dash-v4','mm-vendors','mm-vendors-v2','mm-vendors-v23',
     'mm-workers','mm-attendance','mm-activity-log',
-    'mm-insurance-enrollments','mm-settlements','mm-dunning-queue',
+    'mm-dunning-queue',
     'mm-thresholds','mm-alert-recipients','mm-auth','mm-theme'
   ];
   window.mmBackup = function() {
@@ -19063,70 +18114,6 @@ CREATE TABLE system_map_activity (
     reader.readAsText(fileEl.files[0]);
   };
 
-  // ─── 4대보험 KPI 실데이터 렌더링 ─── [#139.9]
-  window.renderInsurancePage = function(rootEl) {
-    rootEl = rootEl || document.querySelector('[data-screen="insurance"]');
-    if (!rootEl) return;
-    var selects = rootEl.querySelectorAll('select');
-    var ySel = null, mSel = null;
-    selects.forEach(function(s) {
-      var firstOpt = (s.options[0] && s.options[0].textContent || '').trim();
-      if (/월$/.test(firstOpt) && !mSel) mSel = s;
-      else if (/^\d{4}$/.test(firstOpt) && !ySel) ySel = s;
-    });
-    if (!ySel || !mSel) return;
-    var y = parseInt(ySel.value, 10);
-    var m = parseInt((mSel.value || '').replace('월', ''), 10);
-    if (!y || !m) return;
-    var prefix = y + '-' + String(m).padStart(2, '0');
-    var attend = []; try { attend = JSON.parse(localStorage.getItem('mm-attendance') || '[]'); } catch(e) {}
-    if (!Array.isArray(attend)) attend = [];
-    var monthly = attend.filter(function(a){ return (a.date || '').indexOf(prefix) === 0; });
-    var workerDays = {};
-    monthly.forEach(function(a){ if (a.workerId) workerDays[a.workerId] = (workerDays[a.workerId] || 0) + 1; });
-    var eligibleIds = Object.keys(workerDays).filter(function(k){ return workerDays[k] >= 8; });
-    var eligibleCount = eligibleIds.length;
-    var enrollments = []; try { enrollments = JSON.parse(localStorage.getItem('mm-insurance-enrollments') || '[]'); } catch(e) {}
-    if (!Array.isArray(enrollments)) enrollments = [];
-    var workers = []; try { workers = JSON.parse(localStorage.getItem('mm-workers') || '[]'); } catch(e) {}
-    if (!Array.isArray(workers)) workers = [];
-    var eligibleNames = eligibleIds.map(function(id){ var w = workers.find(function(x){return x.id===id}); return w ? w.name : ''; });
-    var enrolledNames = enrollments.filter(function(e){ return (e.enrollDate||'').indexOf(prefix) === 0; }).map(function(e){ return e.workerName; });
-    var enrolledCount = eligibleNames.filter(function(n){ return enrolledNames.indexOf(n) >= 0; }).length;
-    var unenrolledCount = Math.max(0, eligibleCount - enrolledCount);
-    var baseAmount = monthly.filter(function(a){ return a.workerId && eligibleIds.indexOf(a.workerId) >= 0; }).reduce(function(s,a){ return s + (Number(a.wage)||0); }, 0);
-    // 회사 부담 약 11.5%, 근로자 공제 약 8.5% (4대보험 + 산재 개산)
-    var coShare = Math.round(baseAmount * 0.115);
-    var empShare = Math.round(baseAmount * 0.085);
-    var setKpi = function(key, val) { var el = rootEl.querySelector('[data-kpi="' + key + '"]'); if (el) el.textContent = (val||0).toLocaleString(); };
-    setKpi('ins-eligible', eligibleCount);
-    setKpi('ins-co-share', Math.round(coShare / 10000));
-    setKpi('ins-emp-share', Math.round(empShare / 10000));
-    setKpi('ins-unenrolled', unenrolledCount);
-  };
-  window.addEventListener('hashchange', function() {
-    if ((location.hash || '').slice(1) === 'insurance') {
-      setTimeout(function(){
-        if (window.refreshMonthLabels) window.refreshMonthLabels(document.querySelector('[data-screen="insurance"]'));
-        if (window.renderInsurancePage) window.renderInsurancePage();
-      }, 250);
-    }
-  });
-  document.addEventListener('change', function(ev) {
-    var sel = ev.target;
-    if (!sel || sel.tagName !== 'SELECT') return;
-    var firstOpt = (sel.options[0] && sel.options[0].textContent || '').trim();
-    if (!/월$/.test(firstOpt) && !/^\d{4}$/.test(firstOpt)) return;
-    var screen = sel.closest('.main-area');
-    if (screen && screen.getAttribute('data-screen') === 'insurance' && window.renderInsurancePage) {
-      window.renderInsurancePage(screen);
-    }
-  }, true);
-  // monthNavStep / monthNavToToday 호출 시 insurance 화면도 자동 재렌더
-  var _oNav = window.monthNavStep;
-  if (_oNav) window.monthNavStep = function(btn, dir){ _oNav(btn, dir); var sc = btn && btn.closest && btn.closest('.main-area'); if (sc && sc.getAttribute && sc.getAttribute('data-screen') === 'insurance' && window.renderInsurancePage) setTimeout(function(){ window.renderInsurancePage(sc); }, 50); };
-  var _oTd = window.monthNavToToday;
-  if (_oTd) window.monthNavToToday = function(btn){ _oTd(btn); var sc = btn && btn.closest && btn.closest('.main-area'); if (sc && sc.getAttribute && sc.getAttribute('data-screen') === 'insurance' && window.renderInsurancePage) setTimeout(function(){ window.renderInsurancePage(sc); }, 50); };
 })();
 </script>
 
@@ -19172,7 +18159,7 @@ CREATE TABLE system_map_activity (
     var arr = []; try { arr = JSON.parse(localStorage.getItem('mm-workers')||'[]'); } catch(e) {}
     if (!Array.isArray(arr)) arr = [];
     var rows = [['이름','주민번호','전화','주직종','일당','총출역일','누적인건비']];
-    arr.forEach(function(w){ rows.push([w.name||'', w.rrn||'', w.phone||'', w.primaryJob||'', w.primaryWage||0, w.daysWorked||0, w.totalWage||0]); });
+    arr.forEach(function(w){ rows.push([w.name||'', w.rrn||w.jumin||'', w.phone||'', w.primaryJob||'', w.primaryWage||0, w.daysWorked||0, w.totalWage||0]); }); // [주민번호 통일 — 전수감사] jumin 레거시 폴백 — 구 add() 등록분의 주민번호 열이 공백으로 내보내지던 결함
     downloadCsv('일용직마스터-' + new Date().toISOString().slice(0,10) + '.csv', rows);
   };
   window.exportAttendanceCsv = function() {
@@ -19194,13 +18181,6 @@ CREATE TABLE system_map_activity (
     });
     downloadCsv('매입세부내역-' + new Date().toISOString().slice(0,10) + '.csv', rows);
   };
-  window.exportInsuranceCsv = function() {
-    var arr = []; try { arr = JSON.parse(localStorage.getItem('mm-insurance-enrollments')||'[]'); } catch(e) {}
-    if (!Array.isArray(arr)) arr = [];
-    var rows = [['가입일','대상자','보험종류','상태']];
-    arr.forEach(function(e){ rows.push([e.enrollDate||'', e.workerName||'', (e.types||[]).join('·'), e.status||'']); });
-    downloadCsv('4대보험가입-' + new Date().toISOString().slice(0,10) + '.csv', rows);
-  };
   window.exportTemplate = function(type) {
     type = type || 'purchase';
     var rows;
@@ -19217,10 +18197,9 @@ CREATE TABLE system_map_activity (
     if (hash === 'vendors' || hash === 'vendor-status') return window.exportVendorsCsv();
     if (hash === 'workers') return window.exportWorkersCsv();
     if (hash === 'attendance') return window.exportAttendanceCsv();
-    if (hash === 'insurance') return window.exportInsuranceCsv();
     if (hash === 'project-detail') return window.exportPurchasesCsv();
     // 기본: 전체 백업 안내
-    toast('현재 화면에 맞는 데이터를 내보냅니다 — 거래처/일용직/출역/4대보험/매입 화면에서 시도하세요', 'info');
+    toast('현재 화면에 맞는 데이터를 내보냅니다 — 거래처/일용직/출역/매입 화면에서 시도하세요', 'info');
   };
   window.exportContextTemplate = function() {
     var hash = (location.hash || '').slice(1);
@@ -19341,7 +18320,6 @@ CREATE TABLE system_map_activity (
         btn.onclick = function() {
           var alerts = window.mmAlertCheck();
           if (window.renderAttendancePage) try { window.renderAttendancePage(); } catch(e){}
-          if (window.renderInsurancePage) try { window.renderInsurancePage(); } catch(e){}
           if (window.renderActivityPage) try { window.renderActivityPage(); } catch(e){}
           toast('🔄 재계산 완료 — 자동 경보 ' + alerts.length + '건', 'success');
         };
@@ -20210,8 +19188,6 @@ CREATE TABLE system_map_activity (
 
   // ─── 5. Supabase 신규 5 테이블 → localStorage Pull Sync ───
   var SYNC_MAP = {
-    'mm-insurance-enrollments': 'insurance_enrollments',
-    'mm-settlements': 'settlements',
     'mm-alert-recipients': 'alert_recipients'
   };
   function snakeToCamel(s) { return s.replace(/_([a-z])/g, function(_,c){ return c.toUpperCase(); }); }
@@ -20243,7 +19219,6 @@ CREATE TABLE system_map_activity (
         results.thresholds = 'synced';
       }
     } catch(e) {}
-    if (window.renderInsurancePage) window.renderInsurancePage();
     if (window.renderActivityPage) window.renderActivityPage();
     return { ok:true, results:results };
   };
@@ -20461,8 +19436,6 @@ CREATE TABLE system_map_activity (
       } catch(e) { pushed[table] = 'exception'; }
     };
     // 신규 항목만 (createdAt 기준 24시간 이내) — 간단 필터; 정확한 차이 sync는 추후 개선
-    await pushTable('mm-insurance-enrollments', 'insurance_enrollments');
-    await pushTable('mm-settlements', 'settlements');
     await pushTable('mm-alert-recipients', 'alert_recipients');
     await pushTable('mm-dunning-queue', 'dunning_queue');  // [독촉 sync] 테이블 미생성 시 r.error→no-op(기존 패턴)
     // thresholds (단일 row update)
@@ -20478,12 +19451,12 @@ CREATE TABLE system_map_activity (
     return pushed;
   };
 
-  // [감사 4단계] Phase1 PULL — 4대보험·정산·경보수신자 클라우드→로컬 (push와 대칭: snake→camel, cloud id 보존)
+  // [감사 4단계] Phase1 PULL — 경보수신자·독촉 클라우드→로컬 (push와 대칭: snake→camel, cloud id 보존)
   window.mmSyncPullPhase1 = async function() {
     var c = sb();
     if (!c) return;
     function s2c(s){ return String(s).replace(/_([a-z])/g, function(m,x){ return x.toUpperCase(); }); }
-    var tabs = [['insurance_enrollments','mm-insurance-enrollments','INS'],['settlements','mm-settlements','ST'],['alert_recipients','mm-alert-recipients','AR'],['dunning_queue','mm-dunning-queue','DN']];  // [독촉 sync]
+    var tabs = [['alert_recipients','mm-alert-recipients','AR'],['dunning_queue','mm-dunning-queue','DN']];  // [독촉 sync]
     for (var i=0;i<tabs.length;i++){
       var t = tabs[i];
       try{
@@ -20500,7 +19473,6 @@ CREATE TABLE system_map_activity (
         profitMin: th.data.profit_min, costMax: th.data.cost_max, uncollectMax: th.data.uncollect_max
       }));
     }catch(e){}
-    try{ if (window.renderInsurancePage) window.renderInsurancePage(); }catch(e){}
     try{ if (window.mmAlerts && window.mmAlerts.render) window.mmAlerts.render(); }catch(e){}
   };
 
@@ -20686,19 +19658,6 @@ CREATE TABLE system_map_activity (
     if (sd) sd.textContent = wk.length ? ('전체 '+wk.length+'명 작업자 통합 표.') : '등록된 작업자가 없습니다.';
   }
 
-  // ─── insurance 화면: 데모 PJ 카드 숨김 ───
-  function cleanInsurance(){
-    var screen = document.querySelector('[data-screen="insurance"]');
-    if (!screen) return;
-    var ps = projects();
-    var ids = ps.map(function(p){ return String(p.id); });
-    // 데모 PJ 카드 (data-pj 속성, 칩 제외) — 실제 프로젝트 없으면 숨김
-    screen.querySelectorAll('[data-pj]:not(.pj-chip)').forEach(function(card){
-      var pj = card.getAttribute('data-pj');
-      var exists = ids.some(function(id){ return id.indexOf(pj) >= 0; });
-      card.style.display = exists ? '' : 'none';
-    });
-  }
 
   // ─── PJ 필터 칩 (attendance·insurance) 데모 제거 + 실프로젝트 ───
   function cleanPjChips(){
@@ -20709,7 +19668,7 @@ CREATE TABLE system_map_activity (
       dl.innerHTML = ps.map(function(p){ return '<option value="'+(p.id||'')+' '+(p.name||'')+'"></option>'; }).join('');
     }
     // insurance pj-chip 버튼: 데모(988/985/981/991) 숨김, 전체만 유지
-    ['attendance','insurance'].forEach(function(sc){
+    ['attendance'].forEach(function(sc){
       var screen = document.querySelector('[data-screen="'+sc+'"]');
       if (!screen) return;
       screen.querySelectorAll('.pj-chip[data-pj]').forEach(function(chip){
@@ -20759,39 +19718,14 @@ CREATE TABLE system_map_activity (
     var wkIds = Object.keys(byW);
     var totalDays = monthly.length;
     var totalWage = monthly.reduce(function(s,a){return s+num(a.wage);},0);
-    var ins8 = wkIds.filter(function(k){return byW[k].days>=8;}).length;
     var avgWage = totalDays>0 ? Math.round(totalWage/totalDays) : 0;
     var box = document.getElementById('at-summary-box');
     if (box){
       box.innerHTML =
         '· 작업자: <strong>'+wkIds.length+'명</strong><br/>'+
         '· 누적 출역: <strong>'+totalDays+'인-일</strong> · 평균 일당 <strong>'+avgWage.toLocaleString()+'원</strong><br/>'+
-        '· 인건비 합계: <strong>'+totalWage.toLocaleString()+'원</strong> (공급가 기준 / VAT 0)<br/>'+
-        '· 4대보험 가입 대상: <strong>'+ins8+'명</strong> (8일 이상 출역)';
+        '· 인건비 합계: <strong>'+totalWage.toLocaleString()+'원</strong> (공급가 기준 / VAT 0)';
     }
-    // 4대보험 가입안내 카드 (8일 이상)
-    var list = document.getElementById('at-insurance-list');
-    if (list){
-      var enroll = load('mm-insurance-enrollments');
-      var enrolledNames = enroll.map(function(e){return e.workerName;});
-      var targets = wkIds.filter(function(k){return byW[k].days>=8;})
-        .map(function(k){return byW[k];}).sort(function(a,b){return b.days-a.days;});
-      if (!targets.length){
-        list.innerHTML = '<div style="padding:30px 20px;text-align:center;color:#94a3b8;font-size:13px;font-weight:600"><div style="font-size:26px;margin-bottom:6px">🛡️</div>8일 이상 출역자가 없습니다 — 출역 누적 시 자동 검출</div>';
-      } else {
-        list.innerHTML = targets.map(function(t){
-          var done = enrolledNames.indexOf(t.name) >= 0;
-          var badge = done ? '<span class="badge" style="background:#D1FAE5;color:#065F46;font-weight:800">✓ 가입완료</span>'
-            : '<span class="badge" style="background:#FEE2E2;color:#991B1B;font-weight:800">⚠ 미가입 '+t.days+'일</span>';
-          return '<div style="padding:14px 16px;background:#fff;border-radius:10px;border:1px solid #FCD34D">'+
-            '<div class="row" style="justify-content:space-between;align-items:flex-start;margin-bottom:8px">'+
-            '<div><div style="font-size:14px;font-weight:800">'+(t.name||'—')+' '+badge+'</div>'+
-            '<div class="t-xs">출역 '+t.days+'일</div></div>'+
-            '<div style="text-align:right"><div style="font-size:13px;font-weight:800;color:#D97706" class="t-num">'+t.wage.toLocaleString()+'</div><div class="t-xs">누적 인건비</div></div></div>'+
-            (done ? '' : '<button class="btn btn-primary btn-sm" style="width:100%" onclick="window.openModal&&openModal(\'global-insurance-enroll\')">📋 4대보험 자동 가입 처리</button>')+
-            '</div>';
-        }).join('');
-      }
     }
   }
 
@@ -20862,7 +19796,7 @@ CREATE TABLE system_map_activity (
     if (pgi) pgi.textContent = logs.length+'건';
     // 필터 칩 카운트
     var chipMap = { '전체':logs.length };
-    ['프로젝트','매입','기성','수금','출역','4대보험','거래처','설정'].forEach(function(k){
+    ['프로젝트','매입','기성','수금','출역','거래처','설정'].forEach(function(k){
       chipMap[k] = logs.filter(function(l){ return (l.action||'').indexOf(k)>=0 || (l.detail||'').indexOf(k)>=0; }).length;
     });
     screen.querySelectorAll('#act-filter-chips [data-act-filter]').forEach(function(btn){
@@ -20942,32 +19876,6 @@ CREATE TABLE system_map_activity (
     var totalW = wk.length, activeW = wk.filter(function(w){return num(w.daysWorked)>0;}).length, ins8 = wk.filter(function(w){return num(w.daysWorked)>=8;}).length;
     setHeroStats('[data-screen="workers"]', [totalW, activeW+'명', fmtMan(wk.reduce(function(s,w){return s+num(w.totalWage);},0))]);
 
-    // insurance 히어로 + 합산 + 직종별 표 (8일+ 출역자 기준)
-    var ins8Ids = Object.keys(aWk).filter(function(k){return aWk[k]>=8;});
-    var base = monthly.filter(function(a){return ins8Ids.indexOf(a.workerId)>=0;}).reduce(function(s,a){return s+num(a.wage);},0);
-    var coShare = Math.round(base*0.115), empShare = Math.round(base*0.085);
-    setHeroStats('[data-screen="insurance"]', [ins8Ids.length+'명', fmtMan(coShare), fmtMan(empShare)]);
-    var insBox = document.getElementById('ins-summary-box');
-    if (insBox){
-      insBox.innerHTML = '· 가입 대상: <strong>'+ins8Ids.length+'명</strong> (8일 이상 출역)<br/>'+
-        '· 과세표준 합계: <strong>'+base.toLocaleString()+'원</strong><br/>'+
-        '· 회사 부담 합계: <strong>'+coShare.toLocaleString()+'원</strong><br/>'+
-        '· 근로자 공제 합계: <strong>'+empShare.toLocaleString()+'원</strong>';
-    }
-    var insTbody = document.getElementById('ins-job-tbody');
-    if (insTbody){
-      // 직종별 (8일+ 대상자)
-      var byJobIns={}; var wkMap={}; wk.forEach(function(w){wkMap[w.id]=w;});
-      ins8Ids.forEach(function(id){ var w=wkMap[id]; var job=(w&&w.primaryJob)||'일반'; var wage=monthly.filter(function(a){return a.workerId===id;}).reduce(function(s,a){return s+num(a.wage);},0); if(!byJobIns[job])byJobIns[job]={n:0,base:0}; byJobIns[job].n++; byJobIns[job].base+=wage; });
-      var jobs=Object.keys(byJobIns);
-      if (!jobs.length){ insTbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:30px;color:#94a3b8;font-size:13px">직종별 집계 데이터 없음 — 출역 8일 이상 누적 시 자동 산출</td></tr>'; }
-      else {
-        var tBase=0,tIns=0,tN=0;
-        var rows=jobs.map(function(j){ var b=byJobIns[j].base; var ins=Math.round(b*0.20); tBase+=b;tIns+=ins;tN+=byJobIns[j].n; return '<tr><td>'+j+'</td><td class="right tnum"><strong>'+byJobIns[j].n+'명</strong></td><td class="right tnum">'+b.toLocaleString()+'</td><td class="right tnum"><strong>'+ins.toLocaleString()+'</strong></td></tr>'; }).join('');
-        rows+='<tr class="row-subtotal" style="font-weight:800;background:var(--bg-subtle)"><td style="border-top:2px solid var(--border-strong)">합계</td><td class="right tnum" style="border-top:2px solid var(--border-strong)">'+tN+'명</td><td class="right tnum" style="border-top:2px solid var(--border-strong)">'+tBase.toLocaleString()+'</td><td class="right tnum" style="border-top:2px solid var(--border-strong)">'+tIns.toLocaleString()+'</td></tr>';
-        insTbody.innerHTML=rows;
-      }
-    }
 
     // activity: 도넛 카드 항상 숨김(미연동) + 메타 문구 중화
     var actScreen = document.querySelector('[data-screen="activity"]');
@@ -21041,38 +19949,11 @@ CREATE TABLE system_map_activity (
       var vnReg = vn.querySelector('.kpi-card .kpi-value'); if(vnReg) vnReg.innerHTML = vnReg.innerHTML.replace(/[\d][\d,\.]*/, vd.length);
       if (!hasPurchase) hideCards(vn, ['거래액 TOP','미지급 정산']);
     }
-    // ═ insurance KPI (data-kpi 미연동분 강제) ═
-    var ins = document.querySelector('[data-screen="insurance"]');
-    if (ins){
-      var at = attendance();
-      var prefix = '';
-      var s=ins.querySelectorAll('select'),y=null,m=null;
-      s.forEach(function(x){var fo=(x.options[0]&&x.options[0].textContent||'').trim(); if(/월$/.test(fo)&&!m)m=x; else if(/^\d{4}$/.test(fo)&&!y)y=x;});
-      if(y&&m)prefix=y.value+'-'+String(parseInt((m.value||'').replace('월',''),10)||1).padStart(2,'0');
-      var monthly = prefix ? at.filter(function(a){return (a.date||'').indexOf(prefix)===0;}) : at;
-      var dm={}; monthly.forEach(function(a){if(a.workerId)dm[a.workerId]=(dm[a.workerId]||0)+1;});
-      var ins8 = Object.keys(dm).filter(function(k){return dm[k]>=8;}).length;
-      var base = monthly.filter(function(a){return dm[a.workerId]>=8;}).reduce(function(s2,a){return s2+num(a.wage);},0);
-      var kpis = ins.querySelectorAll('.kpi-card .kpi-value');
-      if (kpis[0]) kpis[0].innerHTML = kpis[0].innerHTML.replace(/[\d][\d,\.]*/, ins8);
-      if (kpis[1]) kpis[1].innerHTML = kpis[1].innerHTML.replace(/[\d][\d,\.]*/, Math.round(base*0.115/1000).toLocaleString());
-      if (kpis[2]) kpis[2].innerHTML = kpis[2].innerHTML.replace(/[\d][\d,\.]*/, Math.round(base*0.085/1000).toLocaleString());
-      // 전체 가입자 통합 명세 (12명) 제목 + 표
-      ins.querySelectorAll('.section-title, .table-title').forEach(function(t){
-        if ((t.textContent||'').indexOf('전체 가입자')>=0) t.innerHTML = t.innerHTML.replace(/\(\s*\d+\s*명\s*\)/, '('+ins8+'명)').replace(/\d+명/, ins8+'명');
-      });
-      // 가입자 명세 표 비우기 (정적 행 있으면)
-      var insMainTbody = document.getElementById('insurance-tbody');
-      if (insMainTbody && !ins8){ /* mmInsurance가 처리 */ }
-      // KPI meta 제거
-      ins.querySelectorAll('.kpi-meta span, .kpi-trend').forEach(function(t){ var tx=t.textContent||''; if(/전월|▲|▼/.test(tx)) t.textContent=''; });
-    }
-  }
 
   // ─── 범용 데모 토큰 스위퍼: 가짜 이름/거래처/PJ 든 행·카드 통째 숨김 [#151] ───
   var FAKE_RE = /[가-힣]○○|대성덕트|동성배관|동성덕트|한국밸브|한국용접공사|신한HVAC|송원제어|경동나비엔|케이에이치엔지니어링|대구공조|김경리|이관리|박현장|최영업|이공장|정회계|김현장|박관리|명문-9\d\d|대구 삼성병원|부산 SK뷰|대전 가스공사|대전 한국가스|인천 인하대|광주 LH|SK에코플랜트|daesung@/;
   // 실데이터 컨테이너(렌더 대상)는 건드리지 않음 — 비었거나 실데이터라 가짜 토큰 없음
-  var LIVE_IDS = ['at-tbody','at-insurance-list','at-summary-box','pjpur-tbody','pjpur-direct-items','pjbill-tbody','ov-project-tbody','insurance-tbody','ins-job-tbody','ins-summary-box','activity-log-list','vendors-tbody','workers-tbody'];
+  var LIVE_IDS = ['at-tbody','at-summary-box','pjpur-tbody','pjpur-direct-items','pjbill-tbody','ov-project-tbody','ins-job-tbody','ins-summary-box','activity-log-list','vendors-tbody','workers-tbody'];
   function inLive(el){
     var n = el;
     while (n && n !== document.body){
@@ -21144,7 +20025,6 @@ CREATE TABLE system_map_activity (
     try { cleanVendorStatus(); } catch(e){}
     try { cleanAttendance(); } catch(e){}
     try { cleanAttendanceSummary(); } catch(e){}
-    try { cleanInsurance(); } catch(e){}
     try { cleanPjChips(); } catch(e){}
     try { hideOverviewDemo(); } catch(e){}
     try { cleanAlerts(); } catch(e){}
@@ -21177,34 +20057,6 @@ CREATE TABLE system_map_activity (
     _mo.observe(document.body, { childList:true, subtree:true });
   } catch(e){}
 
-  // ─── 4대보험 요율 연도별 저장/로드 [#151r] ───
-  var RATE_KEY = 'mm-insurance-rates';
-  var DEFAULT_RATES = {
-    '2024': { pension:9.0, health:7.09, longterm:12.81, employ:1.8, injury:3.7 },
-    '2025': { pension:9.0, health:7.09, longterm:12.95, employ:1.8, injury:3.7 },
-    '2026': { pension:9.0, health:7.09, longterm:12.95, employ:1.8, injury:3.7 }
-  };
-  function loadRates(){ try { return Object.assign({}, DEFAULT_RATES, JSON.parse(localStorage.getItem(RATE_KEY)||'{}')); } catch(e){ return Object.assign({}, DEFAULT_RATES); } }
-  window.mmRates = {
-    get: function(year){ var all=loadRates(); return all[String(year)] || all['2026'] || DEFAULT_RATES['2026']; },
-    saveFromForm: function(){
-      var ySel=document.getElementById('rate-year'); if(!ySel) return;
-      var year=ySel.value;
-      var g=function(id){ var e=document.getElementById(id); return e?Number(e.value)||0:0; };
-      var all=loadRates();
-      all[year]={ pension:g('rate-pension'), health:g('rate-health'), longterm:g('rate-longterm'), employ:g('rate-employ'), injury:g('rate-injury') };
-      try { localStorage.setItem(RATE_KEY, JSON.stringify(all)); if(window.globalToast) globalToast('💾 '+year+'년 요율 저장 완료','success'); if(window.mmAudit) window.mmAudit.log('시스템','4대보험 요율 저장 — '+year); }
-      catch(e){ alert('요율 저장 실패 — '+e.message); }
-    },
-    applyToForm: function(){
-      var ySel=document.getElementById('rate-year'); if(!ySel) return;
-      var r=window.mmRates.get(ySel.value);
-      var s=function(id,v){ var e=document.getElementById(id); if(e) e.value=v; };
-      s('rate-pension',r.pension); s('rate-health',r.health); s('rate-longterm',r.longterm); s('rate-employ',r.employ); s('rate-injury',r.injury);
-    }
-  };
-  // 연도 변경 시 폼 자동 로드
-  document.addEventListener('change', function(ev){ if(ev.target && ev.target.id==='rate-year' && window.mmRates) window.mmRates.applyToForm(); });
   // settings 진입 시 폼 채우기
   window.addEventListener('hashchange', function(){ if((location.hash||'').slice(1)==='settings') setTimeout(function(){ window.mmRates && window.mmRates.applyToForm(); }, 400); });
 })();
