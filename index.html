@@ -12088,19 +12088,20 @@ CREATE TABLE system_map_activity (
         <button class="modal-close" onclick="closeModal('global-upload')">✕</button>
       </div>
       <div class="modal-body">
-        <div style="border:2px dashed var(--border-default);border-radius:12px;padding:40px 20px;text-align:center;background:var(--bg-subtle)">
+        <div style="border:2px dashed var(--border-default);border-radius:12px;padding:40px 20px;text-align:center;background:var(--bg-subtle);cursor:pointer" onclick="window.mmGlobalUploadPick && mmGlobalUploadPick()">
           <div style="font-size:48px;margin-bottom:12px">📁</div>
-          <div style="font-size:14px;font-weight:700;color:var(--text-primary);margin-bottom:6px">파일을 드래그하거나 클릭하여 선택</div>
-          <div class="t-xs">최대 50MB · 지원 포맷: .xlsx, .xls, .csv, .jpg, .png</div>
-          <button class="btn btn-primary btn-sm" style="margin-top:14px" onclick="globalToast('📂 파일 선택 대화상자','info')">📁 파일 선택</button>
+          <div style="font-size:14px;font-weight:700;color:var(--text-primary);margin-bottom:6px">클릭하여 파일 선택</div>
+          <div class="t-xs">지원 포맷: .csv (거래처·일용직 일괄 등록 — 양식 다운로드 참조)</div>
+          <input type="file" id="global-upload-input" accept=".csv,.xlsx" style="display:none" onchange="window.mmGlobalUploadFile && mmGlobalUploadFile(this)"/>
+          <button class="btn btn-primary btn-sm" style="margin-top:14px" onclick="event.stopPropagation(); window.mmGlobalUploadPick && mmGlobalUploadPick()">📁 파일 선택</button>
         </div>
         <div class="modal-info-banner" style="margin-top:14px">
-          💡 매입 일괄 등록 시 v21 양식 또는 다우오피스 매입표 자동 인식 가능. AI OCR로 영수증 사진도 처리.
+          💡 거래처·일용직 화면에서 열면 해당 마스터로 일괄 등록됩니다. 매입 일괄 업로드·영수증 OCR은 준비 중.
         </div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-ghost" onclick="closeModal('global-upload')">취소</button>
-        <button class="btn btn-secondary" onclick="globalToast('📋 양식 다운로드 시작','success'); closeModal('global-upload')">📋 양식 다운로드</button>
+        <button class="btn btn-secondary" onclick="window.mmGlobalUploadTemplate && mmGlobalUploadTemplate()">📋 양식 다운로드</button>
       </div>
     </div>
   </div>
@@ -13628,28 +13629,39 @@ CREATE TABLE system_map_activity (
           };
         });
 
-        // 룰 6 정규화 — 기존 거래처 중복 검사
-        var duplicates = [];
-        var newVendors = [];
+        // [선등록 정책 — 대표 기준] 사업자등록번호(10자리) 필수 + 3키 병합 기준 이름·번호 중복 차단
+        var _normN = function(s){ return String(s||'').replace(/\s+/g,'').replace(/[()（）]/g,'').toLowerCase(); };
+        var _digits = function(s){ return String(s||'').replace(/[^0-9]/g,''); };
+        var _all = [];
+        ['mm-vendors','mm-vendors-v2','mm-vendors-v23'].forEach(function(k){ try { var a = JSON.parse(localStorage.getItem(k)||'[]'); if (Array.isArray(a)) a.forEach(function(v){ _all.push(v); }); } catch(e2){} });
+        var _names = {}, _bizs = {};
+        _all.forEach(function(v){ var n=_normN(typeof v==='string'?v:(v&&v.name)); if(n) _names[n]=1; var b=_digits(v&&(v.bizNo||v.businessNo||v.bizno||v.biz_no)); if(b.length>=10) _bizs[b]=1; });
+        var duplicates = [], noBiz = [], newVendors = [];
         rows.forEach(function(r) {
-          if (window.checkDuplicateVendor && window.checkDuplicateVendor(r.name)) {
-            duplicates.push(r.name);
-          } else {
-            r.normalized = window.normalizeVendorName ? window.normalizeVendorName(r.name) : r.name;
-            r.id = 'v_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
-            r.createdAt = new Date().toISOString();
-            newVendors.push(r);
-          }
+          var nm = String(r.name||'').trim(); if (!nm) return;
+          var bz = _digits(r.bizNo);
+          if (bz.length !== 10) { noBiz.push(nm); return; }
+          var n = _normN(nm);
+          if (_names[n] || _bizs[bz]) { duplicates.push(nm); return; }
+          _names[n] = 1; _bizs[bz] = 1;
+          r.name = nm;
+          r.id = 'v_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+          r.createdAt = new Date().toISOString();
+          newVendors.push(r);
         });
 
-        // 신규만 저장
+        // 신규만 저장 + 표 즉시 갱신
         try {
           var existing = JSON.parse(localStorage.getItem('mm-vendors-v23') || '[]');
+          if (!Array.isArray(existing)) existing = [];
           var combined = existing.concat(newVendors);
           localStorage.setItem('mm-vendors-v23', JSON.stringify(combined));
           var msg = '✓ 신규 ' + newVendors.length + '건 등록';
-          if (duplicates.length > 0) msg += ' · 중복 ' + duplicates.length + '건 자동 차단 (룰 6)';
-          if (window.globalToast) globalToast(msg, 'success');
+          if (duplicates.length > 0) msg += ' · 중복 ' + duplicates.length + '건 제외';
+          if (window.globalToast) globalToast(msg, newVendors.length ? 'success' : 'warning', 6000);
+          if (noBiz.length > 0) alert('⚠️ [선등록 정책] 사업자등록번호(10자리) 누락으로 제외된 ' + noBiz.length + '건:\n' + noBiz.join(', ') + '\n\n양식의 "사업자등록번호" 열을 채워 다시 업로드하세요.');
+          try { window.dispatchEvent(new StorageEvent('storage', { key:'mm-vendors-v2' })); } catch(e3){}
+          try { if (window.mmVendors && window.mmVendors.render) window.mmVendors.render(); } catch(e3){}
         } catch (e) {
           if (window.globalToast) globalToast('❌ 저장 실패: ' + e.message, 'danger');
         }
@@ -14393,7 +14405,12 @@ CREATE TABLE system_map_activity (
           return;
         }
         if (text.includes('양식') && !text.includes('EDI')) {
-          btn.onclick = function() { globalToast('🚧 양식 다운로드는 준비 중입니다', 'warning'); };
+          btn.onclick = function() {
+            var _scr = btn.closest('[data-screen]'); var _sid = _scr ? _scr.dataset.screen : '';
+            if ((_sid === 'vendors' || _sid === 'vendor-status') && window.downloadVendorTemplate) { downloadVendorTemplate(); return; }
+            if ((_sid === 'workers' || _sid === 'attendance') && window.downloadWorkerTemplate) { downloadWorkerTemplate(); return; }
+            globalToast('🚧 이 화면의 양식 다운로드는 준비 중입니다', 'warning');
+          };
           return;
         }
         if (text.includes('EDI')) {
@@ -14417,9 +14434,14 @@ CREATE TABLE system_map_activity (
           return;
         }
 
-        // 업로드 / 붙여넣기
+        // 업로드 / 붙여넣기 — [수정] 거래처·일용직 화면은 진짜 파일 input으로 연결 (가짜 global-upload 모달이 가로채던 결함)
         if (text.includes('업로드')) {
-          btn.onclick = function() { openModal('global-upload'); };
+          btn.onclick = function() {
+            var _scr = btn.closest('[data-screen]'); var _sid = _scr ? _scr.dataset.screen : '';
+            if (_sid === 'vendors' || _sid === 'vendor-status') { var _fi = document.getElementById('vendor-excel-input'); if (_fi) { _fi.click(); return; } }
+            if (_sid === 'workers' || _sid === 'attendance') { var _fw = document.getElementById('worker-excel-input'); if (_fw) { _fw.click(); return; } }
+            openModal('global-upload');
+          };
           return;
         }
         if (text.includes('붙여넣기') || text.includes('클립보드')) {
@@ -18510,6 +18532,27 @@ CREATE TABLE system_map_activity (
   }
 
   // ─── 거래처 등록 → mmVendors 저장 ─── [#139.1]
+  // ─── 파일 업로드 모달 실연결 [업로드 결함 수정] — 활성 화면 기준 거래처/일용직 일괄 등록 라우팅 ───
+  function _mmActiveScreen() { var el = document.querySelector('.main-area.active[data-screen]'); return el ? el.getAttribute('data-screen') : ''; }
+  window.mmGlobalUploadPick = function() {
+    var fi = document.getElementById('global-upload-input');
+    if (fi) { fi.value = ''; fi.click(); }
+  };
+  window.mmGlobalUploadFile = function(inp) {
+    var file = inp && inp.files && inp.files[0];
+    if (!file) return;
+    var sid = _mmActiveScreen();
+    if ((sid === 'vendors' || sid === 'vendor-status') && window.processVendorExcel) { processVendorExcel(file); close('global-upload'); return; }
+    if ((sid === 'workers' || sid === 'attendance') && window.processWorkerExcel) { processWorkerExcel(file); close('global-upload'); return; }
+    toast('🚧 이 화면의 일괄 업로드는 준비 중 — 거래처/일용직 화면에서 이용하세요', 'warning');
+  };
+  window.mmGlobalUploadTemplate = function() {
+    var sid = _mmActiveScreen();
+    if ((sid === 'vendors' || sid === 'vendor-status') && window.downloadVendorTemplate) { downloadVendorTemplate(); return; }
+    if ((sid === 'workers' || sid === 'attendance') && window.downloadWorkerTemplate) { downloadWorkerTemplate(); return; }
+    toast('🚧 이 화면의 양식은 준비 중 — 거래처/일용직 화면에서 이용하세요', 'warning');
+  };
+
   window.submitGlobalVendorAdd = function() {
     var f = inputs('global-vendor-add');
     var name = getVal(f, 0);
@@ -18932,6 +18975,9 @@ CREATE TABLE system_map_activity (
   };
   window.exportContextTemplate = function() {
     var hash = (location.hash || '').slice(1);
+    // [선등록 정책] 거래처 양식은 사업자등록번호 열 포함 정식 템플릿으로 — 구 템플릿(번호 열 없음)은 새 업로드 검증에서 전 행 제외됨
+    if ((hash === 'vendors' || hash === 'vendor-status') && window.downloadVendorTemplate) return window.downloadVendorTemplate();
+    if (hash === 'workers' && window.downloadWorkerTemplate) return window.downloadWorkerTemplate();
     if (hash === 'vendors' || hash === 'vendor-status') return window.exportTemplate('vendor');
     if (hash === 'workers') return window.exportTemplate('worker');
     if (hash === 'attendance') return window.exportTemplate('attendance');
