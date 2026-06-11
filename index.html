@@ -14832,6 +14832,30 @@ CREATE TABLE system_map_activity (
 
   // [매입삭제 미반영 수정] 영속+C1시드+push+재렌더 공용 — saveProject·removeRow(삭제 자동저장)가 공유. 성공 시 true.
   function persistItemsNow() {
+    // [선등록 정책 백스톱] 영속 단일 관문 검증 — 삭제 자동저장이 붙여넣기 미등록 행을 정책 우회로 영속하던 구멍 봉쇄
+    try {
+      var _pv = [];
+      ['mm-vendors','mm-vendors-v2','mm-vendors-v23'].forEach(function(k){ try { var a = JSON.parse(localStorage.getItem(k)||'[]'); if (Array.isArray(a)) a.forEach(function(v){ _pv.push(v); }); } catch(e){} });
+      var _pbiz = function(v){ return String((v && (v.bizNo || v.businessNo || v.bizno || v.biz_no)) || '').replace(/[^0-9]/g,''); };
+      var _bad = [], _seen = {};
+      (state.items || []).forEach(function(it){
+        var vn = (it.vendor || '').trim(); if (!vn) return;
+        var n = normVendor(vn); if (!n || _seen[n]) return; _seen[n] = 1;
+        var m = _pv.filter(function(v){ return normVendor(typeof v === 'string' ? v : (v && v.name)) === n; });
+        if (!m.length || !m.some(function(v){ return _pbiz(v).length >= 10; })) _bad.push(vn);
+      });
+      if (_bad.length) {
+        // 순수 삭제(기존 저장분에서 줄어들기만, 새/변경 행 없음)는 허용 — 위반 데이터 정리 경로 보장
+        var _stored = []; try { var _sp = (JSON.parse(localStorage.getItem('mm-dash-v4')||'[]')||[]).find(function(x){ return x.id === state.project.id; }); _stored = (_sp && _sp.costItems) || []; } catch(e){}
+        var _key = function(it){ return [it.vendor, it.desc, it.type, it.supplyAmt, it.total].join(''); };
+        var _pool = {}; _stored.forEach(function(it){ var k = _key(it); _pool[k] = (_pool[k]||0) + 1; });
+        var _pureDelete = state.items.length < _stored.length && (state.items || []).every(function(it){ var k = _key(it); if (_pool[k] > 0) { _pool[k]--; return true; } return false; });
+        if (!_pureDelete) {
+          alert('[선등록 정책] 저장할 수 없습니다.\n\n미등록 또는 사업자번호 누락 거래처 (' + _bad.length + '): ' + _bad.join(', ') + '\n\n→ 거래처 화면에서 신규 등록(사업자번호 포함) 또는 [수정]으로 번호를 보강한 뒤 저장하세요.');
+          return false;
+        }
+      }
+    } catch(_pe) {}
     var raw = localStorage.getItem('mm-dash-v4');
     var projects = raw ? JSON.parse(raw) : [];
     if (!Array.isArray(projects)) projects = [];
@@ -14905,9 +14929,10 @@ CREATE TABLE system_map_activity (
   }
   function removeRow(idx) {
     if (!confirm('이 항목을 삭제하시겠습니까?')) return;
-    state.items.splice(idx, 1);
-    // [H12 계열] 삭제 즉시 자동저장 — 저장 버튼 없이 닫아도 반영(칸반과 동일 정책) + 상세 표·KPI 즉시 갱신
-    if (persistItemsNow() && window.globalToast) globalToast('🗑 항목 삭제 저장됨', 'success');
+    var _removed = state.items.splice(idx, 1)[0];
+    // [H12 계열] 삭제 즉시 자동저장. [백스톱] 정책 차단 시 행 롤백 — 모달·저장소 어긋남 방지
+    if (!persistItemsNow()) { if (_removed !== undefined) state.items.splice(idx, 0, _removed); render(); return; }
+    if (window.globalToast) globalToast('🗑 항목 삭제 저장됨', 'success');
     render();
   }
   function quickFillPaid(idx) {
