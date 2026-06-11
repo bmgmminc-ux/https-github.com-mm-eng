@@ -6854,6 +6854,12 @@ table.data-table {
     });
 
     // ── 매입 세부내역 표 ──
+    // [구분 정렬 — 대표 요청] 9분류(ORDER) 순서로 정렬, 같은 분류 안에서는 입력 순서 유지. 표시 전용 — 원본 costItems 순서(모달·칸반 ci 연동) 불변
+    (function(){
+      var _ord = {}; ORDER.forEach(function(k, i){ _ord[k] = i; });
+      items = items.map(function(it, i){ it._seq = i; return it; })
+        .sort(function(a, b){ return ((_ord[a.type] !== undefined ? _ord[a.type] : 99) - (_ord[b.type] !== undefined ? _ord[b.type] : 99)) || (a._seq - b._seq); });
+    })();
     if (!items.length) {
       tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:#94a3b8;font-size:14px">등록된 매입 항목이 없습니다 — "➕ 항목 추가" 또는 "📋 붙여넣기"로 시작</td></tr>';
     } else {
