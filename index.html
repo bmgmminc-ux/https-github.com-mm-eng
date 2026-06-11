@@ -13166,6 +13166,11 @@ CREATE TABLE system_map_activity (
     };
 
     window.registerVendor = function(vendor) {
+      // [선등록 정책 — 대표 기준] 사업자등록번호(10자리) 없는 등록 금지
+      if (String((vendor && vendor.bizNo) || '').replace(/[^0-9]/g,'').length !== 10) {
+        if (window.globalToast) globalToast('🚫 [선등록 정책] 사업자등록번호(10자리) 없이 거래처를 등록할 수 없습니다', 'warning', 6000);
+        return null;
+      }
       var existing = window.checkDuplicateVendor(vendor.name);
       if (existing) {
         if (window.globalToast) globalToast('⚠ 중복 거래처: "' + existing.name + '" 이미 등록됨 (룰 6 정규화 비교)', 'warning');
@@ -14963,19 +14968,22 @@ CREATE TABLE system_map_activity (
     });
     if (dupes.length) alert('⚠️ 중복 항목 ' + dupes.length + '건 제외:\n' + dupes.join('\n'));
     if (!newItems.length) { alert('모든 항목이 중복'); state.paste = null; render(); return }
-    // 신규 업체 자동 등록
-    var raw = localStorage.getItem('mm-vendors-v2'); var vendors = raw ? JSON.parse(raw) : []; if (!Array.isArray(vendors)) vendors = [];
-    var existing = vendors.map(function(v){return normVendor(typeof v==='string'?v:(v&&v.name)||'')});
-    var newV = [];
-    newItems.forEach(function(it){ if (it.vendor) { var n = normVendor(it.vendor); if (n && existing.indexOf(n)<0 && !newV.some(function(nv){return normVendor(nv)===n})) newV.push(it.vendor.trim()) } });
-    if (newV.length) {
-      newV.forEach(function(name){ vendors.push({id:'V-'+Date.now()+'-'+Math.random().toString(36).slice(2,5), name:name}) });
-      localStorage.setItem('mm-vendors-v2', JSON.stringify(vendors));
-    }
+    // [선등록 정책 — 대표 기준] 붙여넣기 자동 등록 폐기 — 미등록/사업자번호 누락 업체는 경고만(행은 추가, 최종 저장은 차단됨)
+    var _allV = [];
+    ['mm-vendors','mm-vendors-v2','mm-vendors-v23'].forEach(function(k){ try { var a = JSON.parse(localStorage.getItem(k)||'[]'); if (Array.isArray(a)) a.forEach(function(v){ _allV.push(v); }); } catch(e){} });
+    var _bizOf2 = function(v){ return String((v && (v.bizNo || v.businessNo || v.bizno || v.biz_no)) || '').replace(/[^0-9]/g,''); };
+    var _warnV = [];
+    newItems.forEach(function(it){
+      if (!it.vendor) return;
+      var n = normVendor(it.vendor);
+      if (!n || _warnV.some(function(w){ return normVendor(w) === n; })) return;
+      var _m = _allV.filter(function(v){ return normVendor(typeof v==='string'?v:(v&&v.name)) === n; });
+      if (!_m.length || !_m.some(function(v){ return _bizOf2(v).length >= 10; })) _warnV.push(it.vendor.trim());
+    });
     state.items = state.items.concat(newItems);
     state.paste = null;
     render();
-    alert('✅ ' + newItems.length + '건 등록' + (newV.length ? ' (신규 업체 ' + newV.length + '건 자동 추가)' : ''));
+    alert('✅ ' + newItems.length + '건 추가' + (_warnV.length ? '\n\n⚠️ [선등록 정책] 미등록 또는 사업자번호 누락 업체 ' + _warnV.length + '건:\n' + _warnV.join(', ') + '\n→ 거래처 화면에서 사업자등록번호와 함께 선등록해야 저장할 수 있습니다.' : ''));
   }
 
   // ── 엑셀 export ──
