@@ -10338,7 +10338,7 @@ table.data-table {
         <div style="font-size:13px;font-weight:800;color:var(--text-primary);margin-bottom:6px">📌 거래처 관리 도메인 룰</div>
         <div class="t-xs" style="line-height:1.7;color:var(--text-secondary)">
           · 신규 거래처 자동 등록 정규화 (도메인 룰 6): 공백·괄호 제거 후 비교하여 중복 방지<br/>
-          · [선등록 정책] 매입의 거래처는 마스터에 사업자등록번호까지 등록된 업체만 허용 — 미등록·번호 누락 시 저장 차단<br/>
+          · [선등록 정책] 매입의 거래처는 마스터에 사업자등록번호까지 등록된 업체만 허용 — 미등록·번호 누락 시 저장 차단 (예외: 직불금·인건비직불금은 발주처 직접 지급이라 업체명 자유 입력, 인건비는 일용직 마스터 등록)<br/>
           · 9분류 매입 자동 분류 (도메인 룰 4): 거래처 기본 분류 + 세부내역 키워드 매칭<br/>
           · 거래처 마스터는 자동완성 검색의 데이터 소스 — 프로젝트·매입·기타수익 등록 모달에서 모두 사용
         </div>
@@ -14799,7 +14799,8 @@ CREATE TABLE system_map_activity (
       var _missV = [], _noBiz = [], _missW = [], _sv = {}, _sw = {};
       (state.items || []).forEach(function(it){
         var _vn = (it.vendor || '').trim();
-        if (_vn) {
+        // [직불 예외 — 대표 기준] 직불금·인건비직불금은 발주처 직접 지급(자사 회계기장 외) → 업체명 자유 입력, 선등록 면제
+        if (_vn && it.type !== 'direct' && it.type !== 'labordirect') {
           var _nv = normVendor(_vn);
           if (_nv && !_sv[_nv]) {
             _sv[_nv] = 1;
@@ -14840,6 +14841,7 @@ CREATE TABLE system_map_activity (
       var _bad = [], _seen = {};
       (state.items || []).forEach(function(it){
         var vn = (it.vendor || '').trim(); if (!vn) return;
+        if (it.type === 'direct' || it.type === 'labordirect') return;  // [직불 예외 — 대표 기준] 자유 입력
         var n = normVendor(vn); if (!n || _seen[n]) return; _seen[n] = 1;
         var m = _pv.filter(function(v){ return normVendor(typeof v === 'string' ? v : (v && v.name)) === n; });
         if (!m.length || !m.some(function(v){ return _pbiz(v).length >= 10; })) _bad.push(vn);
@@ -15014,6 +15016,7 @@ CREATE TABLE system_map_activity (
     var _warnV = [];
     newItems.forEach(function(it){
       if (!it.vendor) return;
+      if (it.type === 'direct' || it.type === 'labordirect') return;  // [직불 예외 — 대표 기준] 자유 입력
       var n = normVendor(it.vendor);
       if (!n || _warnV.some(function(w){ return normVendor(w) === n; })) return;
       var _m = _allV.filter(function(v){ return normVendor(typeof v==='string'?v:(v&&v.name)) === n; });
