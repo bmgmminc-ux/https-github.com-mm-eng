@@ -5886,8 +5886,10 @@ table.data-table {
     if (Array.isArray(p.costItems) && p.costItems.length) {
       p.costItems.forEach(function(it) {
         if (it.type==='direct'||it.type==='labordirect') {
-          directSupply += num(it.supplyAmt||it.total||0);
-          directTotal += num(it.total||it.supplyAmt||0);
+          // [직불차감] 유효직불 = 공급가 − 직불공제(deduction). 공제분은 netContract(실수금 대상)로 복귀. 원가(costActual)는 gross 유지 — 이중차감 방지(룰1)
+          var _ded = num(it.deduction||0);
+          directSupply += Math.max(0, num(it.supplyAmt||it.total||0) - _ded);
+          directTotal += Math.max(0, num(it.total||it.supplyAmt||0) - _ded);
         }
       });
     } else if (p.costs) {
@@ -6808,8 +6810,9 @@ table.data-table {
         var supply = num(it.supplyAmt||it.supply||it.amount);
         var isDirect = (it.type==='direct'||it.type==='labordirect');
         var tax = (it.type==='labordirect'||it.type==='labor'||it.type==='cashexp') ? 0 : (it.tax!=null?num(it.tax):Math.round(supply*0.1));
-        if (isDirect) directRows.push({ vendor:it.vendor||'—', type:it.type, supply:supply, tax:tax, detail:it.desc||'' });
-        return { type:it.type||'outsource', vendor:it.vendor||'—', detail:it.desc||it.memo||'', supply:supply, tax:tax, paid:num(it.paidAmount), direct:isDirect };
+        var ded = isDirect ? num(it.deduction||0) : 0;  // [직불차감] 직불공제 — 집계는 유효액(공급가−공제), 행 표시는 gross+공제 병기
+        if (isDirect) directRows.push({ vendor:it.vendor||'—', type:it.type, supply:supply, tax:tax, ded:ded, detail:it.desc||'' });
+        return { type:it.type||'outsource', vendor:it.vendor||'—', detail:it.desc||it.memo||'', supply:supply, tax:tax, ded:ded, paid:num(it.paidAmount), direct:isDirect };
       });
     } else if (p && p.costs) {
       ORDER.forEach(function(k){
@@ -6823,7 +6826,7 @@ table.data-table {
     }
 
     // ── 직불금 내역 배너 ──
-    var dpTotal = directRows.reduce(function(s,r){ return s + r.supply + r.tax; }, 0);
+    var dpTotal = directRows.reduce(function(s,r){ return s + Math.max(0, r.supply - (r.ded||0)) + r.tax; }, 0);  // [직불차감] 유효직불 합계
     var dpTotalEl = document.getElementById('pjd-direct-total');
     if (dpTotalEl) dpTotalEl.textContent = fmt(dpTotal) + ' 원';
     var dpItems = document.getElementById('pjd-direct-items');
@@ -6833,9 +6836,10 @@ table.data-table {
       } else {
         dpItems.innerHTML = directRows.map(function(r){
           var lbl = r.type==='labordirect' ? '— 인건비 직불금 (세액 0)' : '— 발주처 직불';
+          var dedNote = (r.ded>0) ? ' <span style="color:#DC2626;font-size:11px">(공제 −'+fmt(r.ded)+')</span>' : '';  // [직불차감]
           return '<div class="dpb-item"><div><span class="dpb-item-vendor">'+r.vendor+'</span>'+
-            '<span class="dpb-item-desc">'+(r.detail?('— '+r.detail):lbl)+'</span></div>'+
-            '<span class="dpb-item-amt">'+fmt(r.supply+r.tax)+'</span></div>';
+            '<span class="dpb-item-desc">'+(r.detail?('— '+r.detail):lbl)+dedNote+'</span></div>'+
+            '<span class="dpb-item-amt">'+fmt(Math.max(0, r.supply-(r.ded||0))+r.tax)+'</span></div>';
         }).join('');
       }
     }
@@ -6845,7 +6849,7 @@ table.data-table {
     items.forEach(function(it){
       var total = it.supply + it.tax;
       supplyTotal += it.supply; taxTotal += it.tax;
-      if (it.direct) { directTotal += total; }
+      if (it.direct) { directTotal += Math.max(0, total - (it.ded||0)); }  // [직불차감] 유효직불
       else { purTotal += total; paidTotal += it.paid; unpaidTotal += Math.max(0, total - it.paid); }
     });
 
@@ -13736,7 +13740,7 @@ CREATE TABLE system_map_activity (
         var oi=(p.otherIncomeItems||[]).reduce(function(s,o){return s+_n(o.total||o.supplyAmt||0);},0);
         var cost=0; C9.forEach(function(c){ if(p.costs&&p.costs[c[0]]) cost+=_n(p.costs[c[0]].actual); });
         var ds=_n(p.costs&&p.costs.direct&&p.costs.direct.actual)+_n(p.costs&&p.costs.labordirect&&p.costs.labordirect.actual);
-        if(Array.isArray(p.costItems)&&p.costItems.length){ ds=0; p.costItems.forEach(function(it){ if(it.type==='direct'||it.type==='labordirect') ds+=_n(it.supplyAmt||it.total||0); }); }
+        if(Array.isArray(p.costItems)&&p.costItems.length){ ds=0; p.costItems.forEach(function(it){ if(it.type==='direct'||it.type==='labordirect') ds+=Math.max(0,_n(it.supplyAmt||it.total||0)-_n(it.deduction||0)); }); }  /* [직불차감] */
         var rev=contract+oi;
         var bs=(p.billingItems||[]).reduce(function(s,b){return s+_n(b.applySupply);},0);
         var bt=(p.billingItems||[]).reduce(function(s,b){return s+_n(b.applyTotal);},0);
@@ -16023,7 +16027,7 @@ CREATE TABLE system_map_activity (
     CATS.forEach(function(c){ if (p.costs && p.costs[c]) cost += num(p.costs[c].actual) });
     // 직불금(netContract용)
     var directSupply = num(p.costs && p.costs.direct && p.costs.direct.actual) + num(p.costs && p.costs.labordirect && p.costs.labordirect.actual);
-    if (Array.isArray(p.costItems) && p.costItems.length) { directSupply = 0; p.costItems.forEach(function(it){ if (it.type==='direct'||it.type==='labordirect') directSupply += num(it.supplyAmt||it.total||0); }); }
+    if (Array.isArray(p.costItems) && p.costItems.length) { directSupply = 0; p.costItems.forEach(function(it){ if (it.type==='direct'||it.type==='labordirect') directSupply += Math.max(0, num(it.supplyAmt||it.total||0) - num(it.deduction||0)); });  /* [직불차감] 유효직불=공급가−공제 */ }
     var netContract = Math.max(0, contract - directSupply);
 
     // 기성: 회차의 applyDate가 기간 안에 들어가는 것만 (기성만 날짜 귀속)
@@ -17411,7 +17415,7 @@ CREATE TABLE system_map_activity (
       var uncollected = billApplied - billReceived;
       // [지표통일 R-2] 기성률 분모 netContract(직불 제외) — overview L15992/프로젝트상세와 동일 공식
       var directSupply = num(p.costs && p.costs.direct && p.costs.direct.actual) + num(p.costs && p.costs.labordirect && p.costs.labordirect.actual);
-      if (Array.isArray(p.costItems) && p.costItems.length) { directSupply = 0; p.costItems.forEach(function(it){ if (it.type==='direct'||it.type==='labordirect') directSupply += num(it.supplyAmt||it.total||0); }); }
+      if (Array.isArray(p.costItems) && p.costItems.length) { directSupply = 0; p.costItems.forEach(function(it){ if (it.type==='direct'||it.type==='labordirect') directSupply += Math.max(0, num(it.supplyAmt||it.total||0) - num(it.deduction||0)); });  /* [직불차감] 유효직불=공급가−공제 */ }
       var netContract = Math.max(0, contract - directSupply);
       var billRate = netContract > 0 ? billSupply / netContract * 100 : 0;
       if (rate >= 100) {
@@ -18599,6 +18603,8 @@ CREATE TABLE system_map_activity (
       if (!Array.isArray(arr)) arr = [];
       arr.unshift({ id:'DN'+Date.now(), target:target, status:'발송 대기 (외부 API 연동 후 자동 발송)', createdAt:new Date().toISOString() });
       localStorage.setItem('mm-dunning-queue', JSON.stringify(arr));
+      // [독촉 sync] 등록 즉시 클라우드 push — mmThresholds.set 패치와 동일 패턴
+      setTimeout(function(){ try { if (window.mmSupabase && window.mmSupabase.isReady && window.mmSupabase.isReady() && window.mmSyncPushPhase1) window.mmSyncPushPhase1(); } catch(e){} }, 500);
       toast('📧 독촉 큐 등록 — ' + target + ' (외부 API 연동 시 자동 발송)', 'success');
       audit('데이터', '독촉 큐 — ' + target);
       close('global-dunning');
@@ -20027,6 +20033,7 @@ CREATE TABLE system_map_activity (
       item.status = '발송 완료 ' + new Date().toISOString();
     }
     try { localStorage.setItem('mm-dunning-queue', JSON.stringify(queue)); } catch(e) {}
+    try { if (sb() && window.mmSyncPushPhase1) window.mmSyncPushPhase1(); } catch(e) {}  // [독촉 sync] '발송 완료' 상태 전파
     toast('알림: '+sent+'건 성공 · '+failed+'건 실패', sent>0?'success':'warn');
     audit('알림', '큐 처리 — '+sent+'/'+(sent+failed));
   };
@@ -20056,6 +20063,7 @@ CREATE TABLE system_map_activity (
     await pushTable('mm-insurance-enrollments', 'insurance_enrollments');
     await pushTable('mm-settlements', 'settlements');
     await pushTable('mm-alert-recipients', 'alert_recipients');
+    await pushTable('mm-dunning-queue', 'dunning_queue');  // [독촉 sync] 테이블 미생성 시 r.error→no-op(기존 패턴)
     // thresholds (단일 row update)
     try {
       var t = JSON.parse(localStorage.getItem('mm-thresholds')||'null');
@@ -20074,7 +20082,7 @@ CREATE TABLE system_map_activity (
     var c = sb();
     if (!c) return;
     function s2c(s){ return String(s).replace(/_([a-z])/g, function(m,x){ return x.toUpperCase(); }); }
-    var tabs = [['insurance_enrollments','mm-insurance-enrollments','INS'],['settlements','mm-settlements','ST'],['alert_recipients','mm-alert-recipients','AR']];
+    var tabs = [['insurance_enrollments','mm-insurance-enrollments','INS'],['settlements','mm-settlements','ST'],['alert_recipients','mm-alert-recipients','AR'],['dunning_queue','mm-dunning-queue','DN']];  // [독촉 sync]
     for (var i=0;i<tabs.length;i++){
       var t = tabs[i];
       try{
