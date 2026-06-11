@@ -15624,7 +15624,7 @@ CREATE TABLE system_map_activity (
         st.project.budgetItems = st.project.budgetItems.filter(function(b){ return !(b && b.src === 'derived' && (b.mode||'contract') === 'cost'); });
         var _manual = st.project.budgetItems.filter(function(b){ return (b.mode||'contract') === 'cost'; });
         var _derived = (st.project.costItems || []).map(function(it, i){
-          return { id:'ci-'+i, type: it.type || 'outsource', name: ((it.desc||'').trim() || (((it.vendor||'').trim()||'매입') + ' 항목')), amount: num(it.supplyAmt || it.total || 0), mode:'cost', src:'ci' };
+          return { id:'ci-'+i, type: it.type || 'outsource', name: ((it.desc||'').trim() || (((it.vendor||'').trim()||'매입') + ' 항목')), vendor: (it.vendor||'').trim(), amount: num(it.supplyAmt || it.total || 0), mode:'cost', src:'ci' };  // [업체명 표시 — 대표 요청]
         });
         st.items = _derived.concat(_manual);
       } else {
@@ -15719,13 +15719,15 @@ CREATE TABLE system_map_activity (
           + '<div style="display:flex;gap:4px"><button onclick="mm'+(mode==='contract'?'ContractDist':'CostDist')+'.commitEdit(\''+b.id+'\')" style="flex:1;padding:5px;border-radius:6px;border:none;background:'+c.color+';color:#fff;font-size:11px;font-weight:700;cursor:pointer">저장</button><button onclick="mm'+(mode==='contract'?'ContractDist':'CostDist')+'.cancelEdit()" style="flex:1;padding:5px;border-radius:6px;border:1px solid #d1d5db;background:#fff;color:#64748b;font-size:11px;cursor:pointer">취소</button></div>'
           + '</div>';
       }
+      var _esc = function(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };  // [H9]
       return '<div draggable="true" ondragstart="mm'+(mode==='contract'?'ContractDist':'CostDist')+'.onDragStart(event,\''+b.id+'\')" style="padding:8px 10px;border-radius:8px;border:'+(isSel?'2px solid '+c.color:'1px solid #e5e7eb')+';background:'+(isSel?c.color+'10':'#fff')+';cursor:grab;display:flex;flex-direction:column;gap:4px;font-size:12px">'
         + '<div style="display:flex;align-items:center;gap:6px">'
         +   '<input type="checkbox" '+(isSel?'checked':'')+' onclick="event.stopPropagation()" onchange="mm'+(mode==='contract'?'ContractDist':'CostDist')+'.toggle(\''+b.id+'\')">'
-        +   '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(b.name||'').replace(/"/g,'&quot;')+'">'+(b.name||'(이름 없음)')+'</span>'
+        +   '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+_esc(b.name)+'">'+(_esc(b.name)||'(이름 없음)')+'</span>'
         +   '<button onclick="mm'+(mode==='contract'?'ContractDist':'CostDist')+'.startEdit(\''+b.id+'\')" style="background:none;border:none;cursor:pointer;color:#64748b;font-size:11px" title="수정">✏️</button>'
         +   '<button onclick="mm'+(mode==='contract'?'ContractDist':'CostDist')+'.remove(\''+b.id+'\')" style="background:none;border:none;cursor:pointer;color:#DC2626;font-size:11px" title="삭제">🗑</button>'
         + '</div>'
+        + (b.vendor ? '<div style="font-size:11px;color:#64748b;padding-left:22px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+_esc(b.vendor)+'">🏢 '+_esc(b.vendor)+'</div>' : '')  /* [업체명 표시 — 대표 요청] 매입 미러 카드에 거래처 병기 */
         + '<div style="text-align:right;font-weight:700;font-variant-numeric:tabular-nums;color:'+c.color+'">'+fmt(b.amount)+'</div>'
         + '</div>';
     }
