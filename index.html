@@ -9455,7 +9455,7 @@ table.data-table {
             </div>
             <div class="hero-stat success">
               <div class="hero-stat-label">평균 거래</div>
-              <div class="hero-stat-value t-num">1,076만</div>
+              <div class="hero-stat-value t-num">—</div><!-- [가짜값 제거] -->
               <div class="hero-stat-trend">per 업체</div>
             </div>
           </div>
@@ -9475,10 +9475,9 @@ table.data-table {
             </svg>
           </div>
           <div class="kpi-label">협력 업체 (90일 거래)</div>
-          <div class="kpi-value t-num">42<span style="font-size:18px;font-weight:700">개</span></div>
+          <div class="kpi-value t-num">0<span style="font-size:18px;font-weight:700">개</span></div><!-- [가짜값 제거] 실집계 hydration -->
           <div class="kpi-meta">
-            <span class="kpi-trend up">▲ +3</span>
-            <span>전체 87개 중</span>
+            <span>등록 거래처 기준</span>
           </div>
           <svg class="kpi-spark" viewBox="0 0 100 40" preserveAspectRatio="none">
             <defs><linearGradient id="sp-vs-1" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#3B68F6" stop-opacity="0.4"/><stop offset="100%" stop-color="#3B68F6" stop-opacity="0"/></linearGradient></defs>
@@ -9496,10 +9495,9 @@ table.data-table {
             </svg>
           </div>
           <div class="kpi-label">누적 매입 <span class="t-xs" style="color:var(--text-muted)">공급가</span></div>
-          <div class="kpi-value t-num">45.2<span style="font-size:18px;font-weight:700">억</span></div>
+          <div class="kpi-value t-num">0.0<span style="font-size:18px;font-weight:700">억</span></div><!-- [가짜값 제거] 실집계 hydration -->
           <div class="kpi-meta">
-            <span class="kpi-trend up">▲ +12.4%</span>
-            <span>VAT포함 49.7억</span>
+            <span>공급가 합계</span>
           </div>
           <svg class="kpi-spark" viewBox="0 0 100 40" preserveAspectRatio="none">
             <defs><linearGradient id="sp-vs-2" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#7C3AED" stop-opacity="0.4"/><stop offset="100%" stop-color="#7C3AED" stop-opacity="0"/></linearGradient></defs>
@@ -9517,9 +9515,9 @@ table.data-table {
             </svg>
           </div>
           <div class="kpi-label">최다 거래 업체</div>
-          <div class="kpi-value t-num" style="font-size:22px">(주)○○</div>
+          <div class="kpi-value t-num" style="font-size:22px">—</div><!-- [가짜값 제거] 실집계 hydration -->
           <div class="kpi-meta">
-            <span style="color:var(--success-700);font-weight:800">14개 PJ · 8.2억</span>
+            <span style="color:var(--success-700);font-weight:800">매입 누적 시 자동 표시</span>
           </div>
           <svg class="kpi-spark" viewBox="0 0 100 40" preserveAspectRatio="none">
             <defs><linearGradient id="sp-vs-3" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#10B981" stop-opacity="0.4"/><stop offset="100%" stop-color="#10B981" stop-opacity="0"/></linearGradient></defs>
@@ -9538,9 +9536,9 @@ table.data-table {
             </svg>
           </div>
           <div class="kpi-label">평균 거래액 <span class="t-xs" style="color:var(--text-muted)">per 업체</span></div>
-          <div class="kpi-value t-num">1,076<span style="font-size:18px;font-weight:700">만</span></div>
+          <div class="kpi-value t-num">0<span style="font-size:18px;font-weight:700">만</span></div><!-- [가짜값 제거] 실집계 hydration -->
           <div class="kpi-meta">
-            <span>중앙값 850만</span>
+            <span>공급가 ÷ 활동 업체</span>
           </div>
           <svg class="kpi-spark" viewBox="0 0 100 40" preserveAspectRatio="none">
             <defs><linearGradient id="sp-vs-4" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#D97706" stop-opacity="0.4"/><stop offset="100%" stop-color="#D97706" stop-opacity="0"/></linearGradient></defs>
@@ -9596,7 +9594,7 @@ table.data-table {
       <div class="table-wrap mb-7">
         <div class="table-header">
           <div>
-            <div class="table-title">📋 업체별 매입 추적 (활동 42개)</div>
+            <div class="table-title" id="vs-track-title">📋 업체별 매입 추적 (활동 0개)</div><!-- [가짜값 제거] renderVendorStatus가 실집계 -->
             <div class="t-xs">행 클릭 시 매입 세부내역 펼침 · 결제 행태 분석 · 거래 빈도 자동 추적</div>
           </div>
           <div class="row gap-2 flex-wrap">
@@ -9607,8 +9605,8 @@ table.data-table {
               📊 분석 리포트
             </button>
             <button class="btn btn-primary btn-sm">
-              <svg class="icon icon-sm"><use href="#i-plus"/></svg> 매입 등록
-            </button>
+              <svg class="icon icon-sm"><use href="#i-plus"/></svg> 현장 매입 입력
+            </button><!-- [직관화] '매입 등록' → 현장 컨텍스트 명시 -->
           </div>
         </div>
         <div class="table-scroll">
@@ -9683,7 +9681,7 @@ table.data-table {
               <div style="height:24px;border-radius:6px;background:#DBEAFE;overflow:hidden;display:flex;align-items:center">
                 <div style="width:52%;height:100%;background:var(--primary-600);display:flex;align-items:center;padding:0 10px;color:#fff;font-size:11px;font-weight:700">52%</div>
               </div>
-              <div class="t-xs" style="margin-top:4px">(주)○○, ○○, ○○ 외 19개</div>
+              <div class="t-xs" style="margin-top:4px">데이터 누적 시 자동 표시</div><!-- [가짜값 제거] -->
             </div>
 
             <!-- 60일+ -->
@@ -9707,7 +9705,7 @@ table.data-table {
               <div style="height:24px;border-radius:6px;background:#FEE2E2;overflow:hidden;display:flex;align-items:center">
                 <div style="width:7%;height:100%;background:var(--danger-700);display:flex;align-items:center;padding:0 10px;color:#fff;font-size:11px;font-weight:700">7%</div>
               </div>
-              <div class="t-xs" style="margin-top:4px;color:var(--danger-700)">(주)○○ (62일), ○○ (55일) 외 1개</div>
+              <div class="t-xs" style="margin-top:4px;color:var(--danger-700)">데이터 누적 시 자동 표시</div><!-- [가짜값 제거] -->
             </div>
           </div>
 
@@ -10018,7 +10016,7 @@ table.data-table {
           <div class="kpi-label">미지급 잔액</div>
           <div class="kpi-value t-num" style="color:#DC2626">1.8<span style="font-size:18px;font-weight:700">억</span></div>
           <div class="kpi-meta">
-            <span class="badge badge-warning">⚠️ 14개 업체</span>
+            <span class="badge badge-warning" id="vd-unpaid-badge">—</span><!-- [가짜값 제거] mmVendors.render 실집계 -->
           </div>
           <svg class="kpi-spark" viewBox="0 0 100 40" preserveAspectRatio="none">
             <defs>
@@ -10040,7 +10038,7 @@ table.data-table {
           <div class="table-header">
             <div>
               <div class="table-title">📋 거래처 마스터 (87개)</div>
-              <div class="t-xs">활동 42개 · 미지급 14개 · 사업자번호·대표자 자동완성 지원</div>
+              <div class="t-xs" id="vd-master-sub">사업자번호·대표자 자동완성 지원</div><!-- [가짜값 제거] mmVendors.render 실집계 -->
             </div>
             <div class="row gap-2 flex-wrap">
               <button class="btn btn-secondary btn-sm">
@@ -10252,7 +10250,7 @@ table.data-table {
             </div>
 
             <div style="margin-top:8px;padding:10px 14px;background:var(--bg-subtle);border-radius:8px;font-size:12px;color:var(--text-secondary);text-align:center">
-              상위 5개 업체가 전체 거래액의 <strong>62%</strong> 점유
+              매입 누적 시 자동 집계됩니다<!-- [가짜값 제거] -->
             </div>
           </div>
         </div>
@@ -10262,7 +10260,7 @@ table.data-table {
           <div class="card-base-header">
             <div>
               <h3 class="t-h4" style="color:#991B1B">🚨 미지급 정산 필요 (TOP 5)</h3>
-              <div class="t-xs" style="color:#B91C1C">총 14개 업체 · 합계 1.8억 미지급</div>
+              <div class="t-xs" style="color:#B91C1C" id="vd-unpaid-sub">미지급 집계 자동 표시</div><!-- [가짜값 제거] mmVendors.render 실집계 -->
             </div>
           </div>
 
@@ -14439,12 +14437,15 @@ CREATE TABLE system_map_activity (
         }
 
         // 매입 등록 (프로젝트 컨텍스트 필요) [#153] — project-detail 버튼은 inline onclick이라 제외됨
-        if (text.includes('매입 등록')) {
+        if (text.includes('매입 등록') || text.includes('현장 매입 입력')) {
           btn.onclick = function() {
             var ps = []; try { ps = JSON.parse(localStorage.getItem('mm-dash-v4') || '[]'); } catch(e){}
             if (!Array.isArray(ps) || !ps.length) { if(window.globalToast) globalToast('먼저 프로젝트를 등록하세요 (전체 현황 → + 신규 등록)', 'info'); return; }
             var pid = sessionStorage.getItem('mm-selected-pid');
-            if (!pid) { if(window.globalToast) globalToast('전체 현황에서 프로젝트를 선택한 뒤 매입을 등록하세요', 'info'); location.hash = 'overview'; return; }
+            if (!pid && ps.length === 1) { pid = ps[0].id; sessionStorage.setItem('mm-selected-pid', pid); }  // [직관화] 현장이 1곳이면 자동 선택
+            if (!pid) { if(window.globalToast) globalToast('현장이 여러 곳입니다 — 전체 현황에서 현장 선택 후 입력하세요', 'info'); location.hash = 'overview'; return; }
+            var _pj = ps.find(function(x){ return x.id === pid; });
+            if (window.globalToast) globalToast('🏗️ ' + ((_pj && _pj.name) || pid) + ' — 매입 입력', 'info');
             openModal('modal-purchase');
           };
           return;
@@ -16935,7 +16936,19 @@ CREATE TABLE system_map_activity (
   function remove(id){
     if (!confirm('이 거래처를 삭제할까요?')) return;
     var _gone = load().find(function(x){ return x.id === id; });
-    save(load().filter(function(v){ return v.id !== id }));
+    // [거래처 삭제 수정] 3키(mm-vendors/-v2/-v23) 전부에서 id+정규화이름으로 제거 — 한 키만 지우면 병합 읽기(load)가 다른 키 사본으로 되살리던 결함
+    var _nm = ((_gone && _gone.name) || '').replace(/\s+/g,'').replace(/[()（）]/g,'').toLowerCase();
+    ['mm-vendors','mm-vendors-v2','mm-vendors-v23'].forEach(function(k){
+      try {
+        var a = JSON.parse(localStorage.getItem(k)||'[]'); if (!Array.isArray(a)) return;
+        a = a.filter(function(v){
+          var vid = (v && v.id) || '';
+          var vn = (((typeof v==='string') ? v : (v && v.name)) || '').replace(/\s+/g,'').replace(/[()（）]/g,'').toLowerCase();
+          return vid !== id && (!_nm || vn !== _nm);
+        });
+        localStorage.setItem(k, JSON.stringify(a));
+      } catch(e){}
+    });
     // [감사 2b + 전수조사 H1] 클라우드 삭제 전파 — 실패 시 통지(툼스톤이 부활 차단, autoSync push가 재시도)
     if (_gone && _gone.name && window.mmData && window.mmData.deleteVendorCloud) window.mmData.deleteVendorCloud(_gone.name).then(function(r){ if(!(r&&r.ok) && window.globalToast) globalToast('⚠️ 거래처 클라우드 삭제 실패('+((r&&r.msg)||'오프라인')+') — 자동 재시도 예정', 'warning', 5000); });
     render();
@@ -16947,6 +16960,18 @@ CREATE TABLE system_map_activity (
     var arr = load();
     var titleEl = document.querySelector('[data-screen="vendors"] .table-title');
     if (titleEl) titleEl.textContent = '📋 거래처 마스터 (' + arr.length + '개)';
+    // [가짜값 제거] 부제·미지급 카드 헤더 실집계 — '활동 42개·미지급 14개·1.8억' 정적값 대체
+    try {
+      var _act = 0, _unpCnt = 0, _unpSum = 0;
+      arr.forEach(function(v){ var st = vendorStats(v.name); if (st.total > 0) _act++; if (st.unpaid > 0) { _unpCnt++; _unpSum += st.unpaid; } });
+      var _sub = document.getElementById('vd-master-sub');
+      if (_sub) _sub.textContent = '활동 ' + _act + '개 · 미지급 ' + _unpCnt + '개 · 사업자번호·대표자 자동완성 지원';
+      var _usub = document.getElementById('vd-unpaid-sub');
+      if (_usub) _usub.textContent = _unpCnt ? ('총 ' + _unpCnt + '개 업체 · 합계 ' + fmt(_unpSum) + '원 미지급') : '미지급 없음 ✓';
+      var _ubadge = document.getElementById('vd-unpaid-badge');
+      if (_ubadge) _ubadge.textContent = _unpCnt ? ('⚠️ ' + _unpCnt + '개 업체') : '✓ 미지급 없음';
+    } catch(e){}
+    var esc = function(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };  // [H9]
     if (!arr.length){
       tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:48px 20px;color:#94a3b8;font-weight:600">' +
         '<div style="font-size:32px;margin-bottom:8px">🏢</div>' +
@@ -16957,11 +16982,11 @@ CREATE TABLE system_map_activity (
     tbody.innerHTML = arr.map(function(v){
       var s = vendorStats(v.name);
       return '<tr>' +
-        '<td><strong>' + v.name + '</strong></td>' +
-        '<td class="center"><span class="badge" style="background:#E0E7FF;color:#3730A3;font-size:10px">' + (v.category||'—') + '</span></td>' +
-        '<td class="tnum">' + (v.bizNo||'—') + '</td>' +
-        '<td>' + (v.ceo||'—') + '</td>' +
-        '<td style="font-size:12px">' + (v.phone||'—') + '</td>' +
+        '<td><strong>' + esc(v.name) + '</strong></td>' +
+        '<td class="center"><span class="badge" style="background:#E0E7FF;color:#3730A3;font-size:10px">' + esc(v.category||'—') + '</span></td>' +
+        '<td class="tnum">' + esc(v.bizNo||'—') + '</td>' +
+        '<td>' + esc(v.ceo||'—') + '</td>' +
+        '<td style="font-size:12px">' + esc(v.phone||'—') + '</td>' +
         '<td class="right tnum">' + s.pjCount + '</td>' +
         '<td class="right tnum"><strong>' + fmt(s.total) + '</strong></td>' +
         '<td class="right tnum" style="color:' + (s.unpaid>0?'#DC2626':'#94a3b8') + '">' + fmt(s.unpaid) + '</td>' +
@@ -17499,6 +17524,9 @@ CREATE TABLE system_map_activity (
     });
     var vendors = Object.keys(vmap).map(function(k){ return vmap[k] });
     vendors.sort(function(a,b){ return b.supply - a.supply });
+    // [가짜값 제거] 표 타이틀 실집계 — '활동 42개' 정적값 대체
+    var _tt = document.getElementById('vs-track-title'); if (_tt) _tt.textContent = '📋 업체별 매입 추적 (활동 ' + vendors.length + '개)';
+    var esc = function(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };  // [H9]
     if (!vendors.length) {
       tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:48px 20px;color:#94a3b8;font-weight:600">' +
         '<div style="font-size:32px;margin-bottom:8px">📊</div>' +
@@ -17511,7 +17539,7 @@ CREATE TABLE system_map_activity (
       var pjCount = Object.keys(v.projects).length;
       var avg = v.count > 0 ? v.supply / v.count : 0;
       return '<tr>' +
-        '<td><strong>' + v.name + '</strong></td>' +
+        '<td><strong>' + esc(v.name) + '</strong></td>' +
         '<td style="font-size:12px">' + (catNames||'—') + '</td>' +
         '<td class="right tnum">' + pjCount + '</td>' +
         '<td class="right tnum">' + v.count + '</td>' +
@@ -20140,7 +20168,14 @@ CREATE TABLE system_map_activity (
   function projects(){ return load('mm-dash-v4'); }
   function workers(){ return load('mm-workers'); }
   function attendance(){ return load('mm-attendance'); }
-  function vendors(){ return load('mm-vendors'); }
+  function vendors(){
+    // [업체수 통일] 3키 병합 — KPI '등록 업체'가 mm-vendors(일부)만 세서 마스터 표(병합 3개)와 불일치하던 결함
+    var out=[], seen={};
+    ['mm-vendors','mm-vendors-v2','mm-vendors-v23'].forEach(function(k){
+      load(k).forEach(function(v){ var nm=(((typeof v==='string')?v:(v&&v.name))||'').replace(/\s+/g,'').toLowerCase(); if(nm&&!seen[nm]){ seen[nm]=1; out.push((typeof v==='string')?{name:v}:v); } });
+    });
+    return out;
+  }
 
   // KPI 숫자만 교체 (단위 span 보존)
   function setKpiNum(el, val){ if(!el) return; el.innerHTML = el.innerHTML.replace(/[\d,\.]+/, (val||0).toLocaleString()); }
@@ -20216,8 +20251,9 @@ CREATE TABLE system_map_activity (
     // KPI
     var kpis = screen.querySelectorAll('.kpi-card .kpi-value');
     if (kpis[0]) setKpiNum(kpis[0], vd.length);
-    if (kpis[1]) { kpis[1].innerHTML = kpis[1].innerHTML.replace(/[\d,\.]+억?/, fmtEok(totalPurchase)); }
-    if (kpis[2]) setKpiNum(kpis[2], 0);
+    if (kpis[1]) { kpis[1].innerHTML = kpis[1].innerHTML.replace(/[\d,\.]+/, ((totalPurchase||0)/1e8).toFixed(1)); }  // [수정] 숫자만 교체 — fmtEok('0.0억')이 단위 span과 겹쳐 '0.0억억' 되던 버그
+    if (kpis[2]) { var _tv = Object.keys(byVendor).slice().sort(function(a,b){ return byVendor[b].amt - byVendor[a].amt; })[0]; kpis[2].textContent = _tv || '—'; }  // [가짜값 제거] 최다 거래 업체 실데이터
+    if (kpis[3]) setKpiNum(kpis[3], Object.keys(byVendor).length ? Math.round(totalPurchase/Object.keys(byVendor).length/10000) : 0);  // [가짜값 제거] 평균 거래액(만)
     // 거래액 TOP5
     var list = findListByTitle(screen, '거래액 TOP');
     if (list){
