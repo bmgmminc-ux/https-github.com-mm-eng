@@ -10104,7 +10104,7 @@ table.data-table {
             <div class="card-base-header">
               <div>
                 <h3 class="t-h4">⚡ 신규 거래처 빠른 등록</h3>
-                <div class="t-xs">최소 업체명만 입력해도 등록 가능. 사업자번호는 추후 추가.</div>
+                <div class="t-xs">사업자등록번호(10자리) 필수 — 사업자등록증 확인된 업체만 등록</div><!-- [선등록 정책] -->
               </div>
             </div>
 
@@ -10173,8 +10173,8 @@ table.data-table {
                 <code style="font-size:11px;color:#6D28D9">/\s+|[()（）]/g</code>
               </div>
               <div style="padding:10px 12px;background:#fff;border-radius:8px;border:1px solid #DDD6FE">
-                <div style="font-weight:800;color:#5B21B6;margin-bottom:4px">3단계: 마스터에 자동 추가</div>
-                <div style="color:#6D28D9">중복 없이 신규만 등록</div>
+                <div style="font-weight:800;color:#5B21B6;margin-bottom:4px">3단계: 선등록 검증</div>
+                <div style="color:#6D28D9">미등록·사업자번호 누락 시 저장 차단</div>
               </div>
             </div>
 
@@ -10337,7 +10337,7 @@ table.data-table {
         <div style="font-size:13px;font-weight:800;color:var(--text-primary);margin-bottom:6px">📌 거래처 관리 도메인 룰</div>
         <div class="t-xs" style="line-height:1.7;color:var(--text-secondary)">
           · 신규 거래처 자동 등록 정규화 (도메인 룰 6): 공백·괄호 제거 후 비교하여 중복 방지<br/>
-          · 매입 등록 시 미등록 업체 발견 → 마스터에 자동 추가 (사업자번호는 추후 보강 가능)<br/>
+          · [선등록 정책] 매입의 거래처는 마스터에 사업자등록번호까지 등록된 업체만 허용 — 미등록·번호 누락 시 저장 차단<br/>
           · 9분류 매입 자동 분류 (도메인 룰 4): 거래처 기본 분류 + 세부내역 키워드 매칭<br/>
           · 거래처 마스터는 자동완성 검색의 데이터 소스 — 프로젝트·매입·기타수익 등록 모달에서 모두 사용
         </div>
@@ -14767,20 +14767,27 @@ CREATE TABLE system_map_activity (
     } catch (e) { state.pasteMap = ['vendor','desc','supplyAmt','total','memo']; }
   }
   function saveProject() {
-    // [요청] 매입 저장 전 — 거래처/일용직이 마스터에 미등록이면 차단 + '지금 등록'(확인) 제공
+    // [선등록 정책 — 대표 기준] 매입의 거래처는 마스터에 '사업자등록번호까지' 선등록된 업체만 허용. 자동 등록 폐기.
     try {
-      var _vraw = localStorage.getItem('mm-vendors-v2');
-      var _vendors = _vraw ? JSON.parse(_vraw) : [];
-      if (!Array.isArray(_vendors)) _vendors = [];
+      var _vendors = [];
+      ['mm-vendors','mm-vendors-v2','mm-vendors-v23'].forEach(function(k){
+        try { var a = JSON.parse(localStorage.getItem(k)||'[]'); if (Array.isArray(a)) a.forEach(function(v){ _vendors.push(v); }); } catch(e){}
+      });
       var _wraw = localStorage.getItem('mm-workers');
       var _workers = _wraw ? JSON.parse(_wraw) : [];
       if (!Array.isArray(_workers)) _workers = [];
-      var _missV = [], _missW = [], _sv = {}, _sw = {};
+      var _bizOf = function(v){ return String((v && (v.bizNo || v.businessNo || v.bizno || v.biz_no)) || '').replace(/[^0-9]/g,''); };
+      var _missV = [], _noBiz = [], _missW = [], _sv = {}, _sw = {};
       (state.items || []).forEach(function(it){
         var _vn = (it.vendor || '').trim();
         if (_vn) {
           var _nv = normVendor(_vn);
-          if (_nv && !_sv[_nv] && !_vendors.some(function(v){ return normVendor(typeof v === 'string' ? v : v.name) === _nv; })) { _sv[_nv] = 1; _missV.push(_vn); }
+          if (_nv && !_sv[_nv]) {
+            _sv[_nv] = 1;
+            var _matches = _vendors.filter(function(v){ return normVendor(typeof v === 'string' ? v : (v && v.name)) === _nv; });
+            if (!_matches.length) _missV.push(_vn);
+            else if (!_matches.some(function(v){ return _bizOf(v).length >= 10; })) _noBiz.push(_vn);
+          }
         }
         var _wn = (it.workerName || '').trim();
         if (_wn) {
@@ -14788,30 +14795,16 @@ CREATE TABLE system_map_activity (
           if (_nw && !_sw[_nw] && !_workers.some(function(w){ return normVendor((w && w.name) || '') === _nw; })) { _sw[_nw] = 1; _missW.push(_wn); }
         }
       });
-      if (_missV.length || _missW.length) {
+      if (_missV.length || _noBiz.length || _missW.length) {
         var _ln = [];
-        if (_missV.length) _ln.push('▪ 미등록 거래처 (' + _missV.length + '): ' + _missV.join(', '));
-        if (_missW.length) _ln.push('▪ 미등록 일용직 (' + _missW.length + '): ' + _missW.join(', '));
-        var _msg = '거래처/일용직 마스터에 미등록 항목이 있어 매입을 저장할 수 없습니다.\n\n' + _ln.join('\n') +
-                   '\n\n[확인] 지금 거래처/일용직에 등록하고 매입을 저장\n[취소] 저장하지 않음 (등록 화면에서 먼저 등록)';
-        if (!confirm(_msg)) {
-          if (window.globalToast) window.globalToast('🚫 매입 저장 취소 — 미등록 거래처/일용직을 먼저 등록하세요', 'warning', 6000);
-          return;
-        }
-        var _today = new Date().toISOString().substring(0,10);
-        if (_missV.length) {
-          _missV.forEach(function(nm, i){ _vendors.push({ id: 'V-' + Date.now() + '-' + i, name: nm, createdAt: _today }); });
-          localStorage.setItem('mm-vendors-v2', JSON.stringify(_vendors));
-          try { window.dispatchEvent(new StorageEvent('storage', { key:'mm-vendors-v2' })); } catch(e){}
-        }
-        if (_missW.length) {
-          _missW.forEach(function(nm, i){ _workers.unshift({ id: 'WK' + Date.now() + '-' + i, name: nm, primaryJob:'일반', primaryWage:0, altJobs:[], daysWorked:0, totalWage:0, createdAt: new Date().toISOString() }); });
-          localStorage.setItem('mm-workers', JSON.stringify(_workers));
-          try { window.dispatchEvent(new StorageEvent('storage', { key:'mm-workers' })); } catch(e){}
-          try { if (window.mmWorkers && window.mmWorkers.render) window.mmWorkers.render(); } catch(e){}
-        }
-        if (window.globalToast) window.globalToast('🏢 지금 등록 완료 — 거래처 ' + _missV.length + ' · 일용직 ' + _missW.length + '곳 → 매입 저장', 'success', 5000);
+        if (_missV.length) _ln.push('▪ 미등록 거래처 (' + _missV.length + '): ' + _missV.join(', ') + '\n   → 거래처 화면에서 사업자등록번호와 함께 등록 후 저장하세요');
+        if (_noBiz.length) _ln.push('▪ 사업자등록번호 미등록 거래처 (' + _noBiz.length + '): ' + _noBiz.join(', ') + '\n   → 거래처 화면에서 사업자번호 보강 후 저장하세요');
+        if (_missW.length) _ln.push('▪ 미등록 일용직 (' + _missW.length + '): ' + _missW.join(', ') + '\n   → 일용직 화면에서 등록 후 저장하세요');
+        alert('[선등록 정책] 매입을 저장할 수 없습니다.\n\n' + _ln.join('\n\n'));
+        if (window.globalToast) window.globalToast('🚫 매입 저장 차단 — 거래처(사업자번호 포함)·일용직 선등록 후 저장하세요', 'warning', 7000);
+        return;
       }
+      // [선등록 정책] 옛 '지금 등록' 자동 등록 흐름 폐기 — 거래처·일용직은 각 마스터 화면에서만 등록
     } catch (_ve) {}
     if (!persistItemsNow()) return;  // quota 실패 시 '저장 완료' 토스트 차단
     if (window.globalToast) window.globalToast('💾 저장 완료', 'success');
@@ -16965,14 +16958,21 @@ CREATE TABLE system_map_activity (
   function add(){
     var name = (document.getElementById('vd-name')||{}).value;
     if (!name || !name.trim()){ alert('업체명을 입력하세요'); return; }
+    // [선등록 정책 — 대표 기준] 사업자등록번호 필수(10자리) — 매입은 사업자번호까지 등록된 업체만 허용
+    var _bizRaw = ((document.getElementById('vd-bizno')||{}).value || '').trim();
+    var _bizDigits = _bizRaw.replace(/[^0-9]/g,'');
+    if (_bizDigits.length !== 10){ alert('사업자등록번호(10자리)는 필수입니다.\n예: 000-00-00000\n\n[선등록 정책] 사업자등록증이 확인된 업체만 등록할 수 있습니다.'); return; }
+    var _norm = function(s){ return String(s||'').replace(/\s+/g,'').replace(/[()（）]/g,'').toLowerCase(); };
     var arr = load();
-    if (arr.some(function(v){ return v.name === name.trim() })){
-      alert('이미 등록된 거래처입니다'); return;
+    if (arr.some(function(v){ return _norm(v.name) === _norm(name) })){
+      alert('이미 등록된 거래처입니다 (표기만 다른 동일 업체 포함)'); return;
     }
+    var _dupBiz = arr.find(function(v){ return String(v.bizNo||'').replace(/[^0-9]/g,'') === _bizDigits; });
+    if (_dupBiz){ alert('이미 등록된 사업자등록번호입니다 — ' + _dupBiz.name + '\n같은 업체는 한 번만 등록하세요.'); return; }
     arr.unshift({
       id: 'V'+Date.now(),
       name: name.trim(),
-      bizNo: (document.getElementById('vd-bizno')||{}).value || '',
+      bizNo: _bizRaw,
       ceo: (document.getElementById('vd-ceo')||{}).value || '',
       phone: (document.getElementById('vd-phone')||{}).value || '',
       category: (document.getElementById('vd-category')||{}).value || '외주비',
@@ -18508,12 +18508,18 @@ CREATE TABLE system_map_activity (
     if (!name) { alert('업체명을 입력하세요'); return; }
     var biz = getVal(f, 1), ceo = getVal(f, 2);
     var cat = (getVal(f, 3) || '외주비').split(' ')[0];
+    // [선등록 정책 — 대표 기준] 사업자등록번호 필수(10자리) + 이름·번호 중복 차단(3키 병합 기준)
+    var _bizDigits = String(biz||'').replace(/[^0-9]/g,'');
+    if (_bizDigits.length !== 10) { alert('사업자등록번호(10자리)는 필수입니다.\n예: 000-00-00000\n\n[선등록 정책] 사업자등록증이 확인된 업체만 등록할 수 있습니다.'); return; }
+    var _norm = function(s){ return String(s||'').replace(/\s+/g,'').replace(/[()（）]/g,'').toLowerCase(); };
     try {
+      var _all = [];
+      ['mm-vendors','mm-vendors-v2','mm-vendors-v23'].forEach(function(k){ try { var a = JSON.parse(localStorage.getItem(k)||'[]'); if (Array.isArray(a)) a.forEach(function(v){ _all.push(v); }); } catch(e){} });
+      if (_all.some(function(v){ return _norm(typeof v==='string'?v:(v&&v.name)) === _norm(name); })) { alert('이미 등록된 거래처입니다 (표기만 다른 동일 업체 포함)'); return; }
+      var _dupBiz = _all.find(function(v){ return String((v&&v.bizNo)||'').replace(/[^0-9]/g,'') === _bizDigits; });
+      if (_dupBiz) { alert('이미 등록된 사업자등록번호입니다 — ' + _dupBiz.name + '\n같은 업체는 한 번만 등록하세요.'); return; }
       var arr = JSON.parse(localStorage.getItem('mm-vendors') || '[]');
       if (!Array.isArray(arr)) arr = [];
-      if (arr.some(function(v){ return (v.name||'').trim() === name; })) {
-        if (!confirm('동일 업체명 이미 존재. 추가할까요?')) return;
-      }
       arr.unshift({ id:'V'+Date.now(), name:name, bizNo:biz, ceo:ceo, category:cat, createdAt:new Date().toISOString() });
       localStorage.setItem('mm-vendors', JSON.stringify(arr));
       if (window.mmVendors && window.mmVendors.render) window.mmVendors.render();
