@@ -8445,7 +8445,7 @@ table.data-table {
             </svg>
           </div>
           <div class="kpi-label">4대보험 대상자 <span class="t-xs" style="color:var(--text-muted)">8일 이상</span></div>
-          <div class="kpi-value t-num"><span class="pj-num" data-kpi="att-insurance8" data-pj-all="12" data-pj-988="5" data-pj-985="3" data-pj-981="3" data-pj-991="1">12</span><span style="font-size:18px;font-weight:700">명</span></div>
+          <div class="kpi-value t-num"><span class="pj-num" data-kpi="att-insurance8">0</span><span style="font-size:18px;font-weight:700">명</span></div><!-- [전수조사 H5] 가짜 12명·현장별 가짜값 제거 — data-kpi 실산출 연결 -->
           <div class="kpi-meta">
             
           </div>
@@ -8983,11 +8983,7 @@ table.data-table {
         <div class="row" style="align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px">
           <div class="row gap-2 flex-wrap" style="align-items:center">
             <span class="filter-bar-label">현장</span>
-            <button class="pj-chip active" data-pj="all" onclick="setInsurancePjFilter('all')">📊 전체</button>
-            <button class="pj-chip" data-pj="988" onclick="setInsurancePjFilter('988')">🏗️ 현장 ○○현장</button>
-            <button class="pj-chip" data-pj="985" onclick="setInsurancePjFilter('985')">🏗️ 현장 ○○현장</button>
-            <button class="pj-chip" data-pj="981" onclick="setInsurancePjFilter('981')">🏗️ 현장 ○○현장</button>
-            <button class="pj-chip" data-pj="991" onclick="setInsurancePjFilter('991')">🏗️ 현장 ○○현장</button>
+            <button class="pj-chip active" data-pj="all" onclick="setInsurancePjFilter('all')">📊 전체</button><!-- [전수조사 H5] 가짜 현장 칩(988/985/981/991 ○○현장) 제거 -->
           </div>
           <div class="row gap-2" style="align-items:center">
             <span class="filter-bar-label">신고 기준월</span>
@@ -9021,7 +9017,7 @@ table.data-table {
             </svg>
           </div>
           <div class="kpi-label">가입 대상자</div>
-          <div class="kpi-value t-num"><span class="ins-pj-num" data-pj-all="12" data-pj-988="5" data-pj-985="3" data-pj-981="3" data-pj-991="1">12</span><span style="font-size:18px;font-weight:700">명</span></div>
+          <div class="kpi-value t-num"><span class="ins-pj-num" data-kpi="ins-eligible">0</span><span style="font-size:18px;font-weight:700">명</span></div><!-- [전수조사 H5] 가짜 12명 제거 — renderInsurancePage 실산출 연결 -->
           <div class="kpi-meta">
             <span class="kpi-trend up"></span>
             <span></span>
@@ -9042,7 +9038,7 @@ table.data-table {
             </svg>
           </div>
           <div class="kpi-label">회사 부담 합계 <span class="t-xs" style="color:var(--text-muted)">5월</span></div>
-          <div class="kpi-value t-num"><span class="ins-pj-num" data-pj-all="6,580" data-pj-988="2,991" data-pj-985="1,600" data-pj-981="1,427" data-pj-991="425">6,580</span><span style="font-size:18px;font-weight:700">천</span></div>
+          <div class="kpi-value t-num"><span class="ins-pj-num" data-kpi="ins-co-share">0</span><span style="font-size:18px;font-weight:700">만</span></div><!-- [전수조사 H5] 가짜 6,580천 제거 — 실산출(만원 단위) 연결 -->
           <div class="kpi-meta">
             <span class="kpi-trend up"></span>
             <span></span>
@@ -9062,7 +9058,7 @@ table.data-table {
             </svg>
           </div>
           <div class="kpi-label">근로자 공제 합계</div>
-          <div class="kpi-value t-num"><span class="ins-pj-num" data-pj-all="4,720" data-pj-988="2,147" data-pj-985="1,148" data-pj-981="1,024" data-pj-991="305">4,720</span><span style="font-size:18px;font-weight:700">천</span></div>
+          <div class="kpi-value t-num"><span class="ins-pj-num" data-kpi="ins-emp-share">0</span><span style="font-size:18px;font-weight:700">만</span></div><!-- [전수조사 H5] 가짜 4,720천 제거 — 실산출(만원 단위) 연결 -->
           <div class="kpi-meta">
             <span>급여 차감액</span>
           </div>
@@ -9084,9 +9080,9 @@ table.data-table {
             </svg>
           </div>
           <div class="kpi-label">신고 마감</div>
-          <div class="kpi-value t-num" style="font-size:24px">06-10<span style="font-size:14px;font-weight:700">까지</span></div>
+          <div class="kpi-value t-num" style="font-size:24px">매월 10일<span style="font-size:14px;font-weight:700">까지</span></div><!-- [전수조사 H5] 고정 날짜·가짜 여유일 제거 -->
           <div class="kpi-meta">
-            <span class="badge badge-success">✓ 37일 여유</span>
+            <span class="badge badge-success">다음달 10일 신고</span>
           </div>
           <svg class="kpi-spark" viewBox="0 0 100 40" preserveAspectRatio="none">
             <defs><linearGradient id="sp-ins-4" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#DC2626" stop-opacity="0.3"/><stop offset="100%" stop-color="#DC2626" stop-opacity="0"/></linearGradient></defs>
@@ -9171,7 +9167,7 @@ table.data-table {
         <div class="table-header">
           <div>
             <div class="table-title">📋 전체 가입자 명세</div>
-            <div class="t-xs">출역일 내림차순 · 회사 부담 4,295,074원 · 근로자 공제 3,082,623원 · 신고 마감 6/10</div>
+            <div class="t-xs">출역일 내림차순 · 월 8일 이상 출역 일용직 기준 · 합계는 상단 KPI 참조</div><!-- [전수조사 H5] 가짜 합계 제거 -->
           </div>
           <div class="row gap-2 flex-wrap">
             <button class="btn btn-secondary btn-sm">🔄 재계산</button>
@@ -9252,8 +9248,7 @@ table.data-table {
           </table>
 
           <div style="margin-top:10px;padding:10px 14px;background:var(--bg-subtle);border-radius:8px;font-size:12px;color:var(--text-secondary);line-height:1.7">
-            💡 회사 부담 4,295,074 + 근로자 공제 3,082,623 = 보험료 합계 7,377,697원<br/>
-            (장기요양 64,937 별도 합산)
+            💡 회사 부담·근로자 공제 합계는 상단 KPI에서 자동 산출됩니다 (월 8일 이상 출역 일용직 기준, 장기요양 별도 합산)<!-- [전수조사 H5] 가짜 합계 제거 -->
           </div>
         </div>
 
@@ -9354,11 +9349,8 @@ table.data-table {
           var labelEl = ctx.querySelector('#ins-pj-label');
           if (labelEl) labelEl.textContent = pjLabels[pj];
 
-          // KPI 숫자 swap
-          ctx.querySelectorAll('.ins-pj-num').forEach(function(span) {
-            var v = span.getAttribute('data-pj-' + pj);
-            if (v !== null) span.textContent = v;
-          });
+          // [전수조사 H5] 가짜 KPI 숫자 swap 제거 — 실산출(renderInsurancePage)이 KPI 관리
+          try { if (window.renderInsurancePage) window.renderInsurancePage(); } catch(e) {}
 
           // 표 토글
           var unified = ctx.querySelector('#insurance-unified-table');
@@ -13732,26 +13724,51 @@ CREATE TABLE system_map_activity (
     };
 
     function generateReportContent(type, format, pjId) {
-      var pjId_ = pjId || '현장';
+      // [전수조사 H3] 하드코딩 가짜 수치(매출5억·원가율89.2% 등) 전면 제거 — 실데이터(mm-dash-v4) 기반, 지표는 전 화면 통일 공식과 동일
       var head = '═══════════════════════════════════════════════════\n  ㈜ 명문이엔지 — ' + (type === 'project_detail' ? 'PJ 상세 보고서' : '종합 보고서') + '\n  ' + new Date().toLocaleDateString() + ' · 발주처 제출용\n═══════════════════════════════════════════════════\n\n';
       var body = '';
+      var _n = function(v){ return Number(String(v==null?0:v).replace(/[^0-9.-]/g,''))||0; };
+      var _f = function(n){ return Math.round(n||0).toLocaleString(); };
+      var C9 = [['outsource','외주비'],['material','자재비'],['product','제품구매비'],['indirect','간접비'],['cashexp','비증빙경비'],['labor','인건비'],['safety','안전관리비'],['direct','직불금'],['labordirect','직불노무비']];
+      var _ps = []; try { _ps = JSON.parse(localStorage.getItem('mm-dash-v4')||'[]'); } catch(e) {} if (!Array.isArray(_ps)) _ps = [];
+      var _kpi = function(p){
+        var contract=_n(p.contractOrig)+_n(p.contractAdd);
+        var oi=(p.otherIncomeItems||[]).reduce(function(s,o){return s+_n(o.total||o.supplyAmt||0);},0);
+        var cost=0; C9.forEach(function(c){ if(p.costs&&p.costs[c[0]]) cost+=_n(p.costs[c[0]].actual); });
+        var ds=_n(p.costs&&p.costs.direct&&p.costs.direct.actual)+_n(p.costs&&p.costs.labordirect&&p.costs.labordirect.actual);
+        if(Array.isArray(p.costItems)&&p.costItems.length){ ds=0; p.costItems.forEach(function(it){ if(it.type==='direct'||it.type==='labordirect') ds+=_n(it.supplyAmt||it.total||0); }); }
+        var rev=contract+oi;
+        var bs=(p.billingItems||[]).reduce(function(s,b){return s+_n(b.applySupply);},0);
+        var bt=(p.billingItems||[]).reduce(function(s,b){return s+_n(b.applyTotal);},0);
+        var br=(p.billingItems||[]).reduce(function(s,b){return s+_n(b.billingAmount);},0);
+        return { contract:contract, oi:oi, rev:rev, cost:cost, profit:rev-cost, costRate:rev>0?cost/rev*100:0,
+          ds:ds, net:Math.max(0,contract-ds), billSupply:bs, billTotal:bt, billRecv:br };
+      };
 
       if (type === 'project_detail') {
-        body = '[기본 정보]\n' +
-          '· 프로젝트: ' + pjId_ + ' (○○현장 신축 기계설비)\n' +
-          '· 계약금액: 500,000,000원 (공급가)\n· 직불금: 60,000,000원 (실수금대상 440,000,000원)\n\n' +
-          '[수익 현황]\n· 매출: 500,000,000\n· 매입: 446,000,000 (원가율 89.2%)\n· 이윤: +54,000,000 (이익률 10.8%)\n\n' +
-          '[원가 분배 (룰 4: 9분류)]\n' +
-          '· 외주비: 200,000,000 (40.0%)\n· 자재비: 130,000,000 (26.0%)\n· 인건비: 60,000,000 (12.0%) [VAT 0]\n' +
-          '· 간접비: 30,000,000 (6.0%)\n· 비증빙경비: 15,000,000 (3.0%) [VAT 0]\n· 안전관리비: 5,000,000 (1.0%)\n' +
-          '· 직불금: 60,000,000 (12.0%) [캐시플로우 제외]\n\n' +
-          '[기성 신청 현황 (룰 1·7)]\n' +
-          '· 1회차: 80,000,000 + VAT 8,000,000 = 88,000,000\n' +
-          '· 2회차: 100,000,000 + VAT 10,000,000 = 110,000,000\n' +
-          '· 3회차: 120,000,000 + VAT 12,000,000 = 132,000,000\n' +
-          '· 누적 신청: 405,000,000 / 미청구: 35,000,000 / 신청률 92.0%\n\n';
-      } else if (type === 'monthly') {
-        body = '[월간 자금 흐름]\n· 매출 입금: 280,000,000\n· 매입 출금: 215,000,000\n· 인건비 지급: 54,000,000\n· 4대보험 회사부담: 4,295,074\n· 순현금 흐름: +6,704,926\n\n';
+        var _p = _ps.find(function(x){ return x.id===pjId || x.name===pjId; }) || _ps[0];
+        if (!_p) {
+          body = '[기본 정보]\n· 등록된 현장이 없습니다 — 현장 등록 후 생성하세요.\n\n';
+        } else {
+          var k = _kpi(_p);
+          body = '[기본 정보]\n' +
+            '· 프로젝트: ' + (_p.id||'') + ' ' + (_p.name||'') + ' · 발주처: ' + (_p.client||'-') + '\n' +
+            '· 계약금액: ' + _f(k.contract) + '원 (공급가)' + (k.oi ? ' · 기타수익: ' + _f(k.oi) + '원' : '') + '\n' +
+            '· 직불금: ' + _f(k.ds) + '원 (실수금대상 ' + _f(k.net) + '원)\n\n' +
+            '[수익 현황]\n· 매출: ' + _f(k.rev) + '\n· 원가: ' + _f(k.cost) + ' (원가율 ' + k.costRate.toFixed(1) + '%)\n· 이익: ' + (k.profit>=0?'+':'') + _f(k.profit) + ' (이익률 ' + (k.rev>0?(k.profit/k.rev*100).toFixed(1):'0.0') + '%)\n\n' +
+            '[원가 분배 (9분류)]\n' +
+            C9.map(function(c){ var a=_n(_p.costs&&_p.costs[c[0]]&&_p.costs[c[0]].actual); if(a<=0) return ''; return '· '+c[1]+': '+_f(a)+' ('+(k.cost>0?(a/k.cost*100).toFixed(1):'0.0')+'%)\n'; }).join('') + '\n' +
+            '[기성 신청 현황]\n' +
+            ((_p.billingItems||[]).map(function(b,i){ return '· '+(i+1)+'회차: '+_f(_n(b.applySupply))+' + VAT '+_f(_n(b.applyTax))+' = '+_f(_n(b.applyTotal))+(b.receiveDate?' (수금 '+b.receiveDate+')':' (미수금)')+'\n'; }).join('') || '· 기성 신청 내역 없음\n') +
+            '· 누적 신청(공급): ' + _f(k.billSupply) + ' / 미청구: ' + _f(Math.max(0,k.net-k.billSupply)) + ' / 신청률 ' + (k.net>0?(k.billSupply/k.net*100).toFixed(1):'0.0') + '%\n\n';
+        }
+      } else if (type === 'monthly' || type === 'annual') {
+        var T = { rev:0, cost:0, profit:0, recv:0, applied:0, cnt:0 };
+        _ps.forEach(function(p){ var k=_kpi(p); T.rev+=k.rev; T.cost+=k.cost; T.profit+=k.profit; T.recv+=k.billRecv; T.applied+=k.billTotal; T.cnt++; });
+        body = '[' + (type==='annual' ? '연간' : '월간') + ' 종합 — 전 현장 ' + T.cnt + '건 합산]\n' +
+          '· 매출(계약+기타수익): ' + _f(T.rev) + '\n· 원가: ' + _f(T.cost) + ' (원가율 ' + (T.rev>0?(T.cost/T.rev*100).toFixed(1):'0.0') + '%)\n' +
+          '· 이익: ' + (T.profit>=0?'+':'') + _f(T.profit) + '\n' +
+          '· 기성 신청(VAT포함): ' + _f(T.applied) + ' / 수금: ' + _f(T.recv) + ' / 미수금: ' + _f(Math.max(0,T.applied-T.recv)) + '\n\n';
       } else if (type === 'insurance_edi') {
         var _ed = (pjId && typeof pjId === 'object') ? pjId : null;
         if (_ed) {
@@ -14352,31 +14369,32 @@ CREATE TABLE system_map_activity (
         var text = (btn.textContent || '').trim();
         if (!text) return;
 
+        // [전수조사 H4] 거짓 '완료/시작' 토스트 정직화 — 실제 처리 없는 버튼은 '준비 중'으로 명시 (H10/H11 선례와 동일)
         // 페이지네이션 숫자 버튼
         if (/^\d+$/.test(text) || text === '◀ 이전' || text === '다음 ▶' || text === '...') {
-          btn.onclick = function() { globalToast('📄 페이지 ' + text + ' 이동', 'info'); };
+          btn.onclick = function() { globalToast('🚧 페이지 이동은 준비 중입니다', 'warning'); };
           return;
         }
 
         // 다운로드 류
         if (text.includes('엑셀') && (text.includes('내보') || text.match(/^.*엑셀$/))) {
-          btn.onclick = function() { globalToast('📊 <strong>엑셀</strong> 다운로드 시작', 'success'); };
+          btn.onclick = function() { globalToast('🚧 이 화면의 엑셀 내보내기는 준비 중 — 실제 파일이 생성되지 않습니다', 'warning'); };
           return;
         }
         if (text === '📊 엑셀' || text.match(/엑셀$/)) {
-          btn.onclick = function() { globalToast('📊 엑셀 다운로드 시작', 'success'); };
+          btn.onclick = function() { globalToast('🚧 이 화면의 엑셀 내보내기는 준비 중 — 실제 파일이 생성되지 않습니다', 'warning'); };
           return;
         }
         if (text.includes('양식') && !text.includes('EDI')) {
-          btn.onclick = function() { globalToast('📋 양식 다운로드 시작', 'success'); };
+          btn.onclick = function() { globalToast('🚧 양식 다운로드는 준비 중입니다', 'warning'); };
           return;
         }
         if (text.includes('EDI')) {
-          btn.onclick = function() { globalToast('📤 <strong>EDI 신고 양식</strong> 4개 파일 일괄 생성', 'success'); };
+          btn.onclick = function() { globalToast('🚧 EDI 신고 양식 일괄 생성은 준비 중 — 4대보험 화면의 EDI 신고 자동화를 이용하세요', 'warning'); };
           return;
         }
         if (text.includes('보고서') && !text.includes('분석')) {
-          btn.onclick = function() { globalToast('📊 보고서 PDF 생성 중...', 'info'); };
+          btn.onclick = function() { if (window.generateReport) window.generateReport('project_detail', 'pdf', sessionStorage.getItem('mm-selected-pid') || undefined); else globalToast('🚧 보고서 생성은 프로젝트 상세 화면에서 이용하세요', 'warning'); };
           return;
         }
         if (text.includes('분석 리포트')) {
@@ -14384,11 +14402,11 @@ CREATE TABLE system_map_activity (
           return;
         }
         if (text.includes('재계산') || text.includes('집계 재계산')) {
-          btn.onclick = function() { globalToast('🔄 재계산 완료', 'success'); };
+          btn.onclick = function() { try { if (window.renderInsurancePage) renderInsurancePage(); if (window.pjDashboard && pjDashboard.render) pjDashboard.render(); if (window.ovProjectList && ovProjectList.render) ovProjectList.render(); globalToast('🔄 화면 재집계 완료 (저장 데이터 기준)', 'success'); } catch(e) { globalToast('재계산 실패: ' + e.message, 'error'); } };
           return;
         }
         if (text.includes('미리보기')) {
-          btn.onclick = function() { globalToast('🔍 미리보기 패널 표시', 'info'); };
+          btn.onclick = function() { globalToast('🚧 미리보기는 준비 중입니다', 'warning'); };
           return;
         }
 
@@ -14444,7 +14462,7 @@ CREATE TABLE system_map_activity (
           return;
         }
         if (text === '🛡️ 신고') {
-          btn.onclick = function() { globalToast('📤 4대보험 신고 자동화 시작', 'success'); };
+          btn.onclick = function() { globalToast('🚧 신고 자동 전송은 준비 중 — EDI 신고 자동화(자료 생성)를 이용하세요', 'warning'); };
           return;
         }
 
@@ -14469,7 +14487,7 @@ CREATE TABLE system_map_activity (
         // 경보 관련 단순 액션
         if (text === '독촉') { btn.onclick = function() { openModal('global-dunning'); }; return; }
         if (text === '대기' || text === '예약' || text === '검수중') {
-          btn.onclick = function() { globalToast('📅 ' + text + ' 상태로 변경됨', 'info'); };
+          btn.onclick = function() { globalToast('🚧 상태 변경 저장은 준비 중입니다', 'warning'); };
           return;
         }
         if (text === '신청') {
@@ -14600,7 +14618,7 @@ CREATE TABLE system_map_activity (
 <!-- 통합 데모 배너 -->
 <div class="merged-banner" onclick="window.scrollTo({top:0,behavior:'smooth'})">
   <span class="merged-banner-dot"></span>
-  <span>v23 통합 데모 · 사이드바로 화면 전환 · 모든 액션 작동</span>
+  <span>㈜명문이엔지 통합 관리 v23 · 사이드바로 화면 전환</span>
 </div>
 
 <script>
