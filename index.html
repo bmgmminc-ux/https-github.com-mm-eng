@@ -10061,8 +10061,7 @@ table.data-table {
           <div class="table-scroll">
 <table class="data-table">
             <colgroup>
-              <col style="width:17%">  <!-- 업체명 -->
-              <col style="width:7%">   <!-- 등급 -->
+              <col style="width:24%">  <!-- 업체명 --><!-- [등급 제거 — 대표 기준: 분류는 매입 건별로만 기록] -->
               <col style="width:12%">  <!-- 사업자번호 -->
               <col style="width:8%">   <!-- 대표자 -->
               <col style="width:9%">   <!-- 업종 -->
@@ -10074,7 +10073,6 @@ table.data-table {
             </colgroup>
             <thead><tr>
               <th>업체명</th>
-              <th class="center">등급</th>
               <th>사업자번호</th>
               <th>대표자</th>
               <th>업종</th>
@@ -10086,7 +10084,7 @@ table.data-table {
             </tr></thead>
             <tbody id="vendors-tbody">
               <tr>
-                <td colspan="10" style="text-align:center;padding:48px 20px;color:#94a3b8;font-weight:600">
+                <td colspan="9" style="text-align:center;padding:48px 20px;color:#94a3b8;font-weight:600">
                   <div style="font-size:32px;margin-bottom:8px">🏢</div>
                   <div style="font-size:14px;font-weight:800;color:#475569;margin-bottom:4px">등록된 거래처가 없습니다</div>
                   <div style="font-size:12px">우측 ⚡ 신규 거래처 빠른 등록에서 시작하세요</div>
@@ -10121,17 +10119,7 @@ table.data-table {
               <label class="form-label">📱 전화번호</label>
               <input type="text" class="form-input" id="vd-phone" placeholder="010-0000-0000"/>
 
-              <label class="form-label">🔧 기본 매입 분류</label>
-              <select class="form-input" id="vd-category">
-                <option>외주비</option>
-                <option>자재비</option>
-                <option>상품비</option>
-                <option>간접비</option>
-                <option>비증빙경비</option>
-                <option>인건비</option>
-                <option>안전관리비</option>
-              </select>
-            </div>
+            </div><!-- [등급 제거] 업체 고정 분류 필드 폐기 — 분류는 매입 건별(it.type)로만 기록 -->
 
             <button class="btn btn-primary" style="width:100%" onclick="window.mmVendors && window.mmVendors.add()">
               <svg class="icon icon-sm"><use href="#i-check"/></svg>
@@ -12403,17 +12391,7 @@ CREATE TABLE system_map_activity (
           <label class="form-label">👤 대표자</label>
           <input type="text" class="form-input" placeholder="대표자명"/>
 
-          <label class="form-label">🔧 기본 매입 분류</label>
-          <select class="form-input">
-            <option>외주비 (시공·하도급)</option>
-            <option>자재비 (배관·밸브·자재)</option>
-            <option>상품비 (FCU·AHU·완제품)</option>
-            <option>간접비 (보험·임대)</option>
-            <option>비증빙경비</option>
-            <option>인건비 (일용직)</option>
-            <option>안전관리비</option>
-          </select>
-        </div>
+        </div><!-- [등급 제거] 업체 고정 분류 필드 폐기 -->
       </div>
       <div class="modal-footer">
         <button class="btn btn-ghost" onclick="closeModal('global-vendor-add')">취소</button>
@@ -13621,12 +13599,13 @@ CREATE TABLE system_map_activity (
           if (window.globalToast) globalToast('⚠ 파일에 데이터 행이 없음', 'warning');
           return;
         }
+        // [등급 제거] 신양식: 업체명,사업자번호,대표자,연락처,이메일,주소. 구양식(거래분류 열 포함)은 헤더로 감지해 호환
+        var _oldFmt = lines[0].indexOf('거래분류') >= 0;
         var rows = lines.slice(1).map(function(l) {
           var cols = l.split(',');
-          return {
-            name: cols[0], bizNo: cols[1], ceo: cols[2], category: cols[3],
-            phone: cols[4], email: cols[5], address: cols[6]
-          };
+          return _oldFmt
+            ? { name: cols[0], bizNo: cols[1], ceo: cols[2], phone: cols[4], email: cols[5], address: cols[6] }
+            : { name: cols[0], bizNo: cols[1], ceo: cols[2], phone: cols[3], email: cols[4], address: cols[5] };
         });
 
         // [선등록 정책 — 대표 기준] 사업자등록번호(10자리) 필수 + 3키 병합 기준 이름·번호 중복 차단
@@ -13671,9 +13650,9 @@ CREATE TABLE system_map_activity (
 
     window.downloadVendorTemplate = function() {
       var csv = '\uFEFF' + [
-        ['업체명', '사업자등록번호', '대표자', '거래분류', '연락처', '이메일', '주소'].join(','),
-        ['(주)○○', '123-45-67890', '김대성', '외주비 (시공·하도급)', '053-***-****', 'daesung@example.kr', '대구광역시 서구'].join(','),
-        ['한국강관(주)', '234-56-78901', '박철강', '자재비 (배관·밸브·자재)', '02-***-****', 'kspipe@example.kr', '경기도 안산시'].join(',')
+        ['업체명', '사업자등록번호', '대표자', '연락처', '이메일', '주소'].join(','),
+        ['(주)○○', '123-45-67890', '김대성', '053-***-****', 'daesung@example.kr', '대구광역시 서구'].join(','),
+        ['한국강관(주)', '234-56-78901', '박철강', '02-***-****', 'kspipe@example.kr', '경기도 안산시'].join(',')
       ].join('\n');
       var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
       var url = URL.createObjectURL(blob);
@@ -17005,7 +16984,6 @@ CREATE TABLE system_map_activity (
       bizNo: _bizRaw,
       ceo: (document.getElementById('vd-ceo')||{}).value || '',
       phone: (document.getElementById('vd-phone')||{}).value || '',
-      category: (document.getElementById('vd-category')||{}).value || '외주비',
       createdAt: new Date().toISOString()
     });
     save(arr);
@@ -17057,7 +17035,7 @@ CREATE TABLE system_map_activity (
     } catch(e){}
     var esc = function(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };  // [H9]
     if (!arr.length){
-      tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:48px 20px;color:#94a3b8;font-weight:600">' +
+      tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:48px 20px;color:#94a3b8;font-weight:600">' +
         '<div style="font-size:32px;margin-bottom:8px">🏢</div>' +
         '<div style="font-size:14px;font-weight:800;color:#475569;margin-bottom:4px">등록된 거래처가 없습니다</div>' +
         '<div style="font-size:12px">우측 ⚡ 신규 거래처 빠른 등록에서 시작하세요</div></td></tr>';
@@ -17067,7 +17045,6 @@ CREATE TABLE system_map_activity (
       var s = vendorStats(v.name);
       return '<tr>' +
         '<td><strong>' + esc(v.name) + '</strong></td>' +
-        '<td class="center"><span class="badge" style="background:#E0E7FF;color:#3730A3;font-size:10px">' + esc(v.category||'—') + '</span></td>' +
         '<td class="tnum">' + esc(v.bizNo||'—') + '</td>' +
         '<td>' + esc(v.ceo||'—') + '</td>' +
         '<td style="font-size:12px">' + esc(v.phone||'—') + '</td>' +
@@ -18558,8 +18535,7 @@ CREATE TABLE system_map_activity (
     var name = getVal(f, 0);
     if (!name) { alert('업체명을 입력하세요'); return; }
     var biz = getVal(f, 1), ceo = getVal(f, 2);
-    var cat = (getVal(f, 3) || '외주비').split(' ')[0];
-    // [선등록 정책 — 대표 기준] 사업자등록번호 필수(10자리) + 이름·번호 중복 차단(3키 병합 기준)
+    // [선등록 정책 — 대표 기준] 사업자등록번호 필수(10자리) + 이름·번호 중복 차단(3키 병합 기준). [등급 제거] 기본 분류 폐기 — 분류는 매입 건별 기록
     var _bizDigits = String(biz||'').replace(/[^0-9]/g,'');
     if (_bizDigits.length !== 10) { alert('사업자등록번호(10자리)는 필수입니다.\n예: 000-00-00000\n\n[선등록 정책] 사업자등록증이 확인된 업체만 등록할 수 있습니다.'); return; }
     var _norm = function(s){ return String(s||'').replace(/\s+/g,'').replace(/[()（）]/g,'').toLowerCase(); };
@@ -18571,7 +18547,7 @@ CREATE TABLE system_map_activity (
       if (_dupBiz) { alert('이미 등록된 사업자등록번호입니다 — ' + _dupBiz.name + '\n같은 업체는 한 번만 등록하세요.'); return; }
       var arr = JSON.parse(localStorage.getItem('mm-vendors') || '[]');
       if (!Array.isArray(arr)) arr = [];
-      arr.unshift({ id:'V'+Date.now(), name:name, bizNo:biz, ceo:ceo, category:cat, createdAt:new Date().toISOString() });
+      arr.unshift({ id:'V'+Date.now(), name:name, bizNo:biz, ceo:ceo, createdAt:new Date().toISOString() });
       localStorage.setItem('mm-vendors', JSON.stringify(arr));
       if (window.mmVendors && window.mmVendors.render) window.mmVendors.render();
       toast('🏢 거래처 등록 완료 — ' + name, 'success');
@@ -18915,8 +18891,8 @@ CREATE TABLE system_map_activity (
   window.exportVendorsCsv = function() {
     var arr = []; try { arr = JSON.parse(localStorage.getItem('mm-vendors')||'[]'); } catch(e) {}
     if (!Array.isArray(arr)) arr = [];
-    var rows = [['업체명','사업자등록번호','대표자','기본분류','전화','등록일']];
-    arr.forEach(function(v){ rows.push([v.name||'', v.bizNo||v.businessNo||'', v.ceo||'', v.category||'', v.phone||'', (v.createdAt||'').slice(0,10)]); });
+    var rows = [['업체명','사업자등록번호','대표자','전화','등록일']];  // [등급 제거]
+    arr.forEach(function(v){ rows.push([v.name||'', v.bizNo||v.businessNo||'', v.ceo||'', v.phone||'', (v.createdAt||'').slice(0,10)]); });
     downloadCsv('거래처마스터-' + new Date().toISOString().slice(0,10) + '.csv', rows);
   };
   window.exportWorkersCsv = function() {
