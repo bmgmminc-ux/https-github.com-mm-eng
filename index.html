@@ -14800,7 +14800,11 @@ CREATE TABLE system_map_activity (
       (state.items || []).forEach(function(it){
         var _vn = (it.vendor || '').trim();
         // [직불 예외 — 대표 기준] 직불금·인건비직불금은 발주처 직접 지급(자사 회계기장 외) → 업체명 자유 입력, 선등록 면제
-        if (_vn && it.type !== 'direct' && it.type !== 'labordirect') {
+        if (_vn && it.type === 'labor') {
+          // [인건비 라우팅 — 대표 기준] 인건비 행의 이름은 자사 인력(사람) — 거래처가 아니라 일용직 마스터로 검증
+          var _nl = normVendor(_vn);
+          if (_nl && !_sw[_nl] && !_workers.some(function(w){ return normVendor((w && w.name) || '') === _nl; })) { _sw[_nl] = 1; _missW.push(_vn); }
+        } else if (_vn && it.type !== 'direct' && it.type !== 'labordirect') {
           var _nv = normVendor(_vn);
           if (_nv && !_sv[_nv]) {
             _sv[_nv] = 1;
@@ -14837,12 +14841,18 @@ CREATE TABLE system_map_activity (
     try {
       var _pv = [];
       ['mm-vendors','mm-vendors-v2','mm-vendors-v23'].forEach(function(k){ try { var a = JSON.parse(localStorage.getItem(k)||'[]'); if (Array.isArray(a)) a.forEach(function(v){ _pv.push(v); }); } catch(e){} });
+      var _pw = []; try { var _pwr = JSON.parse(localStorage.getItem('mm-workers')||'[]'); if (Array.isArray(_pwr)) _pw = _pwr; } catch(e){}
       var _pbiz = function(v){ return String((v && (v.bizNo || v.businessNo || v.bizno || v.biz_no)) || '').replace(/[^0-9]/g,''); };
       var _bad = [], _seen = {};
       (state.items || []).forEach(function(it){
         var vn = (it.vendor || '').trim(); if (!vn) return;
         if (it.type === 'direct' || it.type === 'labordirect') return;  // [직불 예외 — 대표 기준] 자유 입력
         var n = normVendor(vn); if (!n || _seen[n]) return; _seen[n] = 1;
+        if (it.type === 'labor') {
+          // [인건비 라우팅 — 대표 기준] 인건비 행 이름은 사람 — 일용직 마스터로 검증
+          if (!_pw.some(function(w){ return normVendor((w && w.name) || '') === n; })) _bad.push(vn + ' (일용직 미등록)');
+          return;
+        }
         var m = _pv.filter(function(v){ return normVendor(typeof v === 'string' ? v : (v && v.name)) === n; });
         if (!m.length || !m.some(function(v){ return _pbiz(v).length >= 10; })) _bad.push(vn);
       });
@@ -14932,6 +14942,17 @@ CREATE TABLE system_map_activity (
   function removeRow(idx) {
     if (!confirm('이 항목을 삭제하시겠습니까?')) return;
     var _removed = state.items.splice(idx, 1)[0];
+    // [전수감사 보강] 저장된 적 없는 행은 영속 불필요 — 메모리에서만 제거.
+    // (미저장 위반 행이 2개 이상일 때 하나를 지워도 남은 행 차단→롤백으로 삭제 자체가 불가능해지던 교착 해소)
+    var _isStored = true;
+    try {
+      var _sp2 = (JSON.parse(localStorage.getItem('mm-dash-v4')||'[]')||[]).find(function(x){ return x.id === state.project.id; });
+      var _st2 = (_sp2 && _sp2.costItems) || [];
+      var _k2 = function(it){ return [it.vendor, it.desc, it.type, it.supplyAmt, it.total].join(''); };
+      var _rk = _k2(_removed || {});
+      _isStored = _st2.some(function(it){ return _k2(it) === _rk; });
+    } catch(e) { _isStored = true; }
+    if (!_isStored) { render(); return; }
     // [H12 계열] 삭제 즉시 자동저장. [백스톱] 정책 차단 시 행 롤백 — 모달·저장소 어긋남 방지
     if (!persistItemsNow()) { if (_removed !== undefined) state.items.splice(idx, 0, _removed); render(); return; }
     if (window.globalToast) globalToast('🗑 항목 삭제 저장됨', 'success');
@@ -15014,11 +15035,17 @@ CREATE TABLE system_map_activity (
     ['mm-vendors','mm-vendors-v2','mm-vendors-v23'].forEach(function(k){ try { var a = JSON.parse(localStorage.getItem(k)||'[]'); if (Array.isArray(a)) a.forEach(function(v){ _allV.push(v); }); } catch(e){} });
     var _bizOf2 = function(v){ return String((v && (v.bizNo || v.businessNo || v.bizno || v.biz_no)) || '').replace(/[^0-9]/g,''); };
     var _warnV = [];
+    var _allW = []; try { var _awr = JSON.parse(localStorage.getItem('mm-workers')||'[]'); if (Array.isArray(_awr)) _allW = _awr; } catch(e){}
     newItems.forEach(function(it){
       if (!it.vendor) return;
       if (it.type === 'direct' || it.type === 'labordirect') return;  // [직불 예외 — 대표 기준] 자유 입력
       var n = normVendor(it.vendor);
       if (!n || _warnV.some(function(w){ return normVendor(w) === n; })) return;
+      if (it.type === 'labor') {
+        // [인건비 라우팅 — 대표 기준] 인건비 행 이름은 사람 — 일용직 마스터로 검증
+        if (!_allW.some(function(w){ return normVendor((w && w.name) || '') === n; })) _warnV.push(it.vendor.trim() + ' (일용직 미등록)');
+        return;
+      }
       var _m = _allV.filter(function(v){ return normVendor(typeof v==='string'?v:(v&&v.name)) === n; });
       if (!_m.length || !_m.some(function(v){ return _bizOf2(v).length >= 10; })) _warnV.push(it.vendor.trim());
     });
@@ -16964,23 +16991,27 @@ CREATE TABLE system_map_activity (
     catch(e){ return [] }
   }
   function load(){
-    var merged = [], seen = {};
+    // [번호증발 수정] first-wins → 필드 병합 — 클라우드 pull이 만든 번호 없는 그림자(v2)가
+    // 번호 있는 원본(v23)을 가려 '사업자번호가 삭제된 것처럼' 보이던 결함. 키마다 비어있지 않은 필드를 채움.
+    var merged = [], byKey = {};
     ['mm-vendors','mm-vendors-v2','mm-vendors-v23'].forEach(function(k){
       readKey(k).forEach(function(v){
         var nm = (v.name||'').trim();
-        if (!nm || seen[nm]) return;
-        seen[nm] = 1;
-        merged.push({
-          id: v.id || ('V'+Math.random().toString(36).slice(2,10)),
-          name: nm,
-          bizNo: v.bizNo || v.businessNo || v.bizno || v.biz_no || '',
-          ceo: v.ceo || v.representative || v.rep || '',
-          phone: v.phone || v.tel || '',
-          category: v.category || v.type || '외주비',
-          createdAt: v.createdAt || ''
-        });
+        if (!nm) return;
+        var n = vNorm(nm);
+        var o = byKey[n];
+        if (!o) {
+          o = byKey[n] = { id: v.id || ('V'+Math.random().toString(36).slice(2,10)), name: nm, bizNo:'', ceo:'', phone:'', category:'', createdAt:'' };
+          merged.push(o);
+        }
+        if (!o.bizNo) o.bizNo = String(v.bizNo || v.businessNo || v.bizno || v.biz_no || '');
+        if (!o.ceo) o.ceo = v.ceo || v.representative || v.rep || '';
+        if (!o.phone) o.phone = v.phone || v.tel || '';
+        if (!o.category) o.category = v.category || v.type || '';
+        if (!o.createdAt) o.createdAt = v.createdAt || '';
       });
     });
+    merged.forEach(function(o){ if (!o.category) o.category = '외주비'; });
     return merged;
   }
   function save(a){
@@ -18234,7 +18265,7 @@ CREATE TABLE system_map_activity (
   function _attendHash(){ return localStorage.getItem('mm-attendance')||''; }
   var lastMastersHash = _mastersHash(), lastSettingsHash = _settingsHash(), lastAttendHash = _attendHash();
   var mPushTimer = null, sPushTimer = null, aPushTimer = null;
-  function debouncedMasters(){ if (mPushTimer) clearTimeout(mPushTimer); mPushTimer = setTimeout(function(){ pushMasters().then(function(r){ if (r && !r.ok && r.msg && r.msg.indexOf('no-cloud')<0 && r.msg.indexOf('로그인')<0 && window.globalToast) window.globalToast('⚠️ 마스터 동기화: '+r.msg, 'error', 5000); }); }, 2500); }
+  function debouncedMasters(){ try{ localStorage.setItem('mm-masters-dirty','1'); }catch(e){} if (mPushTimer) clearTimeout(mPushTimer); mPushTimer = setTimeout(function(){ pushMasters().then(function(r){ if (r && !r.ok && r.msg && r.msg.indexOf('no-cloud')<0 && r.msg.indexOf('로그인')<0 && window.globalToast) window.globalToast('⚠️ 마스터 동기화: '+r.msg, 'error', 5000); }); }, 2500); }  // [번호증발 수정] dirty 플래그 — 디바운스 발사 전 새로고침해도 다음 부팅이 push를 선행하도록 표시
   function debouncedSettings(){ if (sPushTimer) clearTimeout(sPushTimer); sPushTimer = setTimeout(function(){ pushSettings(); }, 2500); }
   function debouncedAttend(){ if (aPushTimer) clearTimeout(aPushTimer); aPushTimer = setTimeout(function(){ pushAttendance(); }, 2500); }
   setInterval(function() {
@@ -18256,6 +18287,7 @@ CREATE TABLE system_map_activity (
   async function syncOnLogin() {
     if (!sbReady()) return;
     var r = await pull();
+    try { if (localStorage.getItem('mm-masters-dirty')==='1') await pushMasters(); } catch(e){}   // [번호증발 수정] 미전송 마스터 변경 선push — 디바운스 중 새로고침/개명 레이스로 클라우드가 로컬을 역덮어쓰던 결함 봉쇄
     try { await pullMasters(); } catch(e){}   // [감사 2단계] 거래처·일용직도 로그인 시 클라우드에서 복원
     try { if (window.mmSyncPullPhase1) await window.mmSyncPullPhase1(); } catch(e){}   // [감사 4단계] 4대보험·정산·경보수신자 클라우드 복원
     try { await pullSettings(); } catch(e){}   // [감사 4단계] 회사정보·요율·임계값 복원
@@ -18310,7 +18342,8 @@ CREATE TABLE system_map_activity (
   function _mIdMapSave(m){ try{ localStorage.setItem('mm-cloud-id-map', JSON.stringify(m)); }catch(e){} }
   function _mCloudId(kind,name){ var m=_mIdMap(); var k=kind+':'+_mNorm(name); if(!m[k]){ m[k]=_uuid(); _mIdMapSave(m); } return m[k]; }
   function _mLoad(key){ try{ var a=JSON.parse(localStorage.getItem(key)||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
-  function _mVendors(){ var out={}; ['mm-vendors','mm-vendors-v2','mm-vendors-v23'].forEach(function(key){ _mLoad(key).forEach(function(v){ var nm=((typeof v==='string')?v:(v&&v.name))||''; nm=String(nm).trim(); if(nm){ var n=_mNorm(nm); if(!out[n]) out[n]={ name:nm, phone:(v&&v.phone)||null, category:(v&&v.category)||null, memo:(v&&v.memo)||null }; } }); }); return Object.keys(out).map(function(k){ return out[k]; }); }
+  // [번호증발 수정] first-wins 화이트리스트가 사업자번호를 클라우드에 한 번도 올리지 않던 결함 — 3키 필드 병합 + bizNo/ceo/email/addr 포함
+  function _mVendors(){ var out={}; ['mm-vendors','mm-vendors-v2','mm-vendors-v23'].forEach(function(key){ _mLoad(key).forEach(function(v){ var nm=((typeof v==='string')?v:(v&&v.name))||''; nm=String(nm).trim(); if(!nm) return; var n=_mNorm(nm); var o=out[n]||(out[n]={ name:nm }); if(typeof v!=='object'||!v) return; ['phone','category','memo','ceo','email'].forEach(function(f){ if(!o[f]&&v[f]) o[f]=v[f]; }); if(!o.bizNo){ var b=String(v.bizNo||v.businessNo||v.bizno||v.biz_no||'').replace(/[^0-9]/g,''); if(b.length>=10) o.bizNo=b; } if(!o.addr&&(v.addr||v.address)) o.addr=v.addr||v.address; }); }); return Object.keys(out).map(function(k){ var o=out[k]; ['phone','category','memo','ceo','email','bizNo','addr'].forEach(function(f){ if(o[f]===undefined) o[f]=null; }); return o; }); }
 
   async function pushMasters(){
     var sb=sbClient(); if(!sb) return { ok:false, msg:'no-cloud' };
@@ -18318,12 +18351,20 @@ CREATE TABLE system_map_activity (
       var sess=await sb.auth.getSession();
       var ownerId=sess.data.session && sess.data.session.user && sess.data.session.user.id;
       if(!ownerId) return { ok:false, msg:'로그인 필요' };
-      var vP=_mVendors().map(function(v){ return { id:_mCloudId('v',v.name), owner_id:ownerId, name:v.name, phone:v.phone, category:v.category, memo:v.memo }; });
-      if(vP.length){ var rv=await sb.from('vendors').upsert(vP,{ onConflict:'id' }); if(rv.error) return { ok:false, msg:'거래처: '+rv.error.message }; }
+      var vP=_mVendors().map(function(v){ return { id:_mCloudId('v',v.name), owner_id:ownerId, name:v.name, business_no:v.bizNo, phone:v.phone, category:v.category, memo:v.memo, email:v.email, address:v.addr, ceo:v.ceo }; });
+      if(vP.length){ var rv=await sb.from('vendors').upsert(vP,{ onConflict:'id' }); if(rv.error&&/ceo/i.test(rv.error.message||'')){ vP.forEach(function(x){ delete x.ceo; }); rv=await sb.from('vendors').upsert(vP,{ onConflict:'id' }); } if(rv.error) return { ok:false, msg:'거래처: '+rv.error.message }; }
       var wP=_mLoad('mm-workers').filter(function(w){ return w && w.name; }).map(function(w){ return { id:_mCloudId('w',w.name), owner_id:ownerId, name:w.name, jumin_masked:w.rrn||null, phone:w.phone||null, primary_job:w.primaryJob||null, primary_wage:Math.round(w.primaryWage||0), alt_jobs:Array.isArray(w.altJobs)?w.altJobs:[] }; });
       if(wP.length){ var rw=await sb.from('workers').upsert(wP,{ onConflict:'id' }); if(rw.error) return { ok:false, msg:'일용직: '+rw.error.message }; }
       // [전수조사 H1] 툼스톤 잔존분 클라우드 삭제 재시도 — 삭제 당시 실패(오프라인 등)했어도 autoSync push마다 재시도
-      try{ var _tb=_mTombs(); for(var _i=0;_i<_tb.length;_i++){ var _t=_tb[_i]; await sb.from(_t.k==='v'?'vendors':'workers').delete().eq('id', _mCloudId(_t.k,_t.n)); } }catch(e){}
+      // [재등록 보호 — 전수감사] 로컬에 다시 존재하는 이름은 툼스톤 해제: 삭제·개명 후 10분 내 재등록한 행을 push가 클라우드에서 반복 삭제하던 결함
+      try{
+        var _tb=_mTombs();
+        var _cur={}; _mVendors().forEach(function(v){ _cur['v:'+_mNorm(v.name)]=1; }); _mLoad('mm-workers').forEach(function(w){ if(w&&w.name) _cur['w:'+_mNorm(w.name)]=1; });
+        var _keep=[];
+        for(var _i=0;_i<_tb.length;_i++){ var _t=_tb[_i]; if(_cur[_t.k+':'+_t.n]) continue; _keep.push(_t); await sb.from(_t.k==='v'?'vendors':'workers').delete().eq('id', _mCloudId(_t.k,_t.n)); }
+        try{ localStorage.setItem('mm-master-tomb', JSON.stringify(_keep)); }catch(e){}
+      }catch(e){}
+      try{ localStorage.removeItem('mm-masters-dirty'); }catch(e){}  // [번호증발 수정] push 성공 → dirty 해제
       return { ok:true, msg:'거래처 '+vP.length+' · 일용직 '+wP.length };
     }catch(e){ return { ok:false, msg:'마스터 push: '+(e.message||e) }; }
   }
@@ -18337,8 +18378,10 @@ CREATE TABLE system_map_activity (
       var rv=await sb.from('vendors').select('*'); if(rv.error) throw rv.error;
       var rw=await sb.from('workers').select('*'); if(rw.error) throw rw.error;
       var map=_mIdMap();
-      var lv={}; _mLoad('mm-vendors-v2').forEach(function(v){ var nm=((typeof v==='string')?v:(v&&v.name))||''; if(nm&&!_mTombHas('v',nm)) lv[_mNorm(nm)]=(typeof v==='string')?{ id:'V-'+_uuid().slice(0,8), name:nm }:v; });
-      (rv.data||[]).forEach(function(r){ if(r.name&&!_mTombHas('v',r.name)){ var n=_mNorm(r.name); map['v:'+n]=r.id; var ex=lv[n]||{}; lv[n]=Object.assign({}, ex, { id:ex.id||('V-'+String(r.id).slice(0,8)), name:r.name, phone:r.phone||ex.phone, category:r.category||ex.category, memo:r.memo||ex.memo }); } });
+      // [번호증발 수정] 기준을 v2 한 키 → 3키 필드 병합으로 확장. 로컬에만 있는 필드(bizNo·ceo 등)는 무조건 보존,
+      // 클라우드는 빈 필드만 채움 — 번호 없는 클라우드 행이 로컬 번호를 가리는 그림자를 만들던 결함 차단.
+      var lv={}; ['mm-vendors','mm-vendors-v2','mm-vendors-v23'].forEach(function(key){ _mLoad(key).forEach(function(v){ var nm=((typeof v==='string')?v:(v&&v.name))||''; nm=String(nm).trim(); if(!nm||_mTombHas('v',nm)) return; var n=_mNorm(nm); var ex=lv[n]; if(!ex){ lv[n]=(typeof v==='string')?{ id:'V-'+_uuid().slice(0,8), name:nm }:Object.assign({},v); } else if(typeof v==='object'&&v){ Object.keys(v).forEach(function(f){ if((ex[f]===undefined||ex[f]===null||ex[f]==='')&&v[f]!==undefined&&v[f]!==null&&v[f]!=='') ex[f]=v[f]; }); } }); });
+      (rv.data||[]).forEach(function(r){ if(r.name&&!_mTombHas('v',r.name)){ var n=_mNorm(r.name); map['v:'+n]=r.id; var ex=lv[n]||{}; lv[n]=Object.assign({}, ex, { id:ex.id||('V-'+String(r.id).slice(0,8)), name:ex.name||r.name, bizNo:ex.bizNo||String(r.business_no||'').replace(/[^0-9]/g,''), ceo:ex.ceo||r.ceo||'', email:ex.email||r.email||'', addr:ex.addr||r.address||'', phone:r.phone||ex.phone, category:r.category||ex.category, memo:r.memo||ex.memo }); } });
       localStorage.setItem('mm-vendors-v2', JSON.stringify(Object.keys(lv).map(function(k){ return lv[k]; })));
       var lw={}; _mLoad('mm-workers').forEach(function(w){ if(w&&w.name&&!_mTombHas('w',w.name)) lw[_mNorm(w.name)]=w; });
       (rw.data||[]).forEach(function(r){ if(r.name&&!_mTombHas('w',r.name)){ var n=_mNorm(r.name); map['w:'+n]=r.id; var ex=lw[n]||{}; lw[n]=Object.assign({}, ex, { id:ex.id||('WK'+String(r.id).slice(0,8)), name:r.name, rrn:ex.rrn||r.jumin_masked||'', phone:ex.phone||r.phone||'', primaryJob:ex.primaryJob||r.primary_job||'일반', primaryWage:ex.primaryWage||r.primary_wage||0, altJobs:(Array.isArray(ex.altJobs)&&ex.altJobs.length)?ex.altJobs:(Array.isArray(r.alt_jobs)?r.alt_jobs:[]), daysWorked:ex.daysWorked||0, totalWage:ex.totalWage||0, createdAt:ex.createdAt||r.created_at }); } });
@@ -19086,7 +19129,8 @@ CREATE TABLE system_map_activity (
   window.mmDownloadCsv = downloadCsv;
 
   window.exportVendorsCsv = function() {
-    var arr = []; try { arr = JSON.parse(localStorage.getItem('mm-vendors')||'[]'); } catch(e) {}
+    // [번호증발 수정 — 전수감사] mm-vendors 단일 키만 읽어 v2/v23 업체가 번호째 누락되던 결함 → 3키 병합 뷰 사용
+    var arr = []; try { arr = (window.mmVendors && window.mmVendors.load) ? window.mmVendors.load() : JSON.parse(localStorage.getItem('mm-vendors')||'[]'); } catch(e) {}
     if (!Array.isArray(arr)) arr = [];
     var rows = [['업체명','사업자등록번호','대표자','전화','등록일']];  // [등급 제거]
     arr.forEach(function(v){ rows.push([v.name||'', v.bizNo||v.businessNo||'', v.ceo||'', v.phone||'', (v.createdAt||'').slice(0,10)]); });
