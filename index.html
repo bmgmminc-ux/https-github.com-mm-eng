@@ -5682,6 +5682,8 @@ table.data-table {
           <div class="pjd-profit-amt">이익 <strong id="pjd-profit-amt">—</strong> <small id="pjd-profit-amt-full">—</small></div>
         </div>
         <div class="pjd-profit-side">
+          <div class="chip"><span class="l">기성 신청률</span><span class="v primary" id="pjd-side-bill">—</span></div>
+          <div class="chip"><span class="l">미청구</span><span class="v" id="pjd-side-unbilled">—</span></div>
           <div class="chip"><span class="l">원가율</span><span class="v warn" id="pjd-side-cost">—</span></div>
           <div class="chip"><span class="l">수금률</span><span class="v primary" id="pjd-side-collect">—</span></div>
         </div>
@@ -6003,6 +6005,11 @@ table.data-table {
     setT('pjd-profit-amt-full', '(' + fmtFull(k.profit) + '원)');
     setT('pjd-side-cost', pct(k.costRate));
     setT('pjd-side-collect', pct(k.collectRate));
+    // [메인 직관화 — 대표 요청] 기성 신청률·미청구를 수익 띠에 상시 노출 — 미청구>0이면 적색 경고
+    setT('pjd-side-bill', pct(k.billingRate));
+    var _ub = Math.max(0, k.netContract - k.billingAppliedSupply);
+    var _ubEl = document.getElementById('pjd-side-unbilled');
+    if (_ubEl) { _ubEl.innerHTML = fmt(_ub); _ubEl.style.color = _ub > 0 ? '#DC2626' : '#059669'; }  // fmt()는 단위 span 포함 HTML
     // 4분면 D profit-mega class 갱신
     var dProfRow = document.getElementById('pjd-D-profit-row');
     if (dProfRow) { dProfRow.classList.remove('neg'); if (k.profitRate < 0) dProfRow.classList.add('neg') }
