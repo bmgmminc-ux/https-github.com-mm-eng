@@ -10040,6 +10040,7 @@ table.data-table {
               <div class="table-title">📋 거래처 마스터 (87개)</div>
               <div class="t-xs" id="vd-master-sub">사업자번호·대표자 자동완성 지원</div><!-- [가짜값 제거] mmVendors.render 실집계 -->
               <div class="t-xs" style="margin-top:3px;color:var(--text-tertiary)">🗑 단건 삭제: 행의 [삭제] 클릭 → 업체명 입력 &nbsp;·&nbsp; 일괄 삭제: ☑ 체크 선택 → [선택 삭제] → "삭제" 입력 &nbsp;·&nbsp; 매입이 연결된 업체는 삭제 불가(해당 매입 먼저 삭제)</div><!-- [삭제 안내 — 대표 요청] -->
+              <input type="text" class="form-input" id="vd-search" style="margin-top:8px;max-width:340px;padding:6px 12px;font-size:12px" placeholder="🔍 업체명·사업자번호·대표자 검색" oninput="window.mmVendors && mmVendors.search(this.value)"/><!-- [검색 — 대표 요청] -->
             </div>
             <div class="row gap-2 flex-wrap">
               <button class="btn btn-secondary btn-sm">
@@ -17001,7 +17002,7 @@ CREATE TABLE system_map_activity (
   }
   var sel = {};
   function toggleSel(id){ if (sel[id]) delete sel[id]; else sel[id] = 1; }
-  function toggleAll(checked){ sel = {}; if (checked) load().forEach(function(v){ sel[v.id] = 1; }); render(); }
+  function toggleAll(checked){ sel = {}; if (checked) filtered().forEach(function(v){ sel[v.id] = 1; }); render(); }  // 검색 중엔 보이는 것만 전체선택
   // [일괄 삭제 — 대표 요청] 연계 데이터 있는 업체는 차단 목록으로 안내, 나머지만 삭제
   function removeSelected(){
     var ids = Object.keys(sel);
@@ -17026,6 +17027,74 @@ CREATE TABLE system_map_activity (
     sel = {};
     render();
     if (window.globalToast) globalToast('🗑 거래처 ' + ok.length + '건 삭제됨' + (blocked.length ? ' · 연계 차단 ' + blocked.length + '건' : ''), 'success');
+  }
+
+  // [검색 + 수정 — 대표 요청] 업체명·사업자번호·대표자 검색 + 행 인라인 편집(선등록 정책 준수, 업체명 변경 시 매입 cascade)
+  var query = '', editId = null;
+  function filtered(){
+    var arr = load();
+    var q = String(query||'').trim();
+    if (!q) return arr;
+    var qn = vNorm(q), qd = q.replace(/[^0-9]/g,''), ql = q.toLowerCase();
+    return arr.filter(function(v){
+      return (qn && vNorm(v.name).indexOf(qn) >= 0)
+        || (qd.length >= 3 && String(v.bizNo||'').replace(/[^0-9]/g,'').indexOf(qd) >= 0)
+        || (ql && String(v.ceo||'').toLowerCase().indexOf(ql) >= 0);
+    });
+  }
+  function search(q){ query = q || ''; render(); }
+  function startEditV(id){ editId = id; render(); setTimeout(function(){ var el = document.getElementById('vd-edit-name-' + id); if (el) el.focus(); }, 0); }
+  function cancelEditV(){ editId = null; render(); }
+  function commitEditV(id){
+    var cur = load().find(function(x){ return x.id === id; });
+    if (!cur) { editId = null; render(); return; }
+    var gv = function(p){ var el = document.getElementById('vd-edit-' + p + '-' + id); return el ? el.value.trim() : ''; };
+    var nName = gv('name'), nBiz = gv('biz'), nCeo = gv('ceo'), nPhone = gv('phone');
+    if (!nName) { alert('업체명을 입력하세요'); return; }
+    var nBizD = nBiz.replace(/[^0-9]/g,'');
+    if (nBizD.length !== 10) { alert('사업자등록번호(10자리)는 필수입니다.\n예: 000-00-00000'); return; }
+    // 중복 검사 — 자기 자신 제외 (id·기존 정규화 이름 둘 다 제외)
+    var others = load().filter(function(v){ return v.id !== id && vNorm(v.name) !== vNorm(cur.name); });
+    if (others.some(function(v){ return vNorm(v.name) === vNorm(nName); })) { alert('이미 등록된 거래처명입니다 (표기만 다른 동일 업체 포함)'); return; }
+    var dupB = others.find(function(v){ return String(v.bizNo||'').replace(/[^0-9]/g,'') === nBizD; });
+    if (dupB) { alert('이미 등록된 사업자등록번호입니다 — ' + dupB.name); return; }
+    var oldName = cur.name, renamed = vNorm(oldName) !== vNorm(nName);
+    if (renamed) {
+      var u = vendorUsage(oldName);
+      if (u.count > 0 && !confirm('업체명 변경: "' + oldName + '" → "' + nName + '"\n\n연결된 매입 ' + u.count + '건(' + u.pjCount + '개 현장)의 업체명도 함께 변경됩니다. 계속할까요?')) return;
+      // [cascade] 매입(costItems) 업체명 동기 변경 — 이름 연결이 끊어져 집계가 갈라지는 것 방지
+      try {
+        var ps = JSON.parse(localStorage.getItem('mm-dash-v4')||'[]'); if (!Array.isArray(ps)) ps = [];
+        var touched = false;
+        ps.forEach(function(p){ (p.costItems||[]).forEach(function(it){ if (vNorm(it.vendor) === vNorm(oldName)) { it.vendor = nName; touched = true; } }); });
+        if (touched) {
+          localStorage.setItem('mm-dash-v4', JSON.stringify(ps));
+          try { if (window.mmData && window.mmData.push && window.mmData.mode && window.mmData.mode() === 'supabase') window.mmData.push(); } catch(e){}
+          try { window.dispatchEvent(new StorageEvent('storage', { key:'mm-dash-v4' })); } catch(e){}
+          try { ['pjDashboard','pjPurchase','ovProjectList'].forEach(function(k){ if (window[k] && window[k].render) window[k].render(); }); } catch(e){}
+        }
+      } catch(e){}
+      // 클라우드: 옛 이름 행 삭제(이름 기준 uuid라 잔존 방지) — 새 이름은 autoSync pushMasters가 등록
+      try { if (window.mmData && window.mmData.deleteVendorCloud) window.mmData.deleteVendorCloud(oldName); } catch(e){}
+    }
+    // 3키 전부에서 해당 업체 갱신 (id 또는 옛 정규화 이름 매칭)
+    ['mm-vendors','mm-vendors-v2','mm-vendors-v23'].forEach(function(k){
+      try {
+        var a = JSON.parse(localStorage.getItem(k)||'[]'); if (!Array.isArray(a)) return;
+        var ch = false;
+        a = a.map(function(v){
+          var vid = (v && v.id) || '';
+          var vn = vNorm((typeof v==='string') ? v : (v && v.name));
+          if (vid === id || vn === vNorm(oldName)) { ch = true; var o = (typeof v==='object' && v) ? v : { id: id }; o.name = nName; o.bizNo = nBiz; o.ceo = nCeo; o.phone = nPhone; return o; }
+          return v;
+        });
+        if (ch) localStorage.setItem(k, JSON.stringify(a));
+      } catch(e){}
+    });
+    editId = null;
+    render();
+    if (window.globalToast) globalToast('✏️ 거래처 수정 저장 — ' + nName + (renamed ? ' (매입 업체명 동기 변경)' : ''), 'success');
+    if (window.mmAudit) window.mmAudit.log('거래처', '거래처 수정 — ' + nName);
   }
 
   function add(){
@@ -17109,7 +17178,29 @@ CREATE TABLE system_map_activity (
     Object.keys(sel).forEach(function(id){ if (!arr.some(function(v){ return v.id === id; })) delete sel[id]; });
     var _selAll = document.getElementById('vd-sel-all');
     if (_selAll) _selAll.checked = arr.length > 0 && arr.every(function(v){ return sel[v.id]; });
-    tbody.innerHTML = arr.map(function(v){
+    // [검색 — 대표 요청] 필터 적용
+    var view = filtered();
+    if (!view.length) {
+      tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:36px;color:#94a3b8;font-weight:600">🔍 검색 결과 없음 — "' + esc(query) + '"</td></tr>';
+      return;
+    }
+    tbody.innerHTML = view.map(function(v){
+      if (v.id === editId) {
+        // [수정 — 대표 요청] 인라인 편집 행
+        var inp = function(p, val, w){ return '<input type="text" id="vd-edit-' + p + '-' + v.id + '" value="' + esc(val||'') + '" style="width:' + w + ';padding:5px 8px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px;background:#fff"/>'; };
+        return '<tr style="background:#FFFBEB">' +
+          '<td class="center">✏️</td>' +
+          '<td>' + inp('name', v.name, '95%') + '</td>' +
+          '<td>' + inp('biz', v.bizNo, '95%') + '</td>' +
+          '<td>' + inp('ceo', v.ceo, '90%') + '</td>' +
+          '<td>' + inp('phone', v.phone, '95%') + '</td>' +
+          '<td colspan="4" style="font-size:11px;color:#92400E">사업자번호 10자리 필수 · 업체명 변경 시 연결된 매입의 업체명도 함께 변경</td>' +
+          '<td class="center"><div style="display:flex;gap:4px;justify-content:center">' +
+            '<button class="btn btn-primary btn-sm" onclick="window.mmVendors.commitEdit(\'' + v.id + '\')">저장</button>' +
+            '<button class="btn btn-secondary btn-sm" onclick="window.mmVendors.cancelEdit()">취소</button>' +
+          '</div></td>' +
+          '</tr>';
+      }
       var s = vendorStats(v.name);
       return '<tr>' +
         '<td class="center"><input type="checkbox" ' + (sel[v.id] ? 'checked ' : '') + 'onchange="window.mmVendors.toggleSel(\'' + v.id + '\')"/></td>' +
@@ -17121,12 +17212,15 @@ CREATE TABLE system_map_activity (
         '<td class="right tnum"><strong>' + fmt(s.total) + '</strong></td>' +
         '<td class="right tnum" style="color:' + (s.unpaid>0?'#DC2626':'#94a3b8') + '">' + fmt(s.unpaid) + '</td>' +
         '<td class="center tnum">' + (s.lastDate||'—') + '</td>' +
-        '<td class="center"><button class="btn btn-secondary btn-sm" onclick="window.mmVendors.remove(\'' + v.id + '\')">삭제</button></td>' +
+        '<td class="center"><div style="display:flex;gap:4px;justify-content:center">' +
+          '<button class="btn btn-secondary btn-sm" onclick="window.mmVendors.startEdit(\'' + v.id + '\')">수정</button>' +
+          '<button class="btn btn-secondary btn-sm" style="color:#DC2626" onclick="window.mmVendors.remove(\'' + v.id + '\')">삭제</button>' +
+        '</div></td>' +
         '</tr>';
     }).join('');
   }
 
-  window.mmVendors = { add: add, remove: remove, render: render, load: load, toggleSel: toggleSel, toggleAll: toggleAll, removeSelected: removeSelected };
+  window.mmVendors = { add: add, remove: remove, render: render, load: load, toggleSel: toggleSel, toggleAll: toggleAll, removeSelected: removeSelected, search: search, startEdit: startEditV, cancelEdit: cancelEditV, commitEdit: commitEditV };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', render);
   else render();
