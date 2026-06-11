@@ -6290,7 +6290,7 @@ table.data-table {
     var burnRate = allContract>0 ? (allActual/allContract*100) : 0;  // [H8] 소진율=원가/계약분산합(원가예산), 총계약 아님
     var burnStat = statusOf(burnRate);
 
-    setT('pjbx-pid', '일반 7분류 + 직불 2분류 · 실제 원가 · 예상 이윤 · ' + (p.id||'—'));
+    setT('pjbx-pid', '공종 7분류 · 직불 집행은 귀속 공종 원가에 합산 · 실제 원가 · 예상 이윤 · ' + (p.id||'—'));
     setT('pjbx-h-contract', fmt(totalContract));
     setT('pjbx-h-contract-full', fmtFull(totalContract));
     setT('pjbx-h-cost', fmt(allActual));
@@ -6309,50 +6309,55 @@ table.data-table {
       bar.className = 'fill ' + (burnStat==='good'?'':burnStat);
     }
 
-    // 분류별 표 행 (진척바 컬럼 포함)
+    // [귀속 공종 — 대표 기준 B안] 직불은 지급 방식이지 공종이 아님 — 직불 집행을 귀속 공종(attribCat,
+    // 기본: 직불금→외주비·인건비직불금→인건비) 원가에 합산해야 공종별 소진율·마진이 진실해짐.
+    var attrib = {};
+    var _dirItems = (p.costItems||[]).filter(function(it){ return it.type==='direct'||it.type==='labordirect'; });
+    if (_dirItems.length) {
+      _dirItems.forEach(function(it){ var ck = it.attribCat || (it.type==='direct'?'outsource':'labor'); attrib[ck] = (attrib[ck]||0) + num(it.supplyAmt); });
+    } else {
+      // 레거시(costItems 없음): costs 집계를 기본 귀속으로
+      var _dA0 = num(p.costs&&p.costs.direct&&p.costs.direct.actual), _ldA0 = num(p.costs&&p.costs.labordirect&&p.costs.labordirect.actual);
+      if (_dA0) attrib.outsource = (attrib.outsource||0) + _dA0;
+      if (_ldA0) attrib.labor = (attrib.labor||0) + _ldA0;
+    }
+    // 분류별 표 행 (진척바 컬럼 포함) — 원가 = 일반 집행 + 귀속 직불
     var rowsHtml = GENERAL.map(function(c){
       var k = (p.costs&&p.costs[c.key])?p.costs[c.key]:{contract:0,actual:0};
-      var contract = num(k.contract), actual = num(k.actual);
-      var rate = contract>0 ? (actual/contract*100) : (actual>0 ? 150 : 0);
-      var stat = statusOf(rate); var pf = contract - actual;
+      var contract = num(k.contract), at = attrib[c.key]||0, combined = num(k.actual) + at;
+      var unalloc = contract<=0 && combined>0;
+      var rate = contract>0 ? (combined/contract*100) : 0;
+      var stat = unalloc ? 'warn' : statusOf(rate); var pf = contract - combined;
       var fillW = Math.min(100, rate);
-      var barCls = (rate===0 && actual===0) ? 'zero' : stat;
+      var barCls = unalloc ? 'warn' : ((rate===0 && combined===0) ? 'zero' : stat);
+      var badge = unalloc ? '<span class="badge warn">미배정</span>' : '<span class="badge ' + stat + '">' + statusLabel(stat) + '</span>';
       return ''
         + '<tr>'
         +   '<td class="col-cat"><span class="dot" style="background:' + c.color + '"></span>' + c.label + '</td>'
         +   '<td class="col-bar"><div class="bar-row">'
         +     '<div class="bar-wrap"><div class="bar-fill ' + barCls + '" style="width:' + fillW + '%"></div></div>'
-        +     '<div class="bar-pct ' + barCls + '">' + Math.round(rate) + '%</div>'
-        +   '</div></td>'
-        +   '<td class="col-num contract">' + fmt(contract) + '</td>'
-        +   '<td class="col-num">' + fmt(actual) + '</td>'
-        +   '<td class="col-profit ' + (pf>=0?'pos':'neg') + '">' + (pf>=0?'+':'') + fmt(pf) + '</td>'
-        +   '<td class="col-status"><span class="badge ' + stat + '">' + statusLabel(stat) + '</span></td>'
-        + '</tr>';
-    }).join('');
-    // [예산표 정합 — 대표 지적] 직불 2분류를 본 표에 편입 — 분리해 두면 합계 이윤이 직불 집행만큼 부풀어 실제 이익과 어긋남.
-    // 캐시플로우 제외 구분은 행 태그로 표시. 계약 미배정(계약 0·집행>0)은 '미배정'으로 안내.
-    rowsHtml += DIRECT.map(function(c){
-      var k = (p.costs&&p.costs[c.key])?p.costs[c.key]:{contract:0,actual:0};
-      var contract = num(k.contract), actual = num(k.actual);
-      var unalloc = contract<=0 && actual>0;
-      var rate = contract>0 ? (actual/contract*100) : 0;
-      var stat = unalloc ? 'warn' : statusOf(rate); var pf = contract - actual;
-      var fillW = Math.min(100, rate);
-      var barCls = unalloc ? 'warn' : ((rate===0 && actual===0) ? 'zero' : stat);
-      var tag = '<span style="margin-left:6px;font-size:10px;font-weight:700;color:#7C3AED;background:#F5F3FF;border:1px solid #DDD6FE;border-radius:6px;padding:1px 6px;white-space:nowrap;vertical-align:1px">직불 · 캐시 제외</span>';
-      var badge = unalloc ? '<span class="badge warn">미배정</span>' : '<span class="badge ' + stat + '">' + statusLabel(stat) + '</span>';
-      return ''
-        + '<tr>'
-        +   '<td class="col-cat"><span class="dot" style="background:' + c.color + '"></span>' + c.label + tag + '</td>'
-        +   '<td class="col-bar"><div class="bar-row">'
-        +     '<div class="bar-wrap"><div class="bar-fill ' + barCls + '" style="width:' + fillW + '%"></div></div>'
         +     '<div class="bar-pct ' + barCls + '">' + (unalloc ? '—' : Math.round(rate) + '%') + '</div>'
         +   '</div></td>'
         +   '<td class="col-num contract">' + fmt(contract) + '</td>'
-        +   '<td class="col-num">' + fmt(actual) + '</td>'
+        +   '<td class="col-num">' + fmt(combined) + (at>0?'<div style="font-size:10px;color:#7C3AED;font-weight:700;white-space:nowrap">직불 '+fmt(at)+' 포함</div>':'') + '</td>'
         +   '<td class="col-profit ' + (pf>=0?'pos':'neg') + '">' + (pf>=0?'+':'') + fmt(pf) + '</td>'
         +   '<td class="col-status">' + badge + '</td>'
+        + '</tr>';
+    }).join('');
+    // 직불 분류 행은 귀속 합산으로 본 표에 흡수 — 계약 배정이 잔존하는 경우만 재배분 안내 행 표시
+    rowsHtml += DIRECT.map(function(c){
+      var k = (p.costs&&p.costs[c.key])?p.costs[c.key]:{contract:0,actual:0};
+      var contract = num(k.contract);
+      if (contract<=0) return '';
+      var tag = '<span style="margin-left:6px;font-size:10px;font-weight:700;color:#7C3AED;background:#F5F3FF;border:1px solid #DDD6FE;border-radius:6px;padding:1px 6px;white-space:nowrap;vertical-align:1px">직불 · 캐시 제외</span>';
+      return ''
+        + '<tr>'
+        +   '<td class="col-cat"><span class="dot" style="background:' + c.color + '"></span>' + c.label + tag + '</td>'
+        +   '<td class="col-bar"><div class="bar-row"><div class="bar-wrap"><div class="bar-fill zero" style="width:0%"></div></div><div class="bar-pct zero">—</div></div></td>'
+        +   '<td class="col-num contract">' + fmt(contract) + '</td>'
+        +   '<td class="col-num" style="color:#94a3b8;font-size:12px">집행은 공종에 합산</td>'
+        +   '<td class="col-profit" style="color:#94a3b8">—</td>'
+        +   '<td class="col-status"><span class="badge warn">재배분 권장</span></td>'
         + '</tr>';
     }).join('');
     var rowsEl = document.getElementById('pjbx-rows');
@@ -15094,10 +15099,10 @@ CREATE TABLE system_map_activity (
     var banner = document.getElementById('mm-purchase-banner');
     if (state.activeTab === 'direct') {
       banner.style.display = 'block'; banner.style.background = '#F3F4F6'; banner.style.border = '1px solid #D1D5DB'; banner.style.color = '#4B5563';
-      banner.innerHTML = 'ℹ️ <strong>직불금</strong>은 발주처가 하도급업체에 직접 지급하는 금액. 명문이엔지 캐시플로우에서 제외됩니다.';
+      banner.innerHTML = 'ℹ️ <strong>직불금</strong>은 발주처가 하도급업체에 직접 지급하는 금액. 명문이엔지 캐시플로우에서 제외됩니다. <strong>귀속 공종</strong>을 지정하면 예산 분석에서 그 공종 원가로 합산됩니다.';
     } else if (state.activeTab === 'labordirect') {
       banner.style.display = 'block'; banner.style.background = '#F3F4F6'; banner.style.border = '1px solid #D1D5DB'; banner.style.color = '#4B5563';
-      banner.innerHTML = 'ℹ️ <strong>인건비직불금</strong>은 발주처가 노무자에게 직접 지급. 캐시플로우 제외 + 세액 0원.';
+      banner.innerHTML = 'ℹ️ <strong>인건비직불금</strong>은 발주처가 노무자에게 직접 지급. 캐시플로우 제외 + 세액 0원. <strong>귀속 공종</strong>을 지정하면 예산 분석에서 그 공종 원가로 합산됩니다.';
     } else if (isVAT0(state.activeTab)) {
       banner.style.display = 'block'; banner.style.background = '#FFFBEB'; banner.style.border = '1px solid #FDE68A'; banner.style.color = '#92400E';
       banner.innerHTML = '⚠️ <strong>VAT 0 카테고리</strong> ('+cat.label+') — 공급가 = 합계, 세액 자동 0';
@@ -15120,6 +15125,7 @@ CREATE TABLE system_map_activity (
     var head = '<thead><tr>'
       + '<th style="text-align:left;padding:12px 14px;border-bottom:2px solid #e5e7eb;font-size:12px;background:#fafbfc">'+(labor?'업체명/이름':'업체명')+'</th>'
       + '<th style="text-align:left;padding:12px 14px;border-bottom:2px solid #e5e7eb;font-size:12px;background:#fafbfc">세부내역</th>'
+      + (direct?'<th title="이 직불이 어느 공종의 원가인지 — 예산 분석에서 해당 공종 원가로 합산됩니다" style="text-align:left;padding:12px 14px;border-bottom:2px solid #e5e7eb;font-size:12px;background:#fafbfc">귀속 공종<div style="font-size:10px;color:#94a3b8;font-weight:600;margin-top:2px;white-space:nowrap">예산 분석 반영</div></th>':'')
       + (direct?'<th title="이 업체(팀)와 맺은 계약 총액 — 참고 기록용, 어떤 계산에도 반영되지 않습니다" style="text-align:right;padding:12px 14px;border-bottom:2px solid #e5e7eb;font-size:12px;background:#fafbfc">계약총액<div style="font-size:10px;color:#94a3b8;font-weight:600;margin-top:2px;white-space:nowrap">참고용 · 계산 미반영</div></th><th title="직불 지급액 중 발주처가 공제하고 지급한 금액 — 기성 차감에서 빠지고, 그만큼 우리가 받을 실수금으로 복귀합니다" style="text-align:right;padding:12px 14px;border-bottom:2px solid #e5e7eb;font-size:12px;background:#fafbfc">발주처 공제액<div style="font-size:10px;color:#94a3b8;font-weight:600;margin-top:2px;white-space:nowrap">기성차감 제외 · 실수금 복귀</div></th>':'')
       + (direct?'<th title="발주처가 업체에 직접 지급한 금액(전액) — 원가에는 전액 반영, 기성 차감은 지급액−공제액" style="text-align:right;padding:12px 14px;border-bottom:2px solid #e5e7eb;font-size:12px;background:#fafbfc">직불 지급액<div style="font-size:10px;color:#94a3b8;font-weight:600;margin-top:2px;white-space:nowrap">발주처 직접 지급 (전액)</div></th>':'<th style="text-align:right;padding:12px 14px;border-bottom:2px solid #e5e7eb;font-size:12px;background:#fafbfc">공급가</th>')
       + (vat0?'':'<th style="text-align:right;padding:12px 14px;border-bottom:2px solid #e5e7eb;font-size:12px;background:#fafbfc">세액</th>')
@@ -15138,6 +15144,7 @@ CREATE TABLE system_map_activity (
           return '<tr>'
             + '<td style="padding:14px;border-bottom:1px solid #f1f5f9;min-width:160px">'+inp('vendor',it.vendor)+'</td>'
             + '<td style="padding:14px;border-bottom:1px solid #f1f5f9;min-width:180px">'+inp('desc',it.desc)+'</td>'
+            + (direct?(function(){ var _ad=(it.type==='direct')?'outsource':'labor'; var _ac=it.attribCat||_ad; return '<td style="padding:14px;border-bottom:1px solid #f1f5f9;min-width:110px"><select onchange="mmPurchase.edit('+oi+',\'attribCat\',this.value)" style="padding:7px 6px;border-radius:8px;border:1px solid #d1d5db;font-size:13px;width:100%;background:#f8fafc;box-sizing:border-box;cursor:pointer">'+CATS.filter(function(c){return c.key!=='direct'&&c.key!=='labordirect';}).map(function(c){return '<option value="'+c.key+'"'+(c.key===_ac?' selected':'')+'>'+c.label+'</option>';}).join('')+'</select></td>'; })():'')
             + (direct?'<td style="padding:14px;border-bottom:1px solid #f1f5f9;min-width:120px">'+nInp('contractAmt',it.contractAmt)+'</td><td style="padding:14px;border-bottom:1px solid #f1f5f9;min-width:120px">'+nInp('deduction',it.deduction)+'</td>':'')
             + '<td style="padding:14px;border-bottom:1px solid #f1f5f9;min-width:117px">'+nInp('supplyAmt',it.supplyAmt)+'</td>'
             + (vat0?'':'<td style="padding:14px;border-bottom:1px solid #f1f5f9;text-align:right;color:#64748b">'+fmt(it.tax)+'</td>')
@@ -18110,6 +18117,7 @@ CREATE TABLE system_map_activity (
         type: r.type, vendor: r.vendor||'', workerName: r.worker_name||'', desc: r.desc_text||'',
         supplyAmt: num(r.supply_amt), tax: num(r.tax), total: num(r.total),
         paidAmount: num(r.paid_amount), contractAmt: num(r.contract_amt), deduction: num(r.deduction),
+        attribCat: r.attrib_cat||'',  // [귀속 공종 — B안]
         date: r.doc_date||'', paidDate: r.paid_date||'', createdAt: r.created_at||'', memo: r.memo||''
       });
     });
@@ -18162,6 +18170,7 @@ CREATE TABLE system_map_activity (
       return { project_id: p.id, type: it.type, vendor: it.vendor||null, worker_name: it.workerName||null, desc_text: it.desc||null,
         supply_amt: bint(it.supplyAmt), tax: bint(it.tax), total: bint(it.total),
         paid_amount: bint(it.paidAmount), contract_amt: bint(it.contractAmt), deduction: bint(it.deduction),
+        attrib_cat: it.attribCat||null,  // [귀속 공종 — B안] 직불 행의 귀속 공종 (컬럼 부재 시 push 폴백이 제거)
         doc_date: it.date||null, paid_date: it.paidDate||null, created_at: it.createdAt||null, memo: it.memo||null };
     });
     var billingItems = (p.billingItems||[]).map(function(b, i) {
@@ -18199,6 +18208,17 @@ CREATE TABLE system_map_activity (
       });
       var _tomb = _tombIds();   // 방금 삭제한 id가 클라우드에 잔존하더라도(레이스) 로컬 부활 차단 [감사 D4·D5]
       if (_tomb.length) projects = projects.filter(function(p){ return _tomb.indexOf(p.id) < 0; });
+      // [귀속 공종 — B안] attrib_cat 컬럼 미생성 동안 pull이 로컬 attribCat을 지우지 않도록 행 매칭 보존 (번호증발 교훈: pull은 로컬 전용 필드 무조건 보존)
+      try {
+        var _loc = loadLocal();
+        projects.forEach(function(np){
+          var lp = _loc.find(function(x){ return x.id === np.id; }); if (!lp) return;
+          var _ak = function(it){ return [it.type, it.vendor, it.desc, it.supplyAmt, it.total].join('|'); };
+          var _apool = {};
+          (lp.costItems||[]).forEach(function(it){ if (it.attribCat) { var k=_ak(it); (_apool[k]=_apool[k]||[]).push(it.attribCat); } });
+          (np.costItems||[]).forEach(function(it){ if (!it.attribCat) { var k=_ak(it); if (_apool[k] && _apool[k].length) it.attribCat = _apool[k].shift(); } });
+        });
+      } catch(_ae) {}
       saveLocal(projects);
       window.dispatchEvent(new StorageEvent('storage', { key: DASH_KEY }));
       return { ok:true, msg:'다운로드 완료 — 프로젝트 ' + projects.length + '건' };
@@ -18226,6 +18246,11 @@ CREATE TABLE system_map_activity (
         await sb.from('cost_items').delete().eq('project_id', d.project.id);
         if (d.costItems.length) {
           var r3 = await sb.from('cost_items').insert(d.costItems);
+          if (r3.error && /attrib_cat/i.test(r3.error.message||'')) {
+            // [귀속 공종 — B안] attrib_cat 컬럼 미생성 환경 폴백 — delete 후 insert 실패로 클라우드가 비는 사고 방지(로컬 attribCat은 유지)
+            d.costItems.forEach(function(x){ delete x.attrib_cat; });
+            r3 = await sb.from('cost_items').insert(d.costItems);
+          }
           if (r3.error) throw r3.error;
         }
         await sb.from('billing_items').delete().eq('project_id', d.project.id);
