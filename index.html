@@ -14831,7 +14831,7 @@ CREATE TABLE system_map_activity (
       });
     })();
     if (idx >= 0) projects[idx] = state.project; else projects.push(state.project);
-    localStorage.setItem('mm-dash-v4', JSON.stringify(projects));
+    try { localStorage.setItem('mm-dash-v4', JSON.stringify(projects)); } catch(_qe) { if (window.globalToast) globalToast('⛔ 저장 실패 — 저장 공간 부족: ' + _qe.message, 'error', 8000); return; }  // [전수조사] quota 가드 — 실패 시 '저장 완료' 토스트 차단
     // [감사 핫픽스] 매입 저장 즉시 클라우드 push (5.5초 폴링 갭 제거)
     try { if (window.mmData && window.mmData.push && window.mmData.mode && window.mmData.mode() === 'supabase') window.mmData.push(); } catch(e){}
     if (window.globalToast) window.globalToast('💾 저장 완료', 'success');
@@ -15126,7 +15126,7 @@ CREATE TABLE system_map_activity (
     var arr = raw ? JSON.parse(raw) : [];
     return Array.isArray(arr) ? arr : [];
   }
-  function saveProjects(arr) { localStorage.setItem('mm-dash-v4', JSON.stringify(arr)) }
+  function saveProjects(arr) { try { localStorage.setItem('mm-dash-v4', JSON.stringify(arr)); } catch(e) { if (window.globalToast) globalToast('⛔ 저장 실패 — 저장 공간 부족: ' + e.message, 'error', 8000); } }  // [전수조사] quota 가드
   function currentPid() { return sessionStorage.getItem('mm-selected-pid') || (window.location.hash.match(/pid=([^&]+)/) || [])[1] }
   function currentProject() {
     var ps = loadProjects();
@@ -15557,7 +15557,7 @@ CREATE TABLE system_map_activity (
     return '';
   }
   function loadProjects() { var r = localStorage.getItem('mm-dash-v4'); var a = r?JSON.parse(r):[]; return Array.isArray(a)?a:[] }
-  function saveProjects(a) { localStorage.setItem('mm-dash-v4', JSON.stringify(a)) }
+  function saveProjects(a) { try { localStorage.setItem('mm-dash-v4', JSON.stringify(a)); } catch(e) { if (window.globalToast) globalToast('⛔ 저장 실패 — 저장 공간 부족: ' + e.message, 'error', 8000); } }  // [전수조사] quota 가드
   function currentProject() {
     var ps = loadProjects(); var pid = sessionStorage.getItem('mm-selected-pid'); var f = pid?ps.find(function(p){return p.id===pid}):ps[0];
     return f || { id:'명문-DEMO', name:'데모', budgetItems:[], costs:{}, contractOrig:0, contractAdd:0 };
@@ -17685,6 +17685,8 @@ CREATE TABLE system_map_activity (
   function debouncedPull() {
     if (pullTimer) clearTimeout(pullTimer);
     pullTimer = setTimeout(function() {
+      // [전수조사] 셀프-에코 가드 — 이 기기가 방금 push한 변경의 realtime 반향이면 pull 생략 (스테일 덮어쓰기 레이스 + '다른 기기 변경' 토스트 스팸 방지)
+      if (Date.now() - (window._mmSelfWriteAt || 0) < 6000) return;
       if (!window.mmData || !window.mmData.pull) return;
       window.mmData.pull().then(function(r) {
         if (r && r.ok) {
@@ -17757,7 +17759,7 @@ CREATE TABLE system_map_activity (
     try { var a = JSON.parse(localStorage.getItem(DASH_KEY)||'[]'); return Array.isArray(a)?a:[] }
     catch(e) { return [] }
   }
-  function saveLocal(arr) { localStorage.setItem(DASH_KEY, JSON.stringify(arr)) }
+  function saveLocal(arr) { try { localStorage.setItem(DASH_KEY, JSON.stringify(arr)); } catch(e) { if (window.globalToast) globalToast('⛔ 동기화 저장 실패 — 저장 공간 부족: ' + e.message, 'error', 8000); } }  // [전수조사] quota 가드
 
   // ── Supabase rows → localStorage Project 형식 ──
   function assembleProject(pr, costRows, ciRows, bRows, oiRows) {
@@ -17823,7 +17825,7 @@ CREATE TABLE system_map_activity (
     var costs = CATS.map(function(c) {
       var k = (p.costs && p.costs[c]) || {};
       return { project_id: p.id, category: c, contract: bint(k.contract),
-               actual: bint(k.actual), seed_actual: bint(k._seedActual) };
+               actual: bint(k.actual), seed_actual: bint(k._seedActual) };  // 미세팅은 0으로 푸시(컬럼 NOT NULL 가능성) — 부트스트랩이 0/undefined 동일하게 안전 처리(매트릭스 검증됨)
     });
     var costItems = (p.costItems||[]).filter(function(it){return it.type}).map(function(it) {
       return { project_id: p.id, type: it.type, vendor: it.vendor||null, worker_name: it.workerName||null, desc_text: it.desc||null,
@@ -17882,6 +17884,7 @@ CREATE TABLE system_map_activity (
       if (!ownerId) return { ok:false, msg:'로그인 필요 (Supabase 세션 없음)' };
 
       var projects = loadLocal();
+      window._mmSelfWriteAt = Date.now();  // [전수조사] realtime 셀프-에코 가드용 스탬프
       for (var i = 0; i < projects.length; i++) {
         var d = disassembleProject(projects[i], ownerId);
         var r1 = await sb.from('projects').upsert(d.project);
@@ -17908,6 +17911,7 @@ CREATE TABLE system_map_activity (
           }
         } catch(oiErr) { if (window.console) console.warn('[기타수익 sync 건너뜀]', (oiErr && oiErr.message) || oiErr); }
       }
+      window._mmSelfWriteAt = Date.now();  // [전수조사] push 완료 직후 도착하는 반향까지 커버
       return { ok:true, msg:'업로드 완료 — 프로젝트 ' + projects.length + '건' };
     } catch(e) { return { ok:false, msg:'PUSH 실패: ' + (e.message||e) } }
   }
@@ -17987,6 +17991,7 @@ CREATE TABLE system_map_activity (
       var sess = await sb.auth.getSession();
       var ownerId = sess.data.session && sess.data.session.user && sess.data.session.user.id;
       if (!ownerId) return { ok:false, msg:'로그인 필요 (Supabase 세션 없음)' };
+      window._mmSelfWriteAt = Date.now();  // [전수조사] realtime 셀프-에코 가드용 스탬프
       var c1 = await sb.from('cost_items').delete().eq('project_id', id);    if (c1.error) throw c1.error;
       var c2 = await sb.from('billing_items').delete().eq('project_id', id); if (c2.error) throw c2.error;
       try { await sb.from('other_income_items').delete().eq('project_id', id); } catch(oe) {}
