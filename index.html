@@ -10053,6 +10053,9 @@ table.data-table {
               <button class="btn btn-secondary btn-sm">
                 <svg class="icon icon-sm"><use href="#i-download"/></svg> 엑셀
               </button>
+              <button class="btn btn-secondary btn-sm" style="color:#DC2626" onclick="window.mmVendors && window.mmVendors.removeSelected()">
+                🗑 선택 삭제
+              </button><!-- [일괄 삭제 — 대표 요청] 매입 연결 거래처는 차단 -->
               <button class="btn btn-primary btn-sm">
                 <svg class="icon icon-sm"><use href="#i-plus"/></svg> 신규 등록
               </button>
@@ -10061,7 +10064,8 @@ table.data-table {
           <div class="table-scroll">
 <table class="data-table">
             <colgroup>
-              <col style="width:24%">  <!-- 업체명 --><!-- [등급 제거 — 대표 기준: 분류는 매입 건별로만 기록] -->
+              <col style="width:4%">   <!-- 선택 -->
+              <col style="width:20%">  <!-- 업체명 --><!-- [등급 제거 — 대표 기준: 분류는 매입 건별로만 기록] -->
               <col style="width:12%">  <!-- 사업자번호 -->
               <col style="width:8%">   <!-- 대표자 -->
               <col style="width:9%">   <!-- 업종 -->
@@ -10072,6 +10076,7 @@ table.data-table {
               <col style="width:9%">   <!-- 액션 -->
             </colgroup>
             <thead><tr>
+              <th class="center"><input type="checkbox" id="vd-sel-all" onchange="window.mmVendors && window.mmVendors.toggleAll(this.checked)"/></th>
               <th>업체명</th>
               <th>사업자번호</th>
               <th>대표자</th>
@@ -10084,7 +10089,7 @@ table.data-table {
             </tr></thead>
             <tbody id="vendors-tbody">
               <tr>
-                <td colspan="9" style="text-align:center;padding:48px 20px;color:#94a3b8;font-weight:600">
+                <td colspan="10" style="text-align:center;padding:48px 20px;color:#94a3b8;font-weight:600">
                   <div style="font-size:32px;margin-bottom:8px">🏢</div>
                   <div style="font-size:14px;font-weight:800;color:#475569;margin-bottom:4px">등록된 거래처가 없습니다</div>
                   <div style="font-size:12px">우측 ⚡ 신규 거래처 빠른 등록에서 시작하세요</div>
@@ -16964,6 +16969,59 @@ CREATE TABLE system_map_activity (
     return { pjCount:Object.keys(pj).length, total:total, unpaid:unpaid, lastDate:lastDate };
   }
 
+  // [연계 차단 — 대표 요청] 매입(costItems)에 연결된 거래처는 삭제 불가. 정규화 이름 비교(공백·괄호 무시)
+  function vNorm(s){ return String(s||'').replace(/\s+/g,'').replace(/[()（）]/g,'').toLowerCase(); }
+  function vendorUsage(name){
+    var n = vNorm(name), count = 0, pj = {};
+    try {
+      var projects = JSON.parse(localStorage.getItem('mm-dash-v4')||'[]');
+      (Array.isArray(projects)?projects:[]).forEach(function(p){
+        (p.costItems||[]).forEach(function(it){ if (vNorm(it.vendor) === n && n) { count++; pj[p.id] = 1; } });
+      });
+    } catch(e){}
+    return { count: count, pjCount: Object.keys(pj).length };
+  }
+  // 3키 일괄 제거 (단건·일괄 공용)
+  function purgeKeys(id, name){
+    var _nm = vNorm(name);
+    ['mm-vendors','mm-vendors-v2','mm-vendors-v23'].forEach(function(k){
+      try {
+        var a = JSON.parse(localStorage.getItem(k)||'[]'); if (!Array.isArray(a)) return;
+        a = a.filter(function(v){
+          var vid = (v && v.id) || '';
+          var vn = vNorm((typeof v==='string') ? v : (v && v.name));
+          return vid !== id && (!_nm || vn !== _nm);
+        });
+        localStorage.setItem(k, JSON.stringify(a));
+      } catch(e){}
+    });
+  }
+  var sel = {};
+  function toggleSel(id){ if (sel[id]) delete sel[id]; else sel[id] = 1; }
+  function toggleAll(checked){ sel = {}; if (checked) load().forEach(function(v){ sel[v.id] = 1; }); render(); }
+  // [일괄 삭제 — 대표 요청] 연계 데이터 있는 업체는 차단 목록으로 안내, 나머지만 삭제
+  function removeSelected(){
+    var ids = Object.keys(sel);
+    if (!ids.length) { if (window.globalToast) globalToast('선택된 거래처가 없습니다 — 행 앞 체크박스로 선택하세요', 'info'); return; }
+    var all = load(), ok = [], blocked = [];
+    ids.forEach(function(id){
+      var v = all.find(function(x){ return x.id === id; }); if (!v) return;
+      var u = vendorUsage(v.name);
+      if (u.count > 0) blocked.push(v.name + ' — 매입 ' + u.count + '건(' + u.pjCount + '개 현장)'); else ok.push(v);
+    });
+    var msg = '선택 ' + ids.length + '건 중 삭제 가능 ' + ok.length + '건';
+    if (blocked.length) msg += '\n\n🚫 연계 데이터로 차단 ' + blocked.length + '건:\n' + blocked.join('\n') + '\n→ 해당 매입을 먼저 삭제해야 삭제할 수 있습니다.';
+    if (!ok.length) { alert(msg); return; }
+    if (!confirm(msg + '\n\n삭제 가능 ' + ok.length + '건을 삭제할까요? (되돌릴 수 없음)')) return;
+    ok.forEach(function(v){
+      purgeKeys(v.id, v.name);
+      if (v.name && window.mmData && window.mmData.deleteVendorCloud) window.mmData.deleteVendorCloud(v.name).then(function(r){ if(!(r&&r.ok) && window.globalToast) globalToast('⚠️ ' + v.name + ' 클라우드 삭제 실패 — 자동 재시도 예정', 'warning', 5000); });
+    });
+    sel = {};
+    render();
+    if (window.globalToast) globalToast('🗑 거래처 ' + ok.length + '건 삭제됨' + (blocked.length ? ' · 연계 차단 ' + blocked.length + '건' : ''), 'success');
+  }
+
   function add(){
     var name = (document.getElementById('vd-name')||{}).value;
     if (!name || !name.trim()){ alert('업체명을 입력하세요'); return; }
@@ -16996,21 +17054,18 @@ CREATE TABLE system_map_activity (
   }
 
   function remove(id){
-    if (!confirm('이 거래처를 삭제할까요?')) return;
     var _gone = load().find(function(x){ return x.id === id; });
-    // [거래처 삭제 수정] 3키(mm-vendors/-v2/-v23) 전부에서 id+정규화이름으로 제거 — 한 키만 지우면 병합 읽기(load)가 다른 키 사본으로 되살리던 결함
-    var _nm = ((_gone && _gone.name) || '').replace(/\s+/g,'').replace(/[()（）]/g,'').toLowerCase();
-    ['mm-vendors','mm-vendors-v2','mm-vendors-v23'].forEach(function(k){
-      try {
-        var a = JSON.parse(localStorage.getItem(k)||'[]'); if (!Array.isArray(a)) return;
-        a = a.filter(function(v){
-          var vid = (v && v.id) || '';
-          var vn = (((typeof v==='string') ? v : (v && v.name)) || '').replace(/\s+/g,'').replace(/[()（）]/g,'').toLowerCase();
-          return vid !== id && (!_nm || vn !== _nm);
-        });
-        localStorage.setItem(k, JSON.stringify(a));
-      } catch(e){}
-    });
+    // [연계 차단 — 대표 요청] 매입 데이터가 연결된 거래처는 삭제 불가
+    if (_gone) {
+      var _u = vendorUsage(_gone.name);
+      if (_u.count > 0) {
+        alert('🚫 삭제 불가 — "' + _gone.name + '"에 매입 데이터 ' + _u.count + '건(' + _u.pjCount + '개 현장)이 연결되어 있습니다.\n해당 매입 항목을 먼저 삭제한 뒤 거래처를 삭제할 수 있습니다.');
+        return;
+      }
+    }
+    if (!confirm('이 거래처를 삭제할까요?')) return;
+    // [거래처 삭제 수정] 3키 전부에서 id+정규화이름 제거 — 한 키만 지우면 병합 읽기가 되살리던 결함
+    purgeKeys(id, _gone && _gone.name);
     // [감사 2b + 전수조사 H1] 클라우드 삭제 전파 — 실패 시 통지(툼스톤이 부활 차단, autoSync push가 재시도)
     if (_gone && _gone.name && window.mmData && window.mmData.deleteVendorCloud) window.mmData.deleteVendorCloud(_gone.name).then(function(r){ if(!(r&&r.ok) && window.globalToast) globalToast('⚠️ 거래처 클라우드 삭제 실패('+((r&&r.msg)||'오프라인')+') — 자동 재시도 예정', 'warning', 5000); });
     render();
@@ -17041,9 +17096,14 @@ CREATE TABLE system_map_activity (
         '<div style="font-size:12px">우측 ⚡ 신규 거래처 빠른 등록에서 시작하세요</div></td></tr>';
       return;
     }
+    // [일괄 삭제] 선택 상태 정리 + 전체선택 체크박스 동기화
+    Object.keys(sel).forEach(function(id){ if (!arr.some(function(v){ return v.id === id; })) delete sel[id]; });
+    var _selAll = document.getElementById('vd-sel-all');
+    if (_selAll) _selAll.checked = arr.length > 0 && arr.every(function(v){ return sel[v.id]; });
     tbody.innerHTML = arr.map(function(v){
       var s = vendorStats(v.name);
       return '<tr>' +
+        '<td class="center"><input type="checkbox" ' + (sel[v.id] ? 'checked ' : '') + 'onchange="window.mmVendors.toggleSel(\'' + v.id + '\')"/></td>' +
         '<td><strong>' + esc(v.name) + '</strong></td>' +
         '<td class="tnum">' + esc(v.bizNo||'—') + '</td>' +
         '<td>' + esc(v.ceo||'—') + '</td>' +
@@ -17057,7 +17117,7 @@ CREATE TABLE system_map_activity (
     }).join('');
   }
 
-  window.mmVendors = { add: add, remove: remove, render: render, load: load };
+  window.mmVendors = { add: add, remove: remove, render: render, load: load, toggleSel: toggleSel, toggleAll: toggleAll, removeSelected: removeSelected };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', render);
   else render();
