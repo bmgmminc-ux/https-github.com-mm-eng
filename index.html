@@ -8766,15 +8766,9 @@ table.data-table {
               <svg class="icon icon-sm"><use href="#i-check"/></svg>
               출역 등록
             </button>
-            <button class="btn btn-secondary" onclick="window.consecutiveAttendance('worker-current', new Date().toISOString().slice(0,10), 5)">
-              <svg class="icon icon-sm"><use href="#i-plus"/></svg>
-              연속 등록
-            </button>
           </div>
+          <!-- [수술 — 허수 기능 제거] '연속 등록' 버튼: 가짜 workerId('worker-current')로 아무도 읽지 않는 일회용 키에만 기록하고 성공 토스트를 띄우던 무음 데이터 증발 경로 -->
 
-          <div style="margin-top:14px;padding:10px 14px;background:var(--bg-subtle);border-radius:8px;font-size:12px;color:var(--text-secondary)">
-            💡 연속 등록: 같은 작업자의 다음 날을 한 번에 추가.
-          </div>
         </div>
 
       </div>
@@ -13139,32 +13133,7 @@ CREATE TABLE system_map_activity (
       } catch (e) { return false; }
     };
 
-    // ═══════════════════════════════════════════════════════════════
-    // 출역 연속 등록 (같은 작업자 다음 날 자동)
-    // ═══════════════════════════════════════════════════════════════
-    window.consecutiveAttendance = function(workerId, baseDate, count) {
-      count = count || 5;
-      var entries = [];
-      var d = new Date(baseDate || new Date());
-      for (var i = 0; i < count; i++) {
-        // 주말 건너뛰기
-        while (d.getDay() === 0 || d.getDay() === 6) {
-          d.setDate(d.getDate() + 1);
-        }
-        entries.push({
-          worker_id: workerId,
-          date: d.toISOString().slice(0, 10),
-          batch: 'consecutive_' + Date.now()
-        });
-        d.setDate(d.getDate() + 1);
-      }
-      try {
-        localStorage.setItem('mm-attendance-batch-' + Date.now(), JSON.stringify(entries));
-      } catch (e) {}
-      if (window.globalToast) globalToast('✓ 연속 출역 ' + entries.length + '일 등록 (주말 자동 제외)', 'success');
-
-      return entries;
-    };
+    // [수술 — 허수 기능 제거] consecutiveAttendance 폐기 — mm-attendance가 아닌 일회용 키에 기록(reader 0개)하면서 성공 토스트만 띄우던 무음 데이터 증발
 
     window.SystemMapStatus = {
       // 모든 상태 가져오기 (Phase 3: supabase.from('system_map_status').select)
@@ -14033,6 +14002,9 @@ CREATE TABLE system_map_activity (
       var _pbiz = function(v){ return String((v && (v.bizNo || v.businessNo || v.bizno || v.biz_no)) || '').replace(/[^0-9]/g,''); };
       var _bad = [], _seen = {};
       (state.items || []).forEach(function(it){
+        // [수술 — 전수감사] 붙여넣기 workerName 경로 백스톱 — vendor만 검사해 미등록 workerName 행이 삭제 자동저장으로 우회 영속되던 구멍
+        var _wn2 = (it.workerName || '').trim();
+        if (_wn2) { var _nw2 = normVendor(_wn2); if (_nw2 && !_seen['w:' + _nw2]) { _seen['w:' + _nw2] = 1; if (!_pw.some(function(w){ return normVendor((w && w.name) || '') === _nw2; })) _bad.push(_wn2 + ' (일용직 미등록)'); } }
         var vn = (it.vendor || '').trim(); if (!vn) return;
         if (it.type === 'direct' || it.type === 'labordirect') return;  // [직불 예외 — 대표 기준] 자유 입력
         var n = normVendor(vn); if (!n || _seen[n]) return; _seen[n] = 1;
@@ -16404,7 +16376,7 @@ CREATE TABLE system_map_activity (
   function num(v){ return Number(String(v||'0').replace(/[^0-9.-]/g,'')) || 0 }
   function fmt(n){ return (n||0).toLocaleString() }
   function loadAt(){ try{var a=JSON.parse(localStorage.getItem(AT_KEY)||'[]');return Array.isArray(a)?a:[]}catch(e){return[]} }
-  function saveAt(a){ try{ localStorage.setItem(AT_KEY, JSON.stringify(a)); }catch(e){ alert('출역 저장 실패 — 저장 공간 확인: '+e.message); } }
+  function saveAt(a){ try{ localStorage.setItem(AT_KEY, JSON.stringify(a)); localStorage.setItem('mm-attend-dirty','1'); }catch(e){ alert('출역 저장 실패 — 저장 공간 확인: '+e.message); } }  // [수술④ 보강 — 적대검증] dirty를 쓰기 지점에서 직접 설정: autoSync off·오프라인 입력도 다음 로그인 선push 보장
   function loadWk(){ try{var a=JSON.parse(localStorage.getItem(WK_KEY)||'[]');return Array.isArray(a)?a:[]}catch(e){return[]} }
   function saveWk(a){ try{ localStorage.setItem(WK_KEY, JSON.stringify(a)); }catch(e){ alert('일용직 저장 실패 — 저장 공간 확인: '+e.message); } }
   function todayStr(){
@@ -16492,6 +16464,8 @@ CREATE TABLE system_map_activity (
   function remove(id){
     if (!confirm('이 출역 기록을 삭제할까요?')) return;
     saveAt(loadAt().filter(function(a){ return a.id !== id }));
+    // [수술⑥ — 출역 삭제 전파] 로컬만 지우면 다음 로그인 pull이 클라우드 행으로 부활시키던 결함
+    try { if (window.mmData && window.mmData.deleteAttendanceCloud) window.mmData.deleteAttendanceCloud(id).then(function(r){ if(!(r&&r.ok) && (r&&r.msg)!=='no-cloud' && window.globalToast) globalToast('⚠️ 출역 클라우드 삭제 실패('+((r&&r.msg)||'오프라인')+') — 자동 재시도 예정', 'warning', 5000); }); } catch(e){}
     recalcWorkers();
     render();
   }
@@ -16579,6 +16553,10 @@ CREATE TABLE system_map_activity (
   function add(){
     var name = (document.getElementById('wk-name')||{}).value;
     if (!name || !name.trim()) { alert('이름을 입력하세요'); return; }
+    // [수술② — 동명이인 차단] 클라우드 동기화가 이름 기준 uuid라 같은 이름은 한 명으로 합쳐져 무음 삭제되던 결함 — 등록 시점 원천 차단
+    // [적대검증 보강] 정규화를 동기화 계층(_mNorm)과 동일하게: 공백+괄호 제거 — "홍길동(B)" 류 우회 봉쇄
+    var _wn = function(s){ return String(s||'').replace(/\s+/g,'').replace(/[()（）]/g,'').toLowerCase(); };
+    if (load().some(function(w){ return _wn(w.name) === _wn(name); })) { alert('이미 등록된 이름입니다.\n동기화가 이름 기준이라 동명이인은 구분 표기로 등록하세요 (예: 홍길동B, 홍길동-덕트 — 괄호 표기는 같은 이름으로 취급됩니다)'); return; }
     var pjob = (document.getElementById('wk-pjob')||{}).value || '일반';
     var pwage = num((document.getElementById('wk-pwage')||{}).value);
     var altJobs = [];
@@ -16614,8 +16592,17 @@ CREATE TABLE system_map_activity (
   }
 
   function remove(id){
-    if (!confirm('이 인력을 삭제할까요?')) return;
     var _gone = load().find(function(x){ return x.id === id; });
+    if (!_gone) return;
+    // [수술③ — 연계 차단, 거래처와 동일 정책] 출역·매입 인건비에 연결된 일용직은 삭제 불가 — 고아 출역 행이 출역 push 배치 전체를 FK 위반으로 막던 결함 원천 차단
+    var _wn = function(s){ return String(s||'').replace(/\s+/g,'').replace(/[()（）]/g,'').toLowerCase(); };
+    var _chkFail = false;
+    var _atCnt = 0; try { (JSON.parse(localStorage.getItem('mm-attendance')||'[]')||[]).forEach(function(a){ if (a && (a.workerId === id || _wn(a.workerName) === _wn(_gone.name))) _atCnt++; }); } catch(e){ _chkFail = true; }
+    // [적대검증 보강] workerName 행(붙여넣기·클라우드 pull 유래, vendor 빈칸) 매칭 추가 — vendor만 보면 고아 인건비 행이 남아 프로젝트 저장이 잠기던 허점
+    var _labCnt = 0; try { (JSON.parse(localStorage.getItem('mm-dash-v4')||'[]')||[]).forEach(function(p){ (p.costItems||[]).forEach(function(it){ if ((it.type === 'labor' && _wn(it.vendor) === _wn(_gone.name)) || (it.workerName && _wn(it.workerName) === _wn(_gone.name))) _labCnt++; }); }); } catch(e){ _chkFail = true; }
+    if (_chkFail) { alert('연결 데이터 확인에 실패해 삭제를 보류합니다 — 새로고침 후 다시 시도하세요'); return; }  // [적대검증 보강] fail-closed
+    if (_atCnt || _labCnt) { alert('삭제할 수 없습니다 — "' + _gone.name + '" 연결 데이터가 있습니다.\n· 출역 기록 ' + _atCnt + '건 · 매입 인건비 ' + _labCnt + '건\n→ 해당 기록을 먼저 정리한 뒤 삭제하세요'); return; }
+    if (!confirm('이 인력을 삭제할까요?')) return;
     save(load().filter(function(w){ return w.id !== id }));
     // [감사 2b + 전수조사 H1] 클라우드 삭제 전파(출역 cascade) — 실패 시 통지(툼스톤이 부활 차단, autoSync push가 재시도)
     if (_gone && _gone.name && window.mmData && window.mmData.deleteWorkerCloud) window.mmData.deleteWorkerCloud(_gone.name).then(function(r){ if(!(r&&r.ok) && window.globalToast) globalToast('⚠️ 일용직 클라우드 삭제 실패('+((r&&r.msg)||'오프라인')+') — 자동 재시도 예정', 'warning', 5000); });
@@ -17379,7 +17366,7 @@ CREATE TABLE system_map_activity (
   var mPushTimer = null, sPushTimer = null, aPushTimer = null;
   function debouncedMasters(){ try{ localStorage.setItem('mm-masters-dirty','1'); }catch(e){} if (mPushTimer) clearTimeout(mPushTimer); mPushTimer = setTimeout(function(){ pushMasters().then(function(r){ if (r && !r.ok && r.msg && r.msg.indexOf('no-cloud')<0 && r.msg.indexOf('로그인')<0 && window.globalToast) window.globalToast('⚠️ 마스터 동기화: '+r.msg, 'error', 5000); }); }, 2500); }  // [번호증발 수정] dirty 플래그 — 디바운스 발사 전 새로고침해도 다음 부팅이 push를 선행하도록 표시
   function debouncedSettings(){ if (sPushTimer) clearTimeout(sPushTimer); sPushTimer = setTimeout(function(){ pushSettings(); }, 2500); }
-  function debouncedAttend(){ if (aPushTimer) clearTimeout(aPushTimer); aPushTimer = setTimeout(function(){ pushAttendance(); }, 2500); }
+  function debouncedAttend(){ try{ localStorage.setItem('mm-attend-dirty','1'); }catch(e){} if (aPushTimer) clearTimeout(aPushTimer); aPushTimer = setTimeout(function(){ pushAttendance(); }, 2500); }  // [수술④] dirty 플래그 — 디바운스 중 새로고침해도 다음 부팅이 push 선행
   setInterval(function() {
     if (!autoSync || !sbReady()) return;
     var cur = localStorage.getItem(DASH_KEY) || '';
@@ -17403,7 +17390,13 @@ CREATE TABLE system_map_activity (
     try { await pullMasters(); } catch(e){}   // [감사 2단계] 거래처·일용직도 로그인 시 클라우드에서 복원
     try { if (window.mmSyncPullPhase1) await window.mmSyncPullPhase1(); } catch(e){}   // [감사 4단계] 경보수신자·독촉 클라우드 복원
     try { await pullSettings(); } catch(e){}   // [감사 4단계] 회사정보·요율·임계값 복원
-    try { await pullAttendance(); } catch(e){}   // [감사 4단계] 출역 복원(일용직 pull 후)
+    // [수술④ + 적대검증 보강] 미전송 출역 선push — 실패하면 pull을 보류해 로컬 보호 (push 실패를 무시하고 pull이 덮어쓰던 허점 봉쇄)
+    try {
+      var _adOk = true;
+      if (localStorage.getItem('mm-attend-dirty')==='1') { var _adR = await pushAttendance(); _adOk = !!(_adR && _adR.ok); }
+      if (_adOk) { await pullAttendance(); }
+      else if (window.globalToast) globalToast('⚠️ 출역 동기화 보류 — 미전송 출역 보호를 위해 클라우드 복원을 건너뜀 (다음 자동 동기화에서 재시도)', 'warning', 6000);
+    } catch(e){}
     if (window.globalToast) {
       window.globalToast(r.ok ? '☁️ ' + r.msg : '⚠️ ' + r.msg, r.ok?'success':'error');
     }
@@ -17466,7 +17459,7 @@ CREATE TABLE system_map_activity (
       var vP=_mVendors().map(function(v){ return { id:_mCloudId('v',v.name), owner_id:ownerId, name:v.name, business_no:v.bizNo, phone:v.phone, category:v.category, memo:v.memo, email:v.email, address:v.addr, ceo:v.ceo }; });
       if(vP.length){ var rv=await sb.from('vendors').upsert(vP,{ onConflict:'id' }); if(rv.error&&/ceo/i.test(rv.error.message||'')){ vP.forEach(function(x){ delete x.ceo; }); rv=await sb.from('vendors').upsert(vP,{ onConflict:'id' }); } if(rv.error) return { ok:false, msg:'거래처: '+rv.error.message }; }
       // [주민번호 통일 — 전수감사] rrn 표준 + jumin 레거시 폴백 — 구(舊) add() 등록분(jumin만 보유)이 항상 null로 push되어 주민번호가 클라우드에 미도달하던 결함 (push 화이트리스트 누락과 동급)
-      var wP=_mLoad('mm-workers').filter(function(w){ return w && w.name; }).map(function(w){ return { id:_mCloudId('w',w.name), owner_id:ownerId, name:w.name, jumin_masked:w.rrn||w.jumin||null, phone:w.phone||null, primary_job:w.primaryJob||null, primary_wage:Math.round(w.primaryWage||0), alt_jobs:Array.isArray(w.altJobs)?w.altJobs:[] }; });
+      var wP=_mLoad('mm-workers').filter(function(w){ return w && w.name; }).map(function(w){ return { id:_mCloudId('w',w.name), owner_id:ownerId, name:w.name, jumin_masked:w.rrn||w.jumin||null, phone:w.phone||null, address:w.address||null, primary_job:w.primaryJob||null, primary_wage:Math.round(w.primaryWage||0), alt_jobs:Array.isArray(w.altJobs)?w.altJobs:[] }; });  // [수술⑤] address 동기화 편입 — 거래처는 포함인데 일용직만 누락이던 비대칭
       if(wP.length){ var rw=await sb.from('workers').upsert(wP,{ onConflict:'id' }); if(rw.error) return { ok:false, msg:'일용직: '+rw.error.message }; }
       // [전수조사 H1] 툼스톤 잔존분 클라우드 삭제 재시도 — 삭제 당시 실패(오프라인 등)했어도 autoSync push마다 재시도
       // [재등록 보호 — 전수감사] 로컬에 다시 존재하는 이름은 툼스톤 해제: 삭제·개명 후 10분 내 재등록한 행을 push가 클라우드에서 반복 삭제하던 결함
@@ -17474,7 +17467,7 @@ CREATE TABLE system_map_activity (
         var _tb=_mTombs();
         var _cur={}; _mVendors().forEach(function(v){ _cur['v:'+_mNorm(v.name)]=1; }); _mLoad('mm-workers').forEach(function(w){ if(w&&w.name) _cur['w:'+_mNorm(w.name)]=1; });
         var _keep=[];
-        for(var _i=0;_i<_tb.length;_i++){ var _t=_tb[_i]; if(_cur[_t.k+':'+_t.n]) continue; _keep.push(_t); await sb.from(_t.k==='v'?'vendors':'workers').delete().eq('id', _mCloudId(_t.k,_t.n)); }
+        for(var _i=0;_i<_tb.length;_i++){ var _t=_tb[_i]; if(_cur[_t.k+':'+_t.n]) continue; _keep.push(_t); if(_t.k==='a'){ await sb.from('attendance').delete().eq('id', _t.n); } else { await sb.from(_t.k==='v'?'vendors':'workers').delete().eq('id', _mCloudId(_t.k,_t.n)); } }  // [수술⑥] 출역('a') 툼스톤은 uuid 직접 삭제 재시도
         try{ localStorage.setItem('mm-master-tomb', JSON.stringify(_keep)); }catch(e){}
       }catch(e){}
       try{ localStorage.removeItem('mm-masters-dirty'); }catch(e){}  // [번호증발 수정] push 성공 → dirty 해제
@@ -17498,7 +17491,7 @@ CREATE TABLE system_map_activity (
       localStorage.setItem('mm-vendors-v2', JSON.stringify(Object.keys(lv).map(function(k){ return lv[k]; })));
       var lw={}; _mLoad('mm-workers').forEach(function(w){ if(w&&w.name&&!_mTombHas('w',w.name)) lw[_mNorm(w.name)]=w; });
       // [주민번호 통일 — 전수감사] rrn 폴백 체인에 ex.jumin 추가 — pull 1회로 레거시 jumin 행이 rrn 표준으로 이행
-      (rw.data||[]).forEach(function(r){ if(r.name&&!_mTombHas('w',r.name)){ var n=_mNorm(r.name); map['w:'+n]=r.id; var ex=lw[n]||{}; lw[n]=Object.assign({}, ex, { id:ex.id||('WK'+String(r.id).slice(0,8)), name:r.name, rrn:ex.rrn||ex.jumin||r.jumin_masked||'', phone:ex.phone||r.phone||'', primaryJob:ex.primaryJob||r.primary_job||'일반', primaryWage:ex.primaryWage||r.primary_wage||0, altJobs:(Array.isArray(ex.altJobs)&&ex.altJobs.length)?ex.altJobs:(Array.isArray(r.alt_jobs)?r.alt_jobs:[]), daysWorked:ex.daysWorked||0, totalWage:ex.totalWage||0, createdAt:ex.createdAt||r.created_at }); } });
+      (rw.data||[]).forEach(function(r){ if(r.name&&!_mTombHas('w',r.name)){ var n=_mNorm(r.name); map['w:'+n]=r.id; var ex=lw[n]||{}; lw[n]=Object.assign({}, ex, { id:ex.id||('WK'+String(r.id).slice(0,8)), name:r.name, rrn:ex.rrn||ex.jumin||r.jumin_masked||'', phone:ex.phone||r.phone||'', address:ex.address||r.address||'', primaryJob:ex.primaryJob||r.primary_job||'일반', primaryWage:ex.primaryWage||r.primary_wage||0, altJobs:(Array.isArray(ex.altJobs)&&ex.altJobs.length)?ex.altJobs:(Array.isArray(r.alt_jobs)?r.alt_jobs:[]), daysWorked:ex.daysWorked||0, totalWage:ex.totalWage||0, createdAt:ex.createdAt||r.created_at }); } });
       localStorage.setItem('mm-workers', JSON.stringify(Object.keys(lw).map(function(k){ return lw[k]; })));
       _mIdMapSave(map);
       try{ window.dispatchEvent(new StorageEvent('storage',{ key:'mm-vendors-v2' })); }catch(e){}
@@ -17512,6 +17505,14 @@ CREATE TABLE system_map_activity (
   // [전수조사 H1·H2] 호출 즉시 툼스톤 기록(클라우드 삭제 성패 무관) → pull 부활 차단 + pushMasters가 재시도
   async function deleteVendorCloud(name){ if(!name) return { ok:false }; _mTombAdd('v',name); var sb=sbClient(); if(!sb) return { ok:false, msg:'no-cloud' }; try{ var r=await sb.from('vendors').delete().eq('id', _mCloudId('v',name)); return { ok:!r.error, msg:r.error&&r.error.message }; }catch(e){ return { ok:false, msg:e.message }; } }
   async function deleteWorkerCloud(name){ if(!name) return { ok:false }; _mTombAdd('w',name); var sb=sbClient(); if(!sb) return { ok:false, msg:'no-cloud' }; try{ var r=await sb.from('workers').delete().eq('id', _mCloudId('w',name)); return { ok:!r.error, msg:r.error&&r.error.message }; }catch(e){ return { ok:false, msg:e.message }; } }
+  // [수술⑥ — 출역 삭제 전파] upsert-only push가 삭제를 표현 못해 다음 로그인 pull에서 부활하던 결함 — 즉시 툼스톤 + 클라우드 삭제(실패 시 pushMasters가 재시도)
+  async function deleteAttendanceCloud(localId){
+    var m=String(localId||'').match(/^AT([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i);
+    var cid = m ? m[1].toLowerCase() : _mCloudId('a', localId);
+    _mTombAdd('a', cid);
+    var sb=sbClient(); if(!sb) return { ok:false, msg:'no-cloud' };
+    try{ var r=await sb.from('attendance').delete().eq('id', cid); return { ok:!r.error, msg:r.error&&r.error.message }; }catch(e){ return { ok:false, msg:e.message }; }
+  }
 
   // ── 설정(회사정보·보험요율·임계값) 클라우드 동기화 [감사 4단계] — app_settings 키-값. 테이블 없으면 자동 no-op ──
   var SETTING_KEYS = ['mm-company','mm-alert-thresholds'];
@@ -17544,11 +17545,16 @@ CREATE TABLE system_map_activity (
       var ownerId=sess.data.session && sess.data.session.user && sess.data.session.user.id;
       if(!ownerId) return { ok:false, msg:'로그인 필요' };
       var at=_mLoad('mm-attendance').filter(function(a){ return a && a.workerName && a.date; });
-      if(!at.length) return { ok:true, msg:'출역 0' };
+      if(!at.length){ try{ localStorage.removeItem('mm-attend-dirty'); }catch(e){} return { ok:true, msg:'출역 0' }; }
       await pushMasters();   // worker FK 보장(일용직 먼저 upsert)
-      var payload=at.map(function(a){ return { id:_mCloudId('a', a.id||(a.workerName+'|'+a.date)), worker_id:_mCloudId('w', a.workerName), project_id:null, work_date:a.date, job_type:a.jobType||null, wage:Math.round(a.wage||0), memo:a.projectLabel||null }; });
+      // [수술① — 출역 ID 안정화] pull이 재작성한 'AT'+uuid 행은 같은 uuid로 재upsert — pull→재push가 매 로그인 새 uuid로 클라우드 행을 증식시키던 결함 봉쇄
+      var _aCid=function(a){ var m=String(a.id||'').match(/^AT([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i); return m?m[1].toLowerCase():_mCloudId('a', a.id||(a.workerName+'|'+a.date)); };
+      // [적대검증 보강] 일용직 마스터에 없는 이름('(미상)' 등 고아)은 push 제외 — FK 위반 1건이 출역 배치 전체를 무음 실패시키던 결함
+      var _wkSet={}; _mLoad('mm-workers').forEach(function(w){ if(w&&w.name) _wkSet[_mNorm(w.name)]=1; });
+      var payload=at.filter(function(a){ return _wkSet[_mNorm(a.workerName)]; }).map(function(a){ return { id:_aCid(a), worker_id:_mCloudId('w', a.workerName), project_id:null, work_date:a.date, job_type:a.jobType||null, wage:Math.round(a.wage||0), memo:a.projectLabel||null }; }).filter(function(p){ return !_mTombHas('a', p.id); });  // [수술⑥] 삭제 툼스톤 행은 재upsert 금지
       var r=await sb.from('attendance').upsert(payload,{ onConflict:'id' });
       if(r.error) return { ok:false, msg:r.error.message };
+      try{ localStorage.removeItem('mm-attend-dirty'); }catch(e){}  // [수술④] push 성공 → dirty 해제
       return { ok:true, msg:'출역 '+payload.length };
     }catch(e){ return { ok:false, msg:'출역 push: '+(e.message||e) }; }
   }
@@ -17558,7 +17564,7 @@ CREATE TABLE system_map_activity (
       var r=await sb.from('attendance').select('*'); if(r.error) throw r.error;
       var workers=_mLoad('mm-workers');
       function wByCid(cid){ for(var i=0;i<workers.length;i++){ if(_mCloudId('w', workers[i].name)===cid) return workers[i]; } return null; }
-      var arr=(r.data||[]).map(function(row){ var w=wByCid(row.worker_id); return { id:'AT'+row.id, date:row.work_date, workerId:w?w.id:row.worker_id, workerName:w?w.name:'(미상)', jobType:row.job_type||'일반', wage:row.wage||0, projectLabel:row.memo||'', createdAt:row.created_at }; });
+      var arr=(r.data||[]).filter(function(row){ return !_mTombHas('a', String(row.id)); }).map(function(row){ var w=wByCid(row.worker_id); return { id:'AT'+row.id, date:row.work_date, workerId:w?w.id:row.worker_id, workerName:w?w.name:'(미상)', jobType:row.job_type||'일반', wage:row.wage||0, projectLabel:row.memo||'', createdAt:row.created_at }; });
       localStorage.setItem('mm-attendance', JSON.stringify(arr));
       try{ if(window.mmAttend&&window.mmAttend.recalcWorkers) window.mmAttend.recalcWorkers(); }catch(e){}
       try{ if(window.mmAttend&&window.mmAttend.render) window.mmAttend.render(); }catch(e){}
@@ -17570,7 +17576,7 @@ CREATE TABLE system_map_activity (
   window.mmData = {
     pull: pull, push: push, syncOnLogin: syncOnLogin, deleteProject: deleteProject,
     pushMasters: pushMasters, pullMasters: pullMasters,
-    deleteVendorCloud: deleteVendorCloud, deleteWorkerCloud: deleteWorkerCloud,
+    deleteVendorCloud: deleteVendorCloud, deleteWorkerCloud: deleteWorkerCloud, deleteAttendanceCloud: deleteAttendanceCloud,
     pushSettings: pushSettings, pullSettings: pullSettings,
     pushAttendance: pushAttendance, pullAttendance: pullAttendance,
     setAutoSync: setAutoSync, isAutoSync: function(){ return autoSync },
@@ -17949,6 +17955,8 @@ CREATE TABLE system_map_activity (
     var f = inputs('global-worker-add');
     var name = getVal(f, 0);
     if (!name) { alert('이름을 입력하세요'); return; }
+    // [수술② — 동명이인 차단] 등록 전 경로 동일 정책
+    try { var _exw = JSON.parse(localStorage.getItem('mm-workers')||'[]')||[]; var _wnm = function(s){ return String(s||'').replace(/\s+/g,'').replace(/[()（）]/g,'').toLowerCase(); }; if (Array.isArray(_exw) && _exw.some(function(w){ return _wnm(w&&w.name) === _wnm(name); })) { alert('이미 등록된 이름입니다.\n동기화가 이름 기준이라 동명이인은 구분 표기로 등록하세요 (예: 홍길동B)'); return; } } catch(e){}  // [적대검증 보강] _mNorm 동일 정규화
     var rrn = getVal(f, 1), phone = getVal(f, 2);
     var job = getVal(f, 3) || '일반';
     var wage = num(getVal(f, 4));
@@ -17984,11 +17992,8 @@ CREATE TABLE system_map_activity (
       var workers = JSON.parse(localStorage.getItem('mm-workers') || '[]');
       if (!Array.isArray(workers)) workers = [];
       var w = workers.find(function(x){ return (x.name||'').trim() === workerName; });
-      if (!w) {
-        w = { id:'WK'+Date.now(), name:workerName, primaryJob:'일반', primaryWage:wage, altJobs:[], daysWorked:0, totalWage:0, createdAt:new Date().toISOString() };
-        workers.unshift(w);
-        localStorage.setItem('mm-workers', JSON.stringify(workers));
-      }
+      // [수술 — 선등록 정책 정합] 미등록 이름 무확인 자동 생성 차단 — 오타·'+ 신규 등록...' 문자열이 유령 일용직을 만들어 클라우드까지 전파되던 결함
+      if (!w) { alert('[선등록 정책] 일용직 마스터에 등록된 작업자만 출역 등록할 수 있습니다.\n→ 일용직 화면에서 먼저 등록하세요'); return; }
       if (!wage) wage = num(w.primaryWage);  // [감사 rank1] 빈 일당 220,000 합성 제거 — 미입력은 0(미산정)
       var arr = JSON.parse(localStorage.getItem('mm-attendance') || '[]');
       if (!Array.isArray(arr)) arr = [];
@@ -17997,6 +18002,7 @@ CREATE TABLE system_map_activity (
       }
       arr.unshift({ id:'AT'+Date.now(), date:date, workerId:w.id, workerName:w.name, jobType:w.primaryJob||'일반', wage:wage, projectLabel:pjLabel, createdAt:new Date().toISOString() });
       localStorage.setItem('mm-attendance', JSON.stringify(arr));
+      try { localStorage.setItem('mm-attend-dirty','1'); } catch(e){}  // [수술④ 보강] 쓰기 지점 dirty
       if (window.mmAttend) {
         if (window.mmAttend.recalcWorkers) window.mmAttend.recalcWorkers();
         if (window.mmAttend.render) window.mmAttend.render();
@@ -18022,7 +18028,7 @@ CREATE TABLE system_map_activity (
       : '<option value="">— 프로젝트를 먼저 등록하세요 —</option>';
     var today = new Date().toISOString().slice(0,10);
     if (id === 'global-attendance-add') {
-      var ws = document.getElementById('att-worker-select'); if (ws) ws.innerHTML = wOpts + '<option>+ 신규 등록...</option>';
+      var ws = document.getElementById('att-worker-select'); if (ws) ws.innerHTML = wOpts;  // [수술] '+ 신규 등록...' 유령 옵션 제거 — 핸들러 없이 그 문자열 이름의 일용직이 생성되던 결함
       var ps = document.getElementById('att-project-select'); if (ps) ps.innerHTML = pOpts;
       var dt = document.querySelector('#global-attendance-add input[type="date"]'); if (dt) dt.value = today;
     }
@@ -18172,7 +18178,7 @@ CREATE TABLE system_map_activity (
     var rows = [['프로젝트','분류','업체','세부내역','공급가','세액','합계','지급액']];
     projects.forEach(function(p){
       (p.costItems||[]).forEach(function(it){
-        var supply = num(it.supplyAmt), tax = num(it.tax || Math.round(supply*0.1));
+        var supply = num(it.supplyAmt), tax = num(it.tax);  // [수술 — 전수감사] tax=0(VAT0: 인건비·직불 등)에 10% 세액을 합성해 CSV 합계를 과대 기재하던 결함 — 저장 세액 그대로
         rows.push([p.id||'', it.type||'', it.vendor||'', it.desc||'', supply, tax, supply+tax, num(it.paidAmount)]);
       });
     });
@@ -19268,7 +19274,8 @@ CREATE TABLE system_map_activity (
           if (!Array.isArray(arr)) arr = [];
           p.rows.forEach(function(r, i) {
             var name = (r[0]||'').trim(); if (!name) return;
-            if (arr.some(function(v){return (v.name||'').trim()===name;})) return;
+            var _vnc = function(s){ return String(s||'').replace(/\s+/g,'').replace(/[()（）]/g,'').toLowerCase(); };  // [적대검증 보강] 거래처도 정규화 중복 차단 — 공백 변형이 같은 클라우드 uuid로 충돌하던 비대칭
+            if (arr.some(function(v){return _vnc(v.name)===_vnc(name);})) return;
             arr.push({ id:'V'+ts+'_'+i, name:name, bizNo:(r[1]||'').trim(), ceo:(r[2]||'').trim(), category:((r[3]||'외주비').split(' ')[0]||'외주비'), phone:(r[4]||'').trim(), createdAt:new Date().toISOString() });
             count++;
           });
@@ -19277,8 +19284,10 @@ CREATE TABLE system_map_activity (
         } else if (type === 'worker') {
           var arr = JSON.parse(localStorage.getItem('mm-workers')||'[]');
           if (!Array.isArray(arr)) arr = [];
+          var _wnc = function(s){ return String(s||'').replace(/\s+/g,'').replace(/[()（）]/g,'').toLowerCase(); };  // [적대검증 보강] _mNorm 동일 정규화
           p.rows.forEach(function(r, i) {
             var name = (r[0]||'').trim(); if (!name) return;
+            if (arr.some(function(w){ return _wnc(w&&w.name) === _wnc(name); })) return;  // [수술② — 동명이인·재업로드 중복 차단] 이름 기준 동기화 보호
             arr.push({ id:'WK'+ts+'_'+i, name:name, rrn:(r[1]||'').trim(), phone:(r[2]||'').trim(), primaryJob:(r[3]||'일반').trim(), primaryWage:num(r[4]), altJobs:[], daysWorked:0, totalWage:0, createdAt:new Date().toISOString() });
             count++;
           });
@@ -19289,19 +19298,19 @@ CREATE TABLE system_map_activity (
           if (!Array.isArray(arr)) arr = [];
           var workers = JSON.parse(localStorage.getItem('mm-workers')||'[]');
           if (!Array.isArray(workers)) workers = [];
+          var _skip = 0, _dup = 0;
           p.rows.forEach(function(r, i) {
             var date = (r[0]||'').trim(), workerName = (r[1]||'').trim();
             if (!date || !workerName) return;
             var w = workers.find(function(x){return (x.name||'').trim()===workerName;});
-            if (!w) {
-              w = { id:'WK'+ts+'_'+i, name:workerName, primaryJob:(r[2]||'일반').trim(), primaryWage:num(r[3]), altJobs:[], daysWorked:0, totalWage:0, createdAt:new Date().toISOString() };
-              workers.push(w);
-            }
+            if (!w) { _skip++; return; }  // [수술 — 선등록 정책] 미등록 작업자 자동 생성 차단 — 일용직 화면에서 먼저 등록
+            if (arr.some(function(a){ return a.workerId === w.id && a.date === date; })) { _dup++; return; }  // [수술 — 재업로드 중복 차단] 같은 파일 재가져오기 시 출역 2배 누적되던 결함
             arr.push({ id:'AT'+ts+'_'+i, date:date, workerId:w.id, workerName:w.name, jobType:(r[2]||w.primaryJob||'일반').trim(), wage:num(r[3])||num(w.primaryWage), projectLabel:(r[4]||'').trim(), createdAt:new Date().toISOString() });
             count++;
           });
-          localStorage.setItem('mm-workers', JSON.stringify(workers));
+          if (_skip || _dup) toast('⚠️ 제외 — 미등록 작업자 ' + _skip + '건 · 중복 ' + _dup + '건', 'warning', 6000);
           localStorage.setItem('mm-attendance', JSON.stringify(arr));
+          try { localStorage.setItem('mm-attend-dirty','1'); } catch(e){}  // [수술④ 보강] 쓰기 지점 dirty
           if (window.mmAttend && window.mmAttend.recalcWorkers) window.mmAttend.recalcWorkers();
           if (window.mmAttend && window.mmAttend.render) window.mmAttend.render();
           if (window.renderAttendancePage) window.renderAttendancePage();
