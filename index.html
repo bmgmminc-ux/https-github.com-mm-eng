@@ -5673,15 +5673,14 @@ table.data-table {
       <div class="pjd-profit-hero" id="pjd-profit-hero">
         <div class="pjd-profit-icon" id="pjd-profit-icon">💎</div>
         <div class="pjd-profit-main">
-          <div class="pjd-profit-lbl">이익률 · Profit Margin
-            <!-- [상태 배지 — 대표 요청] 전체 현황·예산 분석의 상태 분류를 메인 수익 요약에도 노출 -->
-            <span id="pjd-status-badge" style="display:none;margin-left:8px;font-size:12px;font-weight:800;padding:3px 10px;border-radius:999px;vertical-align:2px"></span>
-            <span id="pjd-progress-badge" style="display:none;margin-left:4px;font-size:12px;font-weight:800;padding:3px 10px;border-radius:999px;vertical-align:2px"></span>
-          </div>
+          <div class="pjd-profit-lbl">이익률 · Profit Margin</div>
           <div class="pjd-profit-rate" id="pjd-profit-rate-mega">—</div>
           <div class="pjd-profit-amt">이익 <strong id="pjd-profit-amt">—</strong> <small id="pjd-profit-amt-full">—</small></div>
         </div>
         <div class="pjd-profit-side">
+          <!-- [상태 카드 — 대표 요청] 전체 현황·예산 분석의 상태 분류를 기성 신청률 칩과 같은 라인·크기로 노출 -->
+          <div class="chip"><span class="l">상태</span><span class="v" id="pjd-side-status">—</span></div>
+          <div class="chip"><span class="l">진행</span><span class="v" id="pjd-side-progress">—</span></div>
           <div class="chip"><span class="l">기성 신청률</span><span class="v primary" id="pjd-side-bill">—</span></div>
           <div class="chip"><span class="l">미청구</span><span class="v" id="pjd-side-unbilled">—</span></div>
           <div class="chip"><span class="l">원가율</span><span class="v warn" id="pjd-side-cost">—</span></div>
@@ -6029,23 +6028,22 @@ table.data-table {
 
     // [상태 배지 — 대표 요청] 종합 상태(마진 기반) + 진행 상태를 수익 요약에 노출 — 전체 현황 리스트·예산 분석표와 동일 분류
     (function(){
-      var sb = document.getElementById('pjd-status-badge');
+      var sb = document.getElementById('pjd-side-status');
       if (sb) {
         // 전체 현황 리스트·예산 분석표와 동일한 원가율(소진율) 기준 분류 — 손실(마진<0)만 별도 강조
         var _cr = k.costRate * 100;
-        var st = (k.profitRate < 0)  ? {t:'🔴 손실', bg:'#FEE2E2', fg:'#991B1B'}
-               : (_cr >= 100)        ? {t:'🔴 초과', bg:'#FEE2E2', fg:'#991B1B'}
-               : (_cr >= 85)         ? {t:'🟡 주의', bg:'#FEF3C7', fg:'#92400E'}
-               :                       {t:'🟢 양호', bg:'#D1FAE5', fg:'#065F46'};
-        sb.textContent = st.t; sb.style.background = st.bg; sb.style.color = st.fg; sb.style.display = '';
+        var st = (k.profitRate < 0)  ? {t:'🔴 손실', fg:'#DC2626'}
+               : (_cr >= 100)        ? {t:'🔴 초과', fg:'#DC2626'}
+               : (_cr >= 85)         ? {t:'🟡 주의', fg:'#D97706'}
+               :                       {t:'🟢 양호', fg:'#059669'};
+        sb.textContent = st.t; sb.style.color = st.fg;
       }
-      var pb = document.getElementById('pjd-progress-badge');
+      var pb = document.getElementById('pjd-side-progress');
       if (pb) {
         var status = '';
-        try { var _p = (JSON.parse(localStorage.getItem('mm-dash-v4')||'[]')||[]).find(function(x){ return x.id === k.id; }); status = (_p && _p.status) || ''; } catch(e){}
-        var pm = { '완료':{t:'✅ 완료', bg:'#DBEAFE', fg:'#1E40AF'}, '보류':{t:'⏸ 보류', bg:'#F1F5F9', fg:'#475569'}, '진행중':{t:'🔄 진행중', bg:'#EDE9FE', fg:'#5B21B6'} }[status];
-        if (pm) { pb.textContent = pm.t; pb.style.background = pm.bg; pb.style.color = pm.fg; pb.style.display = ''; }
-        else pb.style.display = 'none';
+        try { var _p = (JSON.parse(localStorage.getItem('mm-dash-v4')||'[]')||[]).find(function(x){ return x.id === k.id; }); status = (_p && _p.status) || '진행중'; } catch(e){ status = '진행중'; }
+        var pm = { '완료':{t:'✅ 완료', fg:'#2563EB'}, '보류':{t:'⏸ 보류', fg:'#64748B'}, '진행중':{t:'🔄 진행중', fg:'#7C3AED'} }[status] || { t:status, fg:'#475569' };
+        pb.textContent = pm.t; pb.style.color = pm.fg;
       }
     })();
 
