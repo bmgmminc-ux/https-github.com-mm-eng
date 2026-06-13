@@ -10710,77 +10710,20 @@ table.data-table {
               </div>
             </div>
 
-            <div class="modal-info-banner danger" style="margin-top:14px">
-              🚨 <strong>최근 보안 이벤트:</strong> 2026-04-30 23:14 — 알 수 없는 IP에서 로그인 시도 차단됨 (192.168.x.x). 의심 시 전체 비밀번호 재설정 권장.
-            </div>
           </div>
 
-          <!-- 4. API 연동 -->
+          <!-- 4. API 연동 — [가짜 카드 제거] 키는 브라우저가 아닌 서버에서 관리 (정직 표시) -->
           <div class="card-base mb-4" id="sec-api" style="scroll-margin-top:80px;border-left:4px solid #D97706">
             <div class="card-base-header">
               <div>
                 <h3 class="t-h4">⚡ API 연동</h3>
-                <div class="t-xs">Claude AI · 다우오피스 · 경리나라. 키는 SHA-256 암호화 저장.</div>
+                <div class="t-xs">외부 API 키는 브라우저에 저장하지 않고 서버에서 관리합니다.</div>
               </div>
             </div>
-
-            <!-- Claude AI -->
-            <div style="padding:14px 0;border-bottom:1px solid var(--border-subtle)">
-              <div class="row" style="justify-content:space-between;margin-bottom:10px">
-                <div>
-                  <div style="font-size:14px;font-weight:800;display:flex;align-items:center;gap:8px">
-                    🤖 Claude AI <span class="badge badge-success" style="font-size:9px">연결됨</span>
-                  </div>
-                  <div class="t-xs">매입 자동 분류, 영수증 OCR, 견적 분산, CFO 분석 (55 criteria)</div>
-                </div>
-                <button class="btn btn-secondary btn-sm">테스트</button>
-              </div>
-              <div class="form-grid">
-                <label class="form-label">API 키</label>
-                <input type="password" class="form-input" value="sk-ant-api03-•••••••••••••••" />
-                <label class="form-label">모델</label>
-                <select class="form-input">
-                  <option>claude-opus-4-7 (최신)</option>
-                  <option>claude-sonnet-4-6</option>
-                  <option>claude-haiku-4-5 (저비용)</option>
-                </select>
-                <label class="form-label">월 사용 한도</label>
-                <input type="text" class="form-input" value="500,000" placeholder="0 = 무제한" />
-              </div>
-            </div>
-
-            <!-- 다우오피스 -->
-            <div style="padding:14px 0;border-bottom:1px solid var(--border-subtle)">
-              <div class="row" style="justify-content:space-between;margin-bottom:10px">
-                <div>
-                  <div style="font-size:14px;font-weight:800;display:flex;align-items:center;gap:8px">
-                    🏢 다우오피스 <span class="badge badge-warning" style="font-size:9px">대기중</span>
-                  </div>
-                  <div class="t-xs">전자결재 / 메일 / Works 데이터 GET API. 2026-04-05 API 가용 여부 문의 중.</div>
-                </div>
-                <button class="btn btn-secondary btn-sm">재인증</button>
-              </div>
-              <div class="form-grid">
-                <label class="form-label">Client ID</label>
-                <input type="text" class="form-input" value="a6cbb1dbc8affff7" />
-                <label class="form-label">Client Secret</label>
-                <input type="password" class="form-input" value="••••••••••••••••" />
-                <label class="form-label">Access Token</label>
-                <input type="text" class="form-input" value="만료까지 14,521초 (4시간)" readonly style="background:var(--bg-subtle)" />
-              </div>
-            </div>
-
-            <!-- 경리나라 -->
-            <div style="padding:14px 0">
-              <div class="row" style="justify-content:space-between;margin-bottom:10px">
-                <div>
-                  <div style="font-size:14px;font-weight:800;display:flex;align-items:center;gap:8px">
-                    📊 경리나라 <span class="badge" style="font-size:9px;background:var(--bg-subtle);color:var(--text-tertiary)">미연결</span>
-                  </div>
-                  <div class="t-xs">매출·매입·세금계산서 자동 동기화. 회계 담당자 작업 자동화.</div>
-                </div>
-                <button class="btn btn-primary btn-sm">+ 연결하기</button>
-              </div>
+            <div class="modal-info-banner" style="margin-top:6px;line-height:1.7">
+              🔐 <strong>Claude AI (영수증 OCR)</strong> — 키는 Supabase Edge Function 시크릿(<code>ANTHROPIC_API_KEY</code>)에 보관합니다. 클라이언트(브라우저)에는 키를 두지 않습니다.<br>
+              🔐 <strong>이메일·SMS 발송</strong> — 키는 Netlify 환경변수(<code>RESEND_API_KEY</code> · <code>ALIGO_API_KEY</code> 등)에서 관리합니다.<br>
+              실제 연결 상태와 테스트 발송은 아래 <b>"🔌 외부 인프라 상태"</b> 카드에서 확인하세요.
             </div>
           </div>
 
@@ -10926,18 +10869,17 @@ table.data-table {
             <div class="setting-row">
               <div class="setting-row-info">
                 <div class="setting-row-title">☁️ Supabase 연결 상태</div>
-                <div class="setting-row-desc">eppmsprrppvdlolodqlo.supabase.co · 응답 시간 평균 145ms · 가용성 99.97%.</div>
+                <div class="setting-row-desc">실제 연결 상태는 아래 "🔌 외부 인프라 상태" 카드에서 확인하세요. 연결 설정은 클라우드 동기화 화면에서 관리합니다.</div>
               </div>
               <div class="setting-row-control">
-                <span class="badge badge-success">✓ 정상</span>
-                <button class="btn btn-secondary btn-sm">설정 편집</button>
+                <button class="btn btn-secondary btn-sm" onclick="if(window.mmNavigate)mmNavigate('cloud-sync'); else if(location.hash!=='#cloud-sync')location.hash='cloud-sync';">동기화 설정</button>
               </div>
             </div>
 
             <div class="setting-row">
               <div class="setting-row-info">
                 <div class="setting-row-title">🔄 localStorage 동기화</div>
-                <div class="setting-row-desc">오프라인 작업 → 온라인 시 자동 동기화. 마지막 동기화: 1분 전. 보류 중: 0건.</div>
+                <div class="setting-row-desc">오프라인 작업 → 온라인 연결 시 자동 동기화. 변경 즉시 클라우드 백업.</div>
               </div>
               <div class="setting-row-control">
                 <button class="btn btn-secondary btn-sm" onclick="window.cloudSave()">☁️ 수동 동기화</button>
@@ -10971,10 +10913,10 @@ table.data-table {
             <div class="setting-row">
               <div class="setting-row-info">
                 <div class="setting-row-title">📦 전체 데이터 내보내기</div>
-                <div class="setting-row-desc">JSON·엑셀·SQL 형식. 마지막 내보내기: 2026-04-30 (4일 전).</div>
+                <div class="setting-row-desc">현재 데이터를 JSON으로 내보냅니다.</div>
               </div>
               <div class="setting-row-control">
-                <button class="btn btn-secondary btn-sm">📥 다운로드 (~120MB)</button>
+                <button class="btn btn-secondary btn-sm">📥 다운로드</button>
               </div>
             </div>
 
@@ -12529,49 +12471,79 @@ CREATE TABLE system_map_activity (
       if (window.globalToast) globalToast('📋 일용직 템플릿 CSV 다운로드 (UTF-8 BOM)', 'success');
     };
 
+    // ── 일용직 마스터 일괄 등록 공통 코어 — CSV 업로드·클립보드 붙여넣기 공유 ──
+    // [사일런트 유실 수정] 구 processWorkerExcel은 mm-worker-import-history에만 push하고 'N명 등록' 거짓 성공만 띄웠음.
+    //  이제 실제 mm-workers 마스터에 insert + 동명이인 차단(동기화 _mNorm 동일) + mmWorkers.render(). 클라우드는 3초 마스터해시 워처가 pushMasters로 자동 전파.
+    // 열 순서(템플릿 동일): 이름, 주민등록번호, 직종, 일당, 연락처, 계좌번호, 은행, 주소, 비고
+    window.importWorkerMasterText = function(text, opts) {
+      opts = opts || {};
+      text = String(text || '');
+      if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);  // BOM 제거
+      var lines = text.split(/\r?\n/).filter(function(l) { return l.trim() !== ''; });
+      if (!lines.length) { if (window.globalToast) globalToast('⚠ 데이터가 없습니다 (붙여넣기/파일 비어있음)', 'warning'); return { added: 0 }; }
+      // 구분자: 탭(클립보드) 우선, 없으면 콤마(CSV) — 보이지 않는 제로폭/특수공백 제거
+      var splitCells = function(l){ return (l.indexOf('\t') >= 0 ? l.split('\t') : l.split(',')).map(function(c){ return String(c||'').trim(); }); };
+      var grid = lines.map(splitCells);
+      var _hasHeader = /이름|성명|주민|직종|일당/.test(grid[0].join(','));  // 헤더 행이면 제외
+      var dataRows = _hasHeader ? grid.slice(1) : grid;
+      if (!dataRows.length) { if (window.globalToast) globalToast('⚠ 헤더만 있고 데이터 행이 없습니다', 'warning'); return { added: 0 }; }
+      var num = function(v){ return Number(String(v||'0').replace(/[^0-9.-]/g,'')) || 0; };
+      var _wn = function(s){ return String(s||'').replace(/\s+/g,'').replace(/[()（）]/g,'').toLowerCase(); };  // 동기화 계층(_mNorm) 동일 정규화
+      var arr = []; try { arr = JSON.parse(localStorage.getItem('mm-workers') || '[]'); if (!Array.isArray(arr)) arr = []; } catch(e){ arr = []; }
+      var _seen = {}; arr.forEach(function(w){ if (w && w.name) _seen[_wn(w.name)] = 1; });
+      var dups = [], newWorkers = [], added = 0;
+      dataRows.forEach(function(cols, i) {
+        var name = String(cols[0]||'').trim();
+        if (!name) return;
+        var key = _wn(name);
+        if (_seen[key]) { dups.push(name); return; }  // [수술② — 동명이인 차단] 등록 경로 동일 정책
+        _seen[key] = 1;
+        newWorkers.push({
+          id: 'WK' + Date.now() + '_' + i,
+          name: name,
+          rrn: String(cols[1]||'').trim(),          // [주민번호 통일] 원본 저장 — 표시 시 maskJumin 마스킹
+          primaryJob: String(cols[2]||'').trim() || '일반',
+          primaryWage: num(cols[3]),
+          phone: String(cols[4]||'').trim(),
+          account: String(cols[5]||'').trim(),
+          bank: String(cols[6]||'').trim(),
+          address: String(cols[7]||'').trim(),
+          remark: String(cols[8]||'').trim(),
+          altJobs: [], daysWorked: 0, totalWage: 0,
+          createdAt: new Date().toISOString()
+        });
+        added++;
+      });
+      if (!newWorkers.length) {
+        var m0 = '⚠ 일용직 신규 등록 0건';
+        if (dups.length) m0 += ' · 중복(동명) ' + dups.length + '건 제외';
+        if (window.globalToast) globalToast(m0, 'warning', 6000);
+        if (dups.length) alert('⚠️ [동명이인 차단] 이미 등록된 이름으로 전부 제외됨:\n' + dups.join(', ') + '\n\n동기화가 이름 기준이라 동명이인은 구분 표기로 등록하세요 (예: 홍길동B).');
+        return { added: 0, dup: dups.length };
+      }
+      try {
+        var combined = newWorkers.concat(arr);  // 신규를 앞에 (기존 add()의 unshift 정렬감 유지)
+        localStorage.setItem('mm-workers', JSON.stringify(combined));
+        var msg = '✓ 일용직 신규 ' + added + '명 등록 (주민번호 표시 마스킹)';
+        if (dups.length) msg += ' · 중복(동명) ' + dups.length + '건 제외';
+        if (window.globalToast) globalToast(msg, 'success', 6000);
+        if (dups.length) alert('⚠️ [동명이인 차단] 이미 등록된 이름으로 제외된 ' + dups.length + '건:\n' + dups.join(', ') + '\n\n동기화가 이름 기준이라 동명이인은 구분 표기로 등록하세요 (예: 홍길동B).');
+        try { if (window.mmWorkers && window.mmWorkers.render) window.mmWorkers.render(); } catch(e){}
+        try { if (window.mmAttend && window.mmAttend.refresh) window.mmAttend.refresh(); } catch(e){}
+        if (window.mmAudit) window.mmAudit.log('데이터', '일용직 일괄 등록 — ' + added + '명 (' + (opts.source === 'clipboard' ? '붙여넣기' : 'CSV') + ')');
+        return { added: added, dup: dups.length };
+      } catch (e) {
+        if (window.globalToast) globalToast('❌ 저장 실패: ' + e.message, 'danger');
+        return { added: 0, error: e.message };
+      }
+    };
+
     window.processWorkerExcel = function(file) {
       if (!file) return;
       var reader = new FileReader();
       reader.onload = function(e) {
         var text = e.target.result.replace(/^\uFEFF/, '');  // BOM 제거
-        var lines = text.split(/\r?\n/).filter(function(l) { return l.trim() !== ''; });
-        if (lines.length < 2) {
-          if (window.globalToast) globalToast('⚠ 파일에 데이터 행이 없음', 'warning');
-          return;
-        }
-        var headers = lines[0].split(',');
-        var rows = lines.slice(1).map(function(l) {
-          var cols = l.split(',');
-          return {
-            name: cols[0], ssn: cols[1], type: cols[2], daily: parseInt(cols[3]) || 0,
-            phone: cols[4], account: cols[5], bank: cols[6], address: cols[7], remark: cols[8]
-          };
-        });
-
-        // 마스킹 처리 (룰 6 시각 보강)
-        rows.forEach(function(r) {
-          if (r.ssn && r.ssn.length > 7) {
-            r.ssnMasked = r.ssn.substring(0, 7) + '*'.repeat(7);
-          }
-          if (r.account && r.account.length > 4) {
-            r.accountMasked = r.account.substring(0, 4) + '-***-' + r.account.slice(-4);
-          }
-        });
-
-        try {
-          var key = 'mm-worker-import-history';
-          var history = JSON.parse(localStorage.getItem(key) || '[]');
-          history.unshift({
-            imported_at: new Date().toISOString(),
-            count: rows.length,
-            rows: rows
-          });
-          if (history.length > 20) history.length = 20;
-          localStorage.setItem(key, JSON.stringify(history));
-          if (window.globalToast) globalToast('✓ 일용직 ' + rows.length + '명 일괄 등록 (주민번호·계좌 자동 마스킹)', 'success');
-        } catch (e) {
-          if (window.globalToast) globalToast('❌ 저장 실패: ' + e.message, 'danger');
-        }
+        window.importWorkerMasterText(text, { source: 'csv' });
       };
       reader.readAsText(file, 'UTF-8');
     };
@@ -12904,62 +12876,94 @@ CREATE TABLE system_map_activity (
     // ═══════════════════════════════════════════════════════════════
     // 거래처 Excel 일괄 등록 (paste 시스템 재활용)
     // ═══════════════════════════════════════════════════════════════
+    // \u2500\u2500 \uAC70\uB798\uCC98 \uB9C8\uC2A4\uD130 \uC77C\uAD04 \uB4F1\uB85D \uACF5\uD1B5 \uCF54\uC5B4 \u2014 CSV \uC5C5\uB85C\uB4DC\u00B7\uD074\uB9BD\uBCF4\uB4DC \uBD99\uC5EC\uB123\uAE30 \uACF5\uC720 (\uC120\uB4F1\uB85D \uC815\uCC45\u00B7\uC911\uBCF5 \uCC28\uB2E8 \uB2E8\uC77C \uCD9C\uCC98) \u2500\u2500
+    // [\uC0AC\uC77C\uB7F0\uD2B8 \uC720\uC2E4 \uC218\uC815] \uAC70\uB798\uCC98/\uC77C\uC6A9\uC9C1 \uD654\uBA74\uC758 '\uD83D\uDCCB \uD074\uB9BD\uBCF4\uB4DC \uBD99\uC5EC\uB123\uAE30'\uAC00 \uB9E4\uC785\uC6A9 global-paste(submitPasteData mock)\uB85C \uBE60\uC838
+    //  mm-paste-history\uC5D0\uB9CC \uC313\uC774\uACE0 \uAC70\uC9D3 \uC131\uACF5\uB9CC \uB744\uC6B0\uB358 \uACB0\uD568 \u2014 \uC2E4\uC81C \uB9C8\uC2A4\uD130 insert \uACBD\uB85C\uB85C \uD1B5\uD569. \uD074\uB77C\uC6B0\uB4DC\uB294 3\uCD08 \uB9C8\uC2A4\uD130\uD574\uC2DC \uC6CC\uCC98\uAC00 \uC790\uB3D9 \uC804\uD30C.
+    // \uC5F4 \uC21C\uC11C(\uD15C\uD50C\uB9BF \uB3D9\uC77C): \uC5C5\uCCB4\uBA85, \uC0AC\uC5C5\uC790\uB4F1\uB85D\uBC88\uD638, \uB300\uD45C\uC790, \uC5F0\uB77D\uCC98, \uC774\uBA54\uC77C, \uC8FC\uC18C (\uAD6C\uC591\uC2DD '\uAC70\uB798\uBD84\uB958' \uC5F4 \uD3EC\uD568 \uC2DC \uC790\uB3D9 \uD638\uD658)
+    window.importVendorMasterText = function(text, opts) {
+      opts = opts || {};
+      text = String(text || '');
+      if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);  // BOM \uC81C\uAC70
+      var lines = text.split(/\r?\n/).filter(function(l) { return l.trim() !== ''; });
+      if (!lines.length) { if (window.globalToast) globalToast('\u26A0 \uB370\uC774\uD130\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4 (\uBD99\uC5EC\uB123\uAE30/\uD30C\uC77C \uBE44\uC5B4\uC788\uC74C)', 'warning'); return { added: 0 }; }
+      // \uAD6C\uBD84\uC790: \uD0ED(\uD074\uB9BD\uBCF4\uB4DC) \uC6B0\uC120, \uC5C6\uC73C\uBA74 \uCF64\uB9C8(CSV) \u2014 \uBCF4\uC774\uC9C0 \uC54A\uB294 \uC81C\uB85C\uD3ED/\uD2B9\uC218\uACF5\uBC31 \uC81C\uAC70
+      var splitCells = function(l){ return (l.indexOf('\t') >= 0 ? l.split('\t') : l.split(',')).map(function(c){ return String(c||'').trim(); }); };
+      var grid = lines.map(splitCells);
+      var _hdr = grid[0].join(',');
+      var _oldFmt = _hdr.indexOf('\uAC70\uB798\uBD84\uB958') >= 0;  // \uAD6C\uC591\uC2DD: \uAC70\uB798\uBD84\uB958 \uC5F4 \uD3EC\uD568 \u2192 phone \uC704\uCE58 \uBCF4\uC815
+      var _hasHeader = /\uC5C5\uCCB4\uBA85|\uAC70\uB798\uCC98|\uC0C1\uD638|\uD68C\uC0AC|\uC0AC\uC5C5\uC790|\uB300\uD45C/.test(_hdr);  // \uD5E4\uB354 \uD589\uC774\uBA74 \uC81C\uC678
+      var dataRows = _hasHeader ? grid.slice(1) : grid;
+      if (!dataRows.length) { if (window.globalToast) globalToast('\u26A0 \uD5E4\uB354\uB9CC \uC788\uACE0 \uB370\uC774\uD130 \uD589\uC774 \uC5C6\uC2B5\uB2C8\uB2E4', 'warning'); return { added: 0 }; }
+      var rows = dataRows.map(function(cols) {
+        return _oldFmt
+          ? { name: cols[0], bizNo: cols[1], ceo: cols[2], phone: cols[4], email: cols[5], address: cols[6] }
+          : { name: cols[0], bizNo: cols[1], ceo: cols[2], phone: cols[3], email: cols[4], address: cols[5] };
+      });
+      // [\uC120\uB4F1\uB85D \uC815\uCC45 \u2014 \uB300\uD45C \uAE30\uC900] \uC0AC\uC5C5\uC790\uB4F1\uB85D\uBC88\uD638(10\uC790\uB9AC) \uD544\uC218 + 3\uD0A4 \uBCD1\uD569 \uAE30\uC900 \uC774\uB984\u00B7\uBC88\uD638 \uC911\uBCF5 \uCC28\uB2E8
+      var _normN = function(s){ return String(s||'').replace(/\s+/g,'').replace(/[()\uFF08\uFF09]/g,'').toLowerCase(); };
+      var _digits = function(s){ return String(s||'').replace(/[^0-9]/g,''); };
+      var _all = [];
+      ['mm-vendors','mm-vendors-v2','mm-vendors-v23'].forEach(function(k){ try { var a = JSON.parse(localStorage.getItem(k)||'[]'); if (Array.isArray(a)) a.forEach(function(v){ _all.push(v); }); } catch(e2){} });
+      var _names = {}, _bizs = {};
+      _all.forEach(function(v){ var n=_normN(typeof v==='string'?v:(v&&v.name)); if(n) _names[n]=1; var b=_digits(v&&(v.bizNo||v.businessNo||v.bizno||v.biz_no)); if(b.length>=10) _bizs[b]=1; });
+      var duplicates = [], noBiz = [], newVendors = [];
+      rows.forEach(function(r) {
+        var nm = String(r.name||'').trim(); if (!nm) return;
+        var bz = _digits(r.bizNo);
+        if (bz.length !== 10) { noBiz.push(nm); return; }
+        var n = _normN(nm);
+        if (_names[n] || _bizs[bz]) { duplicates.push(nm); return; }
+        _names[n] = 1; _bizs[bz] = 1;
+        r.name = nm;
+        r.id = 'v_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+        r.createdAt = new Date().toISOString();
+        newVendors.push(r);
+      });
+      try {
+        var existing = JSON.parse(localStorage.getItem('mm-vendors-v23') || '[]');
+        if (!Array.isArray(existing)) existing = [];
+        var combined = existing.concat(newVendors);
+        localStorage.setItem('mm-vendors-v23', JSON.stringify(combined));
+        var msg = '\u2713 \uAC70\uB798\uCC98 \uC2E0\uADDC ' + newVendors.length + '\uAC74 \uB4F1\uB85D';
+        if (duplicates.length > 0) msg += ' \u00B7 \uC911\uBCF5 ' + duplicates.length + '\uAC74 \uC81C\uC678';
+        if (window.globalToast) globalToast(msg, newVendors.length ? 'success' : 'warning', 6000);
+        if (noBiz.length > 0) alert('\u26A0\uFE0F [\uC120\uB4F1\uB85D \uC815\uCC45] \uC0AC\uC5C5\uC790\uB4F1\uB85D\uBC88\uD638(10\uC790\uB9AC) \uB204\uB77D\uC73C\uB85C \uC81C\uC678\uB41C ' + noBiz.length + '\uAC74:\n' + noBiz.join(', ') + '\n\n"\uC0AC\uC5C5\uC790\uB4F1\uB85D\uBC88\uD638" \uC5F4\uC744 \uCC44\uC6CC \uB2E4\uC2DC \uB4F1\uB85D\uD558\uC138\uC694.');
+        try { window.dispatchEvent(new StorageEvent('storage', { key:'mm-vendors-v2' })); } catch(e3){}
+        try { if (window.mmVendors && window.mmVendors.render) window.mmVendors.render(); } catch(e3){}
+        if (window.mmAudit) window.mmAudit.log('\uB370\uC774\uD130', '\uAC70\uB798\uCC98 \uC77C\uAD04 \uB4F1\uB85D \u2014 ' + newVendors.length + '\uAC74 (' + (opts.source === 'clipboard' ? '\uBD99\uC5EC\uB123\uAE30' : 'CSV') + ')');
+        return { added: newVendors.length, dup: duplicates.length, noBiz: noBiz.length };
+      } catch (e) {
+        if (window.globalToast) globalToast('\u274C \uC800\uC7A5 \uC2E4\uD328: ' + e.message, 'danger');
+        return { added: 0, error: e.message };
+      }
+    };
+
+    // \u2500\u2500 \uAC70\uB798\uCC98\u00B7\uC77C\uC6A9\uC9C1 \uD654\uBA74 '\uD83D\uDCCB \uD074\uB9BD\uBCF4\uB4DC \uBD99\uC5EC\uB123\uAE30' \u2192 \uC2E4\uC81C \uB9C8\uC2A4\uD130 \uC77C\uAD04 \uB4F1\uB85D (\uC704\uC784 \uD578\uB4E4\uB7EC\uC5D0\uC11C \uD638\uCD9C) \u2500\u2500
+    function _masterPasteRead(kind) {
+      var label = kind === 'vendor' ? '\uAC70\uB798\uCC98' : '\uC77C\uC6A9\uC9C1';
+      var importer = kind === 'vendor' ? window.importVendorMasterText : window.importWorkerMasterText;
+      var tip = kind === 'vendor'
+        ? '\uC5D1\uC140/\uD45C\uC5D0\uC11C [\uC5C5\uCCB4\uBA85, \uC0AC\uC5C5\uC790\uB4F1\uB85D\uBC88\uD638, \uB300\uD45C\uC790, \uC5F0\uB77D\uCC98, \uC774\uBA54\uC77C, \uC8FC\uC18C] \uC5F4 \uC21C\uC11C\uB85C \uD589\uC744 \uC120\uD0DD \u2192 Ctrl+C \uD558\uC138\uC694.\n(\uC0AC\uC5C5\uC790\uB4F1\uB85D\uBC88\uD638 10\uC790\uB9AC \uC5C6\uB294 \uD589\uC740 \uC120\uB4F1\uB85D \uC815\uCC45\uC5D0 \uB530\uB77C \uC81C\uC678)'
+        : '\uC5D1\uC140/\uD45C\uC5D0\uC11C [\uC774\uB984, \uC8FC\uBBFC\uB4F1\uB85D\uBC88\uD638, \uC9C1\uC885, \uC77C\uB2F9, \uC5F0\uB77D\uCC98, \uACC4\uC88C\uBC88\uD638, \uC740\uD589, \uC8FC\uC18C, \uBE44\uACE0] \uC5F4 \uC21C\uC11C\uB85C \uD589\uC744 \uC120\uD0DD \u2192 Ctrl+C \uD558\uC138\uC694.';
+      if (!navigator.clipboard || !navigator.clipboard.readText) {
+        alert('\uC774 \uBE0C\uB77C\uC6B0\uC800\uB294 \uD074\uB9BD\uBCF4\uB4DC \uC77D\uAE30\uB97C \uC9C0\uC6D0\uD558\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4.\n\uB300\uC2E0 [CSV \uC5C5\uB85C\uB4DC] \uB610\uB294 [\uC5C5\uB85C\uB4DC] \uBC84\uD2BC\uC73C\uB85C \uD30C\uC77C\uC744 \uC62C\uB824\uC8FC\uC138\uC694.');
+        return;
+      }
+      navigator.clipboard.readText().then(function(t) {
+        if (!t || !t.trim()) { alert(label + ' \uD074\uB9BD\uBCF4\uB4DC\uAC00 \uBE44\uC5B4\uC788\uC2B5\uB2C8\uB2E4.\n\n' + tip); return; }
+        if (typeof importer === 'function') importer(t, { source: 'clipboard' });
+        else alert('\uAC00\uC838\uC624\uAE30 \uBAA8\uB4C8 \uBBF8\uB85C\uB4DC \u2014 \uC0C8\uB85C\uACE0\uCE68 \uD6C4 \uB2E4\uC2DC \uC2DC\uB3C4\uD558\uC138\uC694.');
+      }).catch(function(e) {
+        alert('\uD074\uB9BD\uBCF4\uB4DC \uC811\uADFC \uC2E4\uD328: ' + (e && e.message ? e.message : e) + '\n\n\uBE0C\uB77C\uC6B0\uC800 \uAD8C\uD55C\uC744 \uD5C8\uC6A9\uD558\uAC70\uB098 [CSV \uC5C5\uB85C\uB4DC]\uB97C \uC0AC\uC6A9\uD558\uC138\uC694.\n\n' + tip);
+      });
+    }
+    window.pasteVendorMaster = function(){ _masterPasteRead('vendor'); };
+    window.pasteWorkerMaster = function(){ _masterPasteRead('worker'); };
+
     window.processVendorExcel = function(file) {
       if (!file) return;
       var reader = new FileReader();
-      reader.onload = function(e) {
-        var text = e.target.result.replace(/^\uFEFF/, '');
-        var lines = text.split(/\r?\n/).filter(function(l) { return l.trim() !== ''; });
-        if (lines.length < 2) {
-          if (window.globalToast) globalToast('⚠ 파일에 데이터 행이 없음', 'warning');
-          return;
-        }
-        // [등급 제거] 신양식: 업체명,사업자번호,대표자,연락처,이메일,주소. 구양식(거래분류 열 포함)은 헤더로 감지해 호환
-        var _oldFmt = lines[0].indexOf('거래분류') >= 0;
-        var rows = lines.slice(1).map(function(l) {
-          var cols = l.split(',');
-          return _oldFmt
-            ? { name: cols[0], bizNo: cols[1], ceo: cols[2], phone: cols[4], email: cols[5], address: cols[6] }
-            : { name: cols[0], bizNo: cols[1], ceo: cols[2], phone: cols[3], email: cols[4], address: cols[5] };
-        });
-
-        // [선등록 정책 — 대표 기준] 사업자등록번호(10자리) 필수 + 3키 병합 기준 이름·번호 중복 차단
-        var _normN = function(s){ return String(s||'').replace(/\s+/g,'').replace(/[()（）]/g,'').toLowerCase(); };
-        var _digits = function(s){ return String(s||'').replace(/[^0-9]/g,''); };
-        var _all = [];
-        ['mm-vendors','mm-vendors-v2','mm-vendors-v23'].forEach(function(k){ try { var a = JSON.parse(localStorage.getItem(k)||'[]'); if (Array.isArray(a)) a.forEach(function(v){ _all.push(v); }); } catch(e2){} });
-        var _names = {}, _bizs = {};
-        _all.forEach(function(v){ var n=_normN(typeof v==='string'?v:(v&&v.name)); if(n) _names[n]=1; var b=_digits(v&&(v.bizNo||v.businessNo||v.bizno||v.biz_no)); if(b.length>=10) _bizs[b]=1; });
-        var duplicates = [], noBiz = [], newVendors = [];
-        rows.forEach(function(r) {
-          var nm = String(r.name||'').trim(); if (!nm) return;
-          var bz = _digits(r.bizNo);
-          if (bz.length !== 10) { noBiz.push(nm); return; }
-          var n = _normN(nm);
-          if (_names[n] || _bizs[bz]) { duplicates.push(nm); return; }
-          _names[n] = 1; _bizs[bz] = 1;
-          r.name = nm;
-          r.id = 'v_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
-          r.createdAt = new Date().toISOString();
-          newVendors.push(r);
-        });
-
-        // 신규만 저장 + 표 즉시 갱신
-        try {
-          var existing = JSON.parse(localStorage.getItem('mm-vendors-v23') || '[]');
-          if (!Array.isArray(existing)) existing = [];
-          var combined = existing.concat(newVendors);
-          localStorage.setItem('mm-vendors-v23', JSON.stringify(combined));
-          var msg = '✓ 신규 ' + newVendors.length + '건 등록';
-          if (duplicates.length > 0) msg += ' · 중복 ' + duplicates.length + '건 제외';
-          if (window.globalToast) globalToast(msg, newVendors.length ? 'success' : 'warning', 6000);
-          if (noBiz.length > 0) alert('⚠️ [선등록 정책] 사업자등록번호(10자리) 누락으로 제외된 ' + noBiz.length + '건:\n' + noBiz.join(', ') + '\n\n양식의 "사업자등록번호" 열을 채워 다시 업로드하세요.');
-          try { window.dispatchEvent(new StorageEvent('storage', { key:'mm-vendors-v2' })); } catch(e3){}
-          try { if (window.mmVendors && window.mmVendors.render) window.mmVendors.render(); } catch(e3){}
-        } catch (e) {
-          if (window.globalToast) globalToast('❌ 저장 실패: ' + e.message, 'danger');
-        }
-      };
+      reader.onload = function(e) { window.importVendorMasterText(e.target.result, { source: 'csv' }); };
       reader.readAsText(file, 'UTF-8');
     };
 
@@ -13653,7 +13657,13 @@ CREATE TABLE system_map_activity (
           return;
         }
         if (text.includes('붙여넣기') || text.includes('클립보드')) {
-          btn.onclick = function() { openModal('global-paste'); };
+          // [수정] 거래처·일용직 화면은 실제 마스터 일괄 등록으로 연결 (가짜 global-paste mock이 사일런트 유실시키던 결함)
+          btn.onclick = function() {
+            var _scr = btn.closest('[data-screen]'); var _sid = _scr ? _scr.dataset.screen : '';
+            if ((_sid === 'vendors' || _sid === 'vendor-status') && window.pasteVendorMaster) { window.pasteVendorMaster(); return; }
+            if ((_sid === 'workers' || _sid === 'attendance') && window.pasteWorkerMaster) { window.pasteWorkerMaster(); return; }
+            openModal('global-paste');
+          };
           return;
         }
 
@@ -15874,53 +15884,7 @@ CREATE TABLE system_map_activity (
     anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1hdXFnc294Ym5jbnd1bWh5c3ZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyOTA5NTQsImV4cCI6MjA5NDg2Njk1NH0.xNPOrmfYLgIAI0R4yfGajWyQFJrFkY7LkWEcj-4WAkI'
   };
 
-  // 데모 시드 — 3개 가상 현장 (데모 계정 진입 시 데이터 없으면 자동 주입) [#138]
-  var DEMO_SEED = [
-    { id:'MM-2025-001', name:'명문빌딩 신축공사', type:'건축 신축', client:'㈜명문건설',
-      startDate:'2025-03-15', endDate:'2026-09-30', contractOrig:1800000000, contractAdd:50000000,
-      costs:{
-        outsource:{contract:900000000,actual:720000000}, material:{contract:280000000,actual:245000000},
-        product:{contract:80000000,actual:65000000}, indirect:{contract:60000000,actual:50000000},
-        cashexp:{contract:35000000,actual:28000000}, labor:{contract:200000000,actual:170000000},
-        safety:{contract:30000000,actual:22000000}, direct:{contract:300000000,actual:220000000},
-        labordirect:{contract:80000000,actual:65000000}
-      },
-      billingItems:[
-        {applyDate:'2025-06-30',applySupply:300000000,applyTax:30000000,applyTotal:330000000,receiveDate:'2025-07-25',billingAmount:330000000},
-        {applyDate:'2025-09-30',applySupply:450000000,applyTax:45000000,applyTotal:495000000,receiveDate:'2025-10-25',billingAmount:495000000},
-        {applyDate:'2025-12-31',applySupply:380000000,applyTax:38000000,applyTotal:418000000,receiveDate:'2026-01-30',billingAmount:366000000},
-        {applyDate:'2026-03-31',applySupply:320000000,applyTax:32000000,applyTotal:352000000,receiveDate:'',billingAmount:0}
-      ]
-    },
-    { id:'MM-2025-014', name:'강남 오피스 인테리어', type:'리모델링', client:'㈜강남타워',
-      startDate:'2025-10-01', endDate:'2026-04-30', contractOrig:480000000, contractAdd:0,
-      costs:{
-        outsource:{contract:120000000,actual:105000000}, material:{contract:180000000,actual:168000000},
-        product:{contract:60000000,actual:52000000}, indirect:{contract:20000000,actual:18000000},
-        cashexp:{contract:10000000,actual:8000000}, labor:{contract:50000000,actual:48000000},
-        safety:{contract:8000000,actual:7000000}, direct:{contract:30000000,actual:25000000},
-        labordirect:{contract:18000000,actual:15000000}
-      },
-      billingItems:[
-        {applyDate:'2025-11-30',applySupply:130000000,applyTax:13000000,applyTotal:143000000,receiveDate:'2025-12-26',billingAmount:143000000},
-        {applyDate:'2026-01-31',applySupply:180000000,applyTax:18000000,applyTotal:198000000,receiveDate:'2026-02-28',billingAmount:198000000},
-        {applyDate:'2026-03-31',applySupply:130000000,applyTax:13000000,applyTotal:143000000,receiveDate:'2026-04-30',billingAmount:128000000}
-      ]
-    },
-    { id:'MM-2026-003', name:'판교 데이터센터 기계설비', type:'MEP 기계설비', client:'판교IDC㈜',
-      startDate:'2026-02-01', endDate:'2027-01-31', contractOrig:1250000000, contractAdd:0,
-      costs:{
-        outsource:{contract:700000000,actual:80000000}, material:{contract:320000000,actual:90000000},
-        product:{contract:60000000,actual:12000000}, indirect:{contract:40000000,actual:8000000},
-        cashexp:{contract:20000000,actual:4000000}, labor:{contract:150000000,actual:35000000},
-        safety:{contract:35000000,actual:8000000}, direct:{contract:100000000,actual:18000000},
-        labordirect:{contract:50000000,actual:10000000}
-      },
-      billingItems:[
-        {applyDate:'2026-04-30',applySupply:80000000,applyTax:8000000,applyTotal:88000000,receiveDate:'',billingAmount:0}
-      ]
-    }
-  ];
+  // [데모 제거 — 대표 결정: 실데이터 전용] 3개 가상현장 시드(DEMO_SEED) 폐기. 자동주입 경로도 함께 제거됨.
 
   function getSupabaseConfig() {
     try {
@@ -16143,39 +16107,8 @@ CREATE TABLE system_map_activity (
       }
     });
 
-    // 데모 로그인 완전 제거됨 (운영용) — demoBtn/roles 마크업 없음. null 가드로 안전.
-    if (demoBtn) demoBtn.addEventListener('click', function() {
-      var roles = document.getElementById('mm-login-roles');
-      if (roles) roles.classList.toggle('show');
-    });
-
-    // 데모 역할별 진입
-    var roleBox = document.getElementById('mm-login-roles');
-    if (roleBox) {
-      roleBox.querySelectorAll('button[data-role]').forEach(function(b) {
-        b.addEventListener('click', function() {
-          var role = b.getAttribute('data-role');
-          var names = { ceo:'대표 (데모)', admin:'관리자 (데모)', user:'직원 (데모)', demo:'열람자 (데모)' };
-          setAuth({ email: role + '@mm-eng.demo', name: names[role]||'데모', role: role, demoMode: true, supabase: false });
-          // 데모 진입 시 데이터가 비어 있으면 3개 가상 현장 자동 주입 후 새로고침 [#138]
-          var hasData = false;
-          try {
-            var ex = JSON.parse(localStorage.getItem('mm-dash-v4') || '[]');
-            hasData = Array.isArray(ex) && ex.length > 0;
-          } catch(e) {}
-          if (!hasData) {
-            try {
-              localStorage.setItem('mm-dash-v4', JSON.stringify(DEMO_SEED));
-              sessionStorage.setItem('mm-selected-pid', DEMO_SEED[0].id);
-            } catch(e) {}
-            location.reload();
-            return;
-          }
-          applyRole();
-          hideLogin();
-        });
-      });
-    }
+    // [데모 제거 — 대표 결정: 실데이터 전용] 데모 로그인·역할별 진입 + 가상현장 자동주입 폐기.
+    //   실로그인(Supabase/로컬 인증)만 사용. demoBtn/roleBox 마크업은 이미 없음.
   }
 
   // 로그아웃 처리 (사이드바 logout nav-item)
@@ -16199,24 +16132,7 @@ CREATE TABLE system_map_activity (
       applyRole();
       hideLogin();
       var a = getAuth();
-      // 데모 세션인데 프로젝트 데이터가 비어 있으면 3개 가상 현장 자동 주입 [#138]
-      if (a && a.demoMode && !sessionStorage.getItem('mm-seed-done')) {
-        var _ex = [];
-        try { _ex = JSON.parse(localStorage.getItem('mm-dash-v4') || '[]'); } catch(e) {}
-        if (!Array.isArray(_ex) || _ex.length === 0) {
-          try {
-            localStorage.setItem('mm-dash-v4', JSON.stringify(DEMO_SEED));
-            sessionStorage.setItem('mm-selected-pid', DEMO_SEED[0].id);
-          } catch(e) {}
-          var _chk = [];
-          try { _chk = JSON.parse(localStorage.getItem('mm-dash-v4') || '[]'); } catch(e) {}
-          if (Array.isArray(_chk) && _chk.length > 0) {
-            sessionStorage.setItem('mm-seed-done', '1');
-            location.reload();
-            return;
-          }
-        }
-      }
+      // [데모 제거 — 대표 결정: 실데이터 전용] 데모 세션 가상현장 자동주입 폐기.
       // 이미 로그인 + Supabase 모드면 데이터 동기화 + Realtime 시작 [#124]
       if (a && a.supabase && isSupabaseReady() && window.mmData && window.mmData.syncOnLogin) {
         setTimeout(function(){ window.mmData.syncOnLogin(); }, 400);
