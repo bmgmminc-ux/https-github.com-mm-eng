@@ -18538,10 +18538,11 @@ CREATE TABLE system_map_activity (
     var projects = []; try { projects = JSON.parse(localStorage.getItem('mm-dash-v4')||'[]'); } catch(e) {}
     if (!Array.isArray(projects)) projects = [];
     var contract = 0, costActual = 0, billingApplied = 0, billingReceived = 0;
+    var byCat = {};
     projects.forEach(function(p){
       contract += num(p.contractOrig) + num(p.contractAdd);
       ['outsource','material','product','indirect','cashexp','labor','safety','direct','labordirect'].forEach(function(c){
-        if (p.costs && p.costs[c]) costActual += num(p.costs[c].actual);
+        if (p.costs && p.costs[c]) { var _v = num(p.costs[c].actual); costActual += _v; byCat[c] = (byCat[c]||0) + _v; }
       });
       (p.billingItems||[]).forEach(function(b){
         billingApplied += num(b.applyTotal);
@@ -18561,6 +18562,36 @@ CREATE TABLE system_map_activity (
     });
     // [Stage 3] 멀티링 게이지(원가율·신청률·수금률·종합점수) 실데이터 연결 — 가짜 84%·76점 제거
     if (window.mmRenderGauge) window.mmRenderGauge({ costRate: costRate, billRate: billRate, collectRate: collectRate, revenue: contract, billTotal: billingApplied });
+
+    // [Stage 3b] 원가 구성비 도넛 실데이터 연결 (5개 주요 분류 슬라이스 + 범례 + 중앙/요약) — 가짜 39.8%·128억 제거
+    (function donut(){
+      var C = 628.3, total = costActual, hasData = total > 0;
+      var subs = { outsource:'자재+시공 외주', material:'본사 매입 원자재', labor:'일용직 노무비', product:'완제품 매입', indirect:'보험·경비·장비' };
+      var cum = 0;
+      ['outsource','material','labor','product','indirect'].forEach(function(c){
+        var amt = byCat[c] || 0, frac = total > 0 ? amt/total : 0, len = frac * C;
+        var sl = document.querySelector('.donut-slice[data-slice="'+c+'"]');
+        if (sl) { sl.setAttribute('stroke-dasharray', Math.max(0,len).toFixed(1)+' '+C); sl.setAttribute('stroke-dashoffset', (-cum).toFixed(1)); }
+        cum += len;
+        var it = document.querySelector('.donut-v2-item[data-slice="'+c+'"]');
+        if (it) {
+          var sb = it.querySelector('.donut-meta-sub'); if (sb) sb.textContent = subs[c] + ' · ' + (amt/1e8).toFixed(1) + '억';
+          var pn = it.querySelector('.donut-meta-pct-num'); if (pn) pn.textContent = (frac*100).toFixed(1) + '%';
+          var br = it.querySelector('.donut-meta-pct-bar > div'); if (br) br.style.width = Math.min(100, frac*100).toFixed(0) + '%';
+        }
+      });
+      var allc = ['outsource','material','product','indirect','cashexp','labor','safety','direct','labordirect'];
+      var nz = allc.filter(function(c){ return (byCat[c]||0) > 0; }).length;
+      var maxc = 0; allc.forEach(function(c){ if ((byCat[c]||0) > maxc) maxc = byCat[c]; });
+      var dm = document.querySelector('#donut-default .donut-center-main');
+      if (dm) dm.innerHTML = (hasData ? (total/1e8).toFixed(0) : 0) + '<tspan font-size="18">억</tspan>';
+      var dsub = document.querySelector('#donut-default .donut-center-sub');
+      if (dsub) dsub.textContent = hasData ? (nz + '개 분류 · 평균 ' + (total/1e8/Math.max(1,nz)).toFixed(1) + '억') : '데이터 없음';
+      var sv = document.querySelectorAll('.donut-summary-value');
+      if (sv[0]) sv[0].textContent = (hasData ? (total/1e8).toFixed(0) : 0) + '억';
+      if (sv[1]) sv[1].textContent = (hasData ? (total/1e8/Math.max(1,nz)).toFixed(1) : 0) + '억';
+      if (sv[2]) sv[2].textContent = (maxc/1e8).toFixed(1) + '억';
+    })();
     try { localStorage.setItem('mm-overview-stats', JSON.stringify({contract:contract,costActual:costActual,costRate:costRate,billRate:billRate,collectRate:collectRate,ts:new Date().toISOString()})); } catch(e) {}
   };
 
