@@ -5673,7 +5673,11 @@ table.data-table {
       <div class="pjd-profit-hero" id="pjd-profit-hero">
         <div class="pjd-profit-icon" id="pjd-profit-icon">💎</div>
         <div class="pjd-profit-main">
-          <div class="pjd-profit-lbl">이익률 · Profit Margin</div>
+          <div class="pjd-profit-lbl">이익률 · Profit Margin
+            <!-- [상태 배지 — 대표 요청] 전체 현황·예산 분석의 상태 분류를 메인 수익 요약에도 노출 -->
+            <span id="pjd-status-badge" style="display:none;margin-left:8px;font-size:12px;font-weight:800;padding:3px 10px;border-radius:999px;vertical-align:2px"></span>
+            <span id="pjd-progress-badge" style="display:none;margin-left:4px;font-size:12px;font-weight:800;padding:3px 10px;border-radius:999px;vertical-align:2px"></span>
+          </div>
           <div class="pjd-profit-rate" id="pjd-profit-rate-mega">—</div>
           <div class="pjd-profit-amt">이익 <strong id="pjd-profit-amt">—</strong> <small id="pjd-profit-amt-full">—</small></div>
         </div>
@@ -6022,6 +6026,28 @@ table.data-table {
     if (k.billingApplied === 0 && k.contract > 0) sigs.push({l:'info',i:'📋',m:'기성 신청 미발생 — 첫 회차 등록 가능'});
     var sigEl = document.getElementById('pjd-signals');
     if (sigEl) sigEl.innerHTML = sigs.map(function(s){return '<div class="pjd-sig '+s.l+'"><span style="font-size:13px">'+s.i+'</span><span>'+s.m+'</span></div>'}).join('');
+
+    // [상태 배지 — 대표 요청] 종합 상태(마진 기반) + 진행 상태를 수익 요약에 노출 — 전체 현황 리스트·예산 분석표와 동일 분류
+    (function(){
+      var sb = document.getElementById('pjd-status-badge');
+      if (sb) {
+        // 전체 현황 리스트·예산 분석표와 동일한 원가율(소진율) 기준 분류 — 손실(마진<0)만 별도 강조
+        var _cr = k.costRate * 100;
+        var st = (k.profitRate < 0)  ? {t:'🔴 손실', bg:'#FEE2E2', fg:'#991B1B'}
+               : (_cr >= 100)        ? {t:'🔴 초과', bg:'#FEE2E2', fg:'#991B1B'}
+               : (_cr >= 85)         ? {t:'🟡 주의', bg:'#FEF3C7', fg:'#92400E'}
+               :                       {t:'🟢 양호', bg:'#D1FAE5', fg:'#065F46'};
+        sb.textContent = st.t; sb.style.background = st.bg; sb.style.color = st.fg; sb.style.display = '';
+      }
+      var pb = document.getElementById('pjd-progress-badge');
+      if (pb) {
+        var status = '';
+        try { var _p = (JSON.parse(localStorage.getItem('mm-dash-v4')||'[]')||[]).find(function(x){ return x.id === k.id; }); status = (_p && _p.status) || ''; } catch(e){}
+        var pm = { '완료':{t:'✅ 완료', bg:'#DBEAFE', fg:'#1E40AF'}, '보류':{t:'⏸ 보류', bg:'#F1F5F9', fg:'#475569'}, '진행중':{t:'🔄 진행중', bg:'#EDE9FE', fg:'#5B21B6'} }[status];
+        if (pm) { pb.textContent = pm.t; pb.style.background = pm.bg; pb.style.color = pm.fg; pb.style.display = ''; }
+        else pb.style.display = 'none';
+      }
+    })();
 
     // HERO 배너 + 브레드크럼 + 메모 하이드레이션 [#138]
     setT('pjd-breadcrumb-pid', k.id || '—');
