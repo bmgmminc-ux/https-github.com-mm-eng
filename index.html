@@ -15272,6 +15272,8 @@ CREATE TABLE system_map_activity (
       var profit = revenue - cost;
       var rate = revenue > 0 ? cost / revenue * 100 : 0;
       var s = statusInfo(rate);
+      // [상태 정합 — 대표 지적] 상태 컬럼은 실제 프로젝트 진행 상태(p.status)를 불러옴 — 클릭 변환 위젯 아님. 원가율 위험은 '원가율' 컬럼 색으로 표현.
+      var _pst = { '완료':{t:'✅ 완료', cls:'success'}, '준공':{t:'✅ 준공', cls:'success'}, '보류':{t:'⏸ 보류', cls:''}, '진행중':{t:'🔄 진행중', cls:'warning'} }[(p.status||'진행중')] || { t:(p.status||'진행중'), cls:'' };
       var profitColor = profit >= 0 ? 'var(--success-700)' : 'var(--danger-700)';
       var profitSign = profit >= 0 ? '+' : '';
       return '<tr data-pid="' + (p.id||'') + '" style="cursor:pointer">' +
@@ -15286,7 +15288,7 @@ CREATE TABLE system_map_activity (
           '<div class="progress-bar" style="width:60px"><div class="progress-fill ' + fillCls(rate) + '" style="width:' + Math.min(100, rate) + '%"></div></div>' +
           '<strong style="color:var(--' + fillCls(rate) + '-700)">' + Math.round(rate) + '%</strong>' +
         '</div></td>' +
-        '<td class="center"><span class="badge badge-' + s.cls + '">' + s.icon + ' ' + s.txt + '</span></td>' +
+        '<td class="center"><span class="badge' + (_pst.cls?(' badge-'+_pst.cls):'') + '" style="' + (_pst.cls?'':'background:#F1F5F9;color:#475569') + '">' + _pst.t + '</span></td>' +
         '</tr>';
     }).join('');
 
@@ -18786,22 +18788,9 @@ CREATE TABLE system_map_activity (
     if (type && id) window.mmStatus.set(type, id, nxt);
     toast('상태: ' + ST_LABELS[nxt], 'info');
   });
-  // 기존 표 행 마지막 셀에 상태 뱃지 자동 주입 (모든 data-table·pjbill-table)
-  window.mmInjectStatusBadges = function() {
-    document.querySelectorAll('table.data-table tbody tr, table.pjbill-table tbody tr').forEach(function(tr){
-      if (tr.querySelector('.mm-status-badge')) return;
-      if (tr.classList.contains('row-subtotal')) return;
-      var lastTd = tr.querySelector('td:last-child');
-      if (!lastTd) return;
-      // 액션 컬럼이면 새 td 추가 대신 마지막 td에 뱃지 append
-      var rowId = tr.getAttribute('data-id') || (tr.querySelector('strong') && tr.querySelector('strong').textContent) || '';
-      var screen = tr.closest('[data-screen]');
-      var type = screen ? screen.getAttribute('data-screen') : 'item';
-      var badge = window.mmStatus.badge(window.mmStatus.get(type, rowId), type, rowId);
-      // 액션 버튼이 있는 td라면 그 옆에, 없으면 직접
-      lastTd.insertAdjacentHTML('beforeend', '<div style="display:inline-block;margin-left:8px">'+badge+'</div>');
-    });
-  };
+  // [상태 정합 — 대표 지적] 가짜 순환 상태 뱃지 자동 주입 폐기 — 클릭으로 대기→…→취소 순환하던 위젯은
+  // 실제 프로젝트 상태와 무관(별도 mm-*-status 키)해 혼란만 유발. 상태는 각 표가 실데이터(p.status 등)로 직접 렌더.
+  window.mmInjectStatusBadges = function() { /* no-op */ };
 
   // ─── 3. 직종별 인건비 도넛 SVG 실데이터 [#142.3] ───
   window.renderJobDonutSvg = function() {
