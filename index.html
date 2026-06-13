@@ -6123,13 +6123,29 @@ table.data-table {
 
   /* Hero KPI 4분할 */
   .pjbx-hero-kpi { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:14px; }
-  .pjbx-hero-stat { padding:14px 16px; border-radius:10px; background:#fafbfc; border:1px solid #f1f5f9; }
-  .pjbx-hero-stat .l { font-size:11px; font-weight:800; color:#64748b; letter-spacing:.04em; text-transform:uppercase; margin-bottom:6px; }
-  .pjbx-hero-stat .v { font-size:18px; font-weight:900; color:#0f172a; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
+  .pjbx-hero-stat {
+    position:relative; padding:18px 18px 16px; border-radius:14px; background:#fff;
+    border:1px solid #eef2f7; border-top:3px solid var(--kc,#cbd5e1);
+    box-shadow:0 4px 14px -8px rgba(15,23,42,.18); transition:transform .15s, box-shadow .15s;
+  }
+  .pjbx-hero-stat:hover { transform:translateY(-2px); box-shadow:0 10px 22px -10px rgba(15,23,42,.25); }
+  .pjbx-hero-stat .hd { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+  .pjbx-hero-stat .ic {
+    width:30px; height:30px; border-radius:9px; display:inline-flex; align-items:center; justify-content:center;
+    font-size:15px; background:var(--kbg,#f1f5f9); flex-shrink:0;
+  }
+  .pjbx-hero-stat .l { font-size:12.5px; font-weight:800; color:#475569; letter-spacing:.01em; }
+  .pjbx-hero-stat .v { font-size:24px; font-weight:900; color:#0f172a; letter-spacing:-.02em; font-variant-numeric:tabular-nums; line-height:1.1; }
   .pjbx-hero-stat .v.pos { color:#059669; }
   .pjbx-hero-stat .v.neg { color:#DC2626; }
   .pjbx-hero-stat .v.rate { color:#2563EB; }
-  .pjbx-hero-stat .meta { font-size:10px; color:#94a3b8; font-weight:600; margin-top:3px; font-variant-numeric:tabular-nums; }
+  .pjbx-hero-stat .meta { font-size:11.5px; color:#94a3b8; font-weight:700; margin-top:5px; font-variant-numeric:tabular-nums; }
+  .pjbx-hero-stat.c-contract { --kc:#2563EB; --kbg:#EFF6FF; }
+  .pjbx-hero-stat.c-cost     { --kc:#7C3AED; --kbg:#F5F3FF; }
+  .pjbx-hero-stat.c-profit   { --kc:#059669; --kbg:#ECFDF5; }
+  .pjbx-hero-stat.c-rate     { --kc:#0891B2; --kbg:#ECFEFF; }
+  [data-theme="dark"] .pjbx-hero-stat { background:#111827; border-color:#374151; }
+  [data-theme="dark"] .pjbx-hero-stat .v { color:#f1f5f9; }
 
   /* 예산 소진 진척바 — % 숫자 크게 */
   .pjbx-hero-burn { padding:16px 18px; border-radius:10px; background:#fafbfc; border:1px solid #f1f5f9; margin-bottom:16px; }
@@ -6236,10 +6252,10 @@ table.data-table {
   </div>
 
   <div class="pjbx-hero-kpi">
-    <div class="pjbx-hero-stat"><div class="l">총 계약</div><div class="v" id="pjbx-h-contract">—</div><div class="meta" id="pjbx-h-contract-full">—</div></div>
-    <div class="pjbx-hero-stat"><div class="l">총 원가</div><div class="v" id="pjbx-h-cost">—</div><div class="meta" id="pjbx-h-cost-full">—</div></div>
-    <div class="pjbx-hero-stat"><div class="l">예상 이윤</div><div class="v pos" id="pjbx-h-profit-stat"><span id="pjbx-h-profit">—</span></div><div class="meta" id="pjbx-h-profit-full">—</div></div>
-    <div class="pjbx-hero-stat"><div class="l">이익률</div><div class="v rate" id="pjbx-h-rate">—</div><div class="meta">목표 15% 이상</div></div>
+    <div class="pjbx-hero-stat c-contract"><div class="hd"><span class="ic">📋</span><span class="l">총 계약</span></div><div class="v" id="pjbx-h-contract">—</div><div class="meta" id="pjbx-h-contract-full">—</div></div>
+    <div class="pjbx-hero-stat c-cost"><div class="hd"><span class="ic">🏗️</span><span class="l">총 원가</span></div><div class="v" id="pjbx-h-cost">—</div><div class="meta" id="pjbx-h-cost-full">—</div></div>
+    <div class="pjbx-hero-stat c-profit"><div class="hd"><span class="ic">💰</span><span class="l">예상 이윤</span></div><div class="v pos" id="pjbx-h-profit-stat"><span id="pjbx-h-profit">—</span></div><div class="meta" id="pjbx-h-profit-full">—</div></div>
+    <div class="pjbx-hero-stat c-rate"><div class="hd"><span class="ic">📈</span><span class="l">이익률</span></div><div class="v rate" id="pjbx-h-rate">—</div><div class="meta">목표 15% 이상</div></div>
   </div>
 
   <div class="pjbx-hero-burn">
