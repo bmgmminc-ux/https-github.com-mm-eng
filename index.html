@@ -15572,6 +15572,39 @@ CREATE TABLE system_map_activity (
     }
   }
 
+  // [Stage 3 — 가짜값 제거] 멀티링 게이지(원가율·신청률·수금률·종합점수)를 실집계로 연결. 데이터 없으면 0·'데이터 없음'.
+  function renderOverviewGauge(t) {
+    function ring(name, pct, circ) {
+      var p = Math.max(0, pct || 0), pc = Math.min(100, p);
+      var c = document.querySelector('.multiring-fill-v2[data-ring="' + name + '"]');
+      if (c) c.setAttribute('stroke-dashoffset', (circ * (1 - pc / 100)).toFixed(1));
+      var card = document.querySelector('.ring-card[data-ring="' + name + '"]');
+      if (card) {
+        var n = card.querySelector('.ring-card-pct-num'); if (n) n.textContent = p.toFixed(1) + '%';
+        var b = card.querySelector('.ring-card-bar > div'); if (b) b.style.width = pc + '%';
+      }
+    }
+    ring('cost', t.costRate, 754);
+    ring('billing', t.billRate, 597);
+    ring('collect', t.collectRate, 440);
+    var hasData = (t.revenue || 0) > 0 || (t.billTotal || 0) > 0;
+    var score = Math.round(Math.max(0, Math.min(100, (100 - (t.costRate || 0)) * 0.4 + (t.billRate || 0) * 0.3 + (t.collectRate || 0) * 0.3)));
+    var mainEl = document.querySelector('#mr-default .multiring-main-v2');
+    if (mainEl) mainEl.innerHTML = (hasData ? score : 0) + '<sup>점</sup>';
+    var mv = document.getElementById('mrd-value'); if (mv) mv.innerHTML = (t.costRate || 0).toFixed(0) + '<sup>%</sup>';
+    var g = score >= 80 ? { t: '🟢 양호 단계', b: 'linear-gradient(135deg,#D1FAE5,#6EE7B7)', c: '#065F46' }
+          : score >= 60 ? { t: '🟡 주의 단계', b: 'linear-gradient(135deg,#FEF3C7,#FCD34D)', c: '#92400E' }
+          :               { t: '🔴 위험 단계', b: 'linear-gradient(135deg,#FEE2E2,#FCA5A5)', c: '#991B1B' };
+    var gEl = document.querySelector('#mr-default .multiring-grade-v2');
+    if (gEl) { gEl.textContent = hasData ? g.t : '데이터 없음'; gEl.style.background = hasData ? g.b : '#F1F5F9'; gEl.style.color = hasData ? g.c : '#64748B'; }
+    var st = document.querySelector('.ring-summary-text');
+    if (st) st.textContent = hasData ? ('원가율 ' + (t.costRate || 0).toFixed(1) + '% · 신청률 ' + (t.billRate || 0).toFixed(1) + '% · 수금률 ' + (t.collectRate || 0).toFixed(1) + '%')
+                                     : '데이터가 없습니다 — 프로젝트·매입·기성 입력 시 자동 표시';
+    var si = document.querySelector('.ring-summary-icon'); if (si) si.textContent = hasData ? (score >= 80 ? '✅' : score >= 60 ? '⚠️' : '🚨') : 'ℹ️';
+    var tr = document.querySelector('.ring-summary-trend'); if (tr) tr.textContent = '';   // 가짜 '지난주 +2점' 제거
+  }
+  window.mmRenderGauge = renderOverviewGauge;   // overview 진입(renderOverviewChart)에서도 호출 가능하게 노출
+
   function renderKPI(totals, label, rangeStr) {
     var set = function(sel, val) { var el = document.querySelector(sel); if (el) el.textContent = val };
     set('[data-ov-kpi="contract"]', fmtBil(totals.contract));
@@ -15594,6 +15627,9 @@ CREATE TABLE system_map_activity (
     set('#ov-hero-projects', totals.count);
     set('#ov-hero-contract', fmtBil(totals.contract));
     set('#ov-hero-profit',   num1(totals.profit));
+
+    // [Stage 3] 멀티링 게이지 실데이터 연결
+    renderOverviewGauge(totals);
   }
 
   function applyPeriod(key) {
@@ -18523,6 +18559,8 @@ CREATE TABLE system_map_activity (
       else if (key === 'bill') el.textContent = billRate + '%';
       else if (key === 'collect') el.textContent = collectRate + '%';
     });
+    // [Stage 3] 멀티링 게이지(원가율·신청률·수금률·종합점수) 실데이터 연결 — 가짜 84%·76점 제거
+    if (window.mmRenderGauge) window.mmRenderGauge({ costRate: costRate, billRate: billRate, collectRate: collectRate, revenue: contract, billTotal: billingApplied });
     try { localStorage.setItem('mm-overview-stats', JSON.stringify({contract:contract,costActual:costActual,costRate:costRate,billRate:billRate,collectRate:collectRate,ts:new Date().toISOString()})); } catch(e) {}
   };
 
