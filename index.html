@@ -6148,68 +6148,69 @@ table.data-table {
   [data-theme="dark"] .pjbx-hero-stat .v { color:#f1f5f9; }
 
   /* 예산 소진 진척바 — % 숫자 크게 */
-  .pjbx-hero-burn { padding:16px 18px; border-radius:10px; background:#fafbfc; border:1px solid #f1f5f9; margin-bottom:16px; }
-  .pjbx-hero-burn .top { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
-  .pjbx-hero-burn .top .l { font-size:13px; font-weight:800; color:#475569; }
-  .pjbx-hero-burn .top .v { font-size:30px; font-weight:900; color:#0f172a; letter-spacing:-.02em; font-variant-numeric:tabular-nums; line-height:1; }
+  .pjbx-hero-burn { padding:20px 22px; border-radius:16px; background:#fff; border:1px solid #eef2f7; box-shadow:0 4px 14px -8px rgba(15,23,42,.16); margin-bottom:18px; }
+  .pjbx-hero-burn .top { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:14px; }
+  .pjbx-hero-burn .top .l { font-size:14px; font-weight:800; color:#334155; }
+  .pjbx-hero-burn .top .v { font-size:34px; font-weight:900; color:#2563EB; letter-spacing:-.03em; font-variant-numeric:tabular-nums; line-height:1; }
   .pjbx-hero-burn .top .v.warn { color:#D97706; }
   .pjbx-hero-burn .top .v.bad  { color:#DC2626; }
-  .pjbx-hero-burn .track { height:10px; border-radius:99px; background:#f1f5f9; overflow:hidden; }
-  .pjbx-hero-burn .fill { height:100%; border-radius:99px; background:linear-gradient(90deg,#3B82F6,#2563EB); transition:width .4s; }
-  .pjbx-hero-burn .fill.warn { background:linear-gradient(90deg,#F59E0B,#D97706); }
-  .pjbx-hero-burn .fill.bad  { background:linear-gradient(90deg,#EF4444,#DC2626); }
+  .pjbx-hero-burn .track { height:16px; border-radius:99px; background:#eef2f7; overflow:hidden; box-shadow:inset 0 1px 3px rgba(15,23,42,.08); }
+  .pjbx-hero-burn .fill { height:100%; border-radius:99px; background:linear-gradient(90deg,#60A5FA,#2563EB); transition:width .5s cubic-bezier(.4,0,.2,1); box-shadow:0 1px 4px rgba(37,99,235,.4); }
+  .pjbx-hero-burn .fill.warn { background:linear-gradient(90deg,#FBBF24,#D97706); box-shadow:0 1px 4px rgba(217,119,6,.4); }
+  .pjbx-hero-burn .fill.bad  { background:linear-gradient(90deg,#F87171,#DC2626); box-shadow:0 1px 4px rgba(220,38,38,.4); }
 
-  /* 분류별 표 — 세로 구분선 추가 */
-  .pjbx-table { width:100%; border-collapse:separate; border-spacing:0; font-size:13px; }
-  .pjbx-table th { padding:12px 14px; background:#fafbfc;
-    border-bottom:1px solid #e5e7eb; border-right:1px solid #e5e7eb;
-    font-size:11px; font-weight:800; color:#64748b; letter-spacing:.04em; text-transform:uppercase; text-align:center; }
-  .pjbx-table th:first-child { border-top-left-radius:10px; text-align:left; }
-  .pjbx-table th:last-child  { border-top-right-radius:10px; border-right:0; }
-  .pjbx-table td { padding:14px 14px;
-    border-bottom:1px solid #f1f5f9; border-right:1px solid #f1f5f9;
-    font-size:14px; font-variant-numeric:tabular-nums; }
-  .pjbx-table td:last-child { border-right:0; }
-  .pjbx-table tbody tr:hover td { background:#FAFBFC; }
+  /* 분류별 표 — 세로선 절제, 여백·위계 중심 정리 */
+  .pjbx-table { width:100%; border-collapse:separate; border-spacing:0; font-size:14px; background:#fff; border-radius:14px; overflow:hidden; border:1px solid #eef2f7; box-shadow:0 4px 14px -10px rgba(15,23,42,.14); }
+  .pjbx-table th { padding:13px 16px; background:#f8fafc;
+    border-bottom:1px solid #e5e7eb;
+    font-size:11px; font-weight:800; color:#64748b; letter-spacing:.06em; text-transform:uppercase; text-align:center; white-space:nowrap; }
+  .pjbx-table th:first-child { text-align:left; }
+  .pjbx-table td { padding:16px;
+    border-bottom:1px solid #f1f5f9;
+    font-size:15px; font-variant-numeric:tabular-nums; }
+  .pjbx-table tbody tr:last-child td { border-bottom:0; }
+  .pjbx-table tbody tr { transition:background .12s; }
+  .pjbx-table tbody tr:hover td { background:#f8fafc; }
 
-  .pjbx-table .col-cat { text-align:left; color:#0f172a; font-weight:800; font-size:14px; white-space:nowrap; }
-  .pjbx-table .col-cat .dot { display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:8px; vertical-align:middle; }
+  .pjbx-table .col-cat { text-align:left; color:#0f172a; font-weight:800; font-size:15px; white-space:nowrap; }
+  .pjbx-table .col-cat .dot { display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:9px; vertical-align:middle; }
 
   /* 진척바 + 소진율% 통합 컬럼 */
-  .pjbx-table .col-bar { padding:14px 16px; min-width:240px; }
-  .pjbx-table .bar-row { display:flex; align-items:center; gap:12px; }
-  .pjbx-table .bar-wrap { flex:1; position:relative; height:10px; background:#f1f5f9; border-radius:99px; overflow:hidden; min-width:120px; }
-  .pjbx-table .bar-fill { position:absolute; left:0; top:0; height:100%; border-radius:99px; transition:width .4s; box-shadow:0 0 0 1px rgba(255,255,255,.4) inset; }
-  .pjbx-table .bar-fill.good { background:linear-gradient(90deg,#10B981,#059669); }
-  .pjbx-table .bar-fill.warn { background:linear-gradient(90deg,#F59E0B,#D97706); }
-  .pjbx-table .bar-fill.bad  { background:linear-gradient(90deg,#EF4444,#DC2626); }
-  .pjbx-table .bar-fill.zero { background:#e5e7eb; }
-  .pjbx-table .bar-pct { font-size:14px; font-weight:900; min-width:56px; text-align:right; font-variant-numeric:tabular-nums; letter-spacing:-.01em; }
+  .pjbx-table .col-bar { padding:16px 18px; min-width:260px; }
+  .pjbx-table .bar-row { display:flex; align-items:center; gap:14px; }
+  .pjbx-table .bar-wrap { flex:1; position:relative; height:12px; background:#eef2f7; border-radius:99px; overflow:hidden; min-width:120px; box-shadow:inset 0 1px 2px rgba(15,23,42,.06); }
+  .pjbx-table .bar-fill { position:absolute; left:0; top:0; height:100%; border-radius:99px; transition:width .5s cubic-bezier(.4,0,.2,1); }
+  .pjbx-table .bar-fill.good { background:linear-gradient(90deg,#34D399,#059669); }
+  .pjbx-table .bar-fill.warn { background:linear-gradient(90deg,#FBBF24,#D97706); }
+  .pjbx-table .bar-fill.bad  { background:linear-gradient(90deg,#F87171,#DC2626); }
+  .pjbx-table .bar-fill.zero { background:#cbd5e1; }
+  .pjbx-table .bar-pct { font-size:15px; font-weight:900; min-width:54px; text-align:right; font-variant-numeric:tabular-nums; letter-spacing:-.01em; }
   .pjbx-table .bar-pct.good { color:#059669; }
   .pjbx-table .bar-pct.warn { color:#D97706; }
   .pjbx-table .bar-pct.bad  { color:#DC2626; }
   .pjbx-table .bar-pct.zero { color:#94a3b8; }
 
-  .pjbx-table .col-num { text-align:right; color:#475569; font-weight:600; }
+  .pjbx-table .col-num { text-align:right; color:#64748b; font-weight:600; font-size:15px; }
   .pjbx-table .col-num.contract { color:#0f172a; font-weight:800; }
-  .pjbx-table .col-profit { text-align:right; font-weight:900; font-size:14px; font-variant-numeric:tabular-nums; }
+  .pjbx-table .col-profit { text-align:right; font-weight:900; font-size:15px; font-variant-numeric:tabular-nums; }
   .pjbx-table .col-profit.pos { color:#059669; }
   .pjbx-table .col-profit.neg { color:#DC2626; }
   .pjbx-table .col-status { text-align:center; }
-  .pjbx-table .badge { display:inline-block; padding:4px 10px; border-radius:99px; font-size:11px; font-weight:800; letter-spacing:.02em; }
-  .pjbx-table .badge.good { background:#D1FAE5; color:#059669; }
-  .pjbx-table .badge.warn { background:#FED7AA; color:#D97706; }
-  .pjbx-table .badge.bad  { background:#FECACA; color:#DC2626; }
+  .pjbx-table .badge { display:inline-block; padding:5px 12px; border-radius:99px; font-size:11px; font-weight:800; letter-spacing:.02em; }
+  .pjbx-table .badge.good { background:#D1FAE5; color:#047857; }
+  .pjbx-table .badge.warn { background:#FEF3C7; color:#B45309; }
+  .pjbx-table .badge.bad  { background:#FEE2E2; color:#B91C1C; }
 
-  /* tfoot 합계 */
-  .pjbx-table tfoot td { padding:16px 14px;
-    border-top:2px solid #0f172a; border-bottom:0;
-    border-right:1px solid #e5e7eb;
-    font-size:14px; font-weight:900; color:#0f172a; background:#fafbfc; }
-  .pjbx-table tfoot td:last-child { border-right:0; }
+  /* tfoot 합계 — 강조 */
+  .pjbx-table tfoot td { padding:18px 16px;
+    border-top:2px solid #1e293b; border-bottom:0;
+    font-size:15px; font-weight:900; color:#0f172a; background:#f1f5f9; }
   .pjbx-table tfoot .label { text-align:left; }
   .pjbx-table tfoot .num { text-align:right; }
   .pjbx-table tfoot .rate { text-align:center; }
+  [data-theme="dark"] .pjbx-table, [data-theme="dark"] .pjbx-hero-burn { background:#111827; border-color:#374151; }
+  [data-theme="dark"] .pjbx-table th, [data-theme="dark"] .pjbx-table tfoot td { background:#1f2937; color:#cbd5e1; }
+  [data-theme="dark"] .pjbx-table .col-cat, [data-theme="dark"] .pjbx-table tfoot td { color:#f1f5f9; }
 
   /* 직불금 분리 영역 */
   .pjbx-direct { margin-top:18px; padding:16px 18px; border-radius:12px;
