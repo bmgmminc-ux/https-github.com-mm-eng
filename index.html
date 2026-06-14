@@ -6821,6 +6821,46 @@ table.data-table {
   };
   var ORDER = ['outsource','material','product','indirect','cashexp','labor','safety','direct','labordirect'];
 
+  // ── [매입 건별 증빙·메모·날짜 — 대표 요청] 행 클릭 → 선택 입력 패널 (전부 선택, 강제 없음) ──
+  var _expandedCi = null;
+  function _escA(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function pjPurBadges(edate, memo){
+    var b = '';
+    if (edate) b += '<span style="margin-left:6px;font-size:10px;color:#475569;background:#f1f5f9;padding:2px 6px;border-radius:99px;white-space:nowrap">📅 '+_escA(String(edate).slice(5))+'</span>';
+    if (memo)  b += '<span title="'+_escA(memo)+'" style="margin-left:6px;font-size:10px;color:#92400E;background:#FEF3C7;padding:2px 6px;border-radius:99px;white-space:nowrap">📝 메모</span>';
+    return b;
+  }
+  function pjPurDetailRow(ci, edate, memo){
+    return '<tr class="pjpur-detail"><td colspan="8" style="background:#f8fafc;padding:14px 18px;border-bottom:1px solid #e5e7eb">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'
+      +   '<div style="font-size:12px;color:#64748b">ℹ️ 선택 입력 — 비워둬도 저장됩니다. 꼭 기억할 것만 기재.</div>'
+      +   '<button onclick="event.stopPropagation();window.pjPurMeta.toggle('+ci+')" style="border:1px solid #e5e7eb;background:#fff;border-radius:7px;padding:4px 10px;font-size:12px;cursor:pointer">✕ 닫기</button>'
+      + '</div>'
+      + '<div style="display:flex;gap:14px;flex-wrap:wrap" onclick="event.stopPropagation()">'
+      +   '<div style="flex:1;min-width:160px"><label style="font-size:12px;color:#64748b;font-weight:600">📅 거래·증빙 일자 <span style="color:#94a3b8">(선택)</span></label>'
+      +     '<input type="date" value="'+_escA(edate)+'" onchange="window.pjPurMeta.set('+ci+',\'evidenceDate\',this.value)" style="width:100%;margin-top:4px;padding:8px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;box-sizing:border-box"/></div>'
+      +   '<div style="flex:2;min-width:220px"><label style="font-size:12px;color:#64748b;font-weight:600">📝 메모 <span style="color:#94a3b8">(선택 · 꼭 기억할 내용)</span></label>'
+      +     '<textarea rows="2" placeholder="예: 추가공사분 — 협의단가 적용 / 하자 재시공 아님 / 발주처 구두승인" onchange="window.pjPurMeta.set('+ci+',\'memo\',this.value)" style="width:100%;margin-top:4px;padding:8px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;box-sizing:border-box;resize:vertical">'+_escA(memo)+'</textarea></div>'
+      + '</div>'
+      + '<div style="margin-top:10px;font-size:11px;color:#94a3b8">📎 이 매입 건 증빙 첨부 — 첨부 보안정책 SQL(attachments_rls_schema.sql) 적용 후 활성화됩니다</div>'
+      + '</td></tr>';
+  }
+  window.pjPurMeta = {
+    toggle: function(ci){ _expandedCi = (_expandedCi === ci ? null : ci); render(); },
+    set: function(ci, field, val){
+      try {
+        var ps = JSON.parse(localStorage.getItem('mm-dash-v4')||'[]');
+        var pid = sessionStorage.getItem('mm-selected-pid');
+        var proj = pid ? ps.find(function(x){return x.id===pid;}) : ps[0];
+        if (!proj || !Array.isArray(proj.costItems) || !proj.costItems[ci]) return;
+        proj.costItems[ci][field] = val;
+        localStorage.setItem('mm-dash-v4', JSON.stringify(ps));
+        try { if (window.cloudSave) window.cloudSave(); } catch(e){}   // 클라우드 push
+        render();
+      } catch(e){}
+    }
+  };
+
   function loadProject() {
     var ps; try { ps = JSON.parse(localStorage.getItem('mm-dash-v4')||'[]'); } catch(e){ ps=[]; }
     if (!Array.isArray(ps) || !ps.length) return null;
@@ -6838,13 +6878,13 @@ table.data-table {
     var items = [];
     var directRows = [];
     if (p && Array.isArray(p.costItems) && p.costItems.length) {
-      items = p.costItems.map(function(it){
+      items = p.costItems.map(function(it, _idx){
         var supply = num(it.supplyAmt||it.supply||it.amount);
         var isDirect = (it.type==='direct'||it.type==='labordirect');
         var tax = (it.type==='labordirect'||it.type==='labor'||it.type==='cashexp') ? 0 : (it.tax!=null?num(it.tax):Math.round(supply*0.1));
         var ded = isDirect ? num(it.deduction||0) : 0;  // [직불차감] 직불공제 — 집계는 유효액(공급가−공제), 행 표시는 gross+공제 병기
         if (isDirect) directRows.push({ vendor:it.vendor||'—', type:it.type, supply:supply, tax:tax, ded:ded, detail:it.desc||'' });
-        return { type:it.type||'outsource', vendor:it.vendor||'—', detail:it.desc||it.memo||'', supply:supply, tax:tax, ded:ded, paid:num(it.paidAmount), direct:isDirect };
+        return { type:it.type||'outsource', vendor:it.vendor||'—', detail:it.desc||it.memo||'', supply:supply, tax:tax, ded:ded, paid:num(it.paidAmount), direct:isDirect, _ci:_idx, _edate:(it.evidenceDate||''), _memo:(it.memo||'') };
       });
     } else if (p && p.costs) {
       ORDER.forEach(function(k){
@@ -6899,23 +6939,30 @@ table.data-table {
         var cat = CAT[it.type] || CAT.outsource;
         var total = it.supply + it.tax;
         var dot = '<span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:'+cat.c+';margin-right:6px;vertical-align:middle"></span>';
+        var hasMeta = (it._ci != null && it._ci >= 0);
+        var click = hasMeta ? ' data-ci="'+it._ci+'" onclick="window.pjPurMeta.toggle('+it._ci+')"' : '';
+        var badges = hasMeta ? pjPurBadges(it._edate, it._memo) : '';
+        var rowHtml;
         if (it.direct) {
-          return '<tr style="background:#f5f3ff"><td>'+dot+cat.name+'</td><td><strong>'+it.vendor+'</strong></td>'+
-            '<td style="color:#7C3AED;font-style:italic">'+(it.detail||'발주처 직접지급')+'</td>'+
+          rowHtml = '<tr'+click+' style="background:#f5f3ff'+(hasMeta?';cursor:pointer':'')+'"><td>'+dot+cat.name+'</td><td><strong>'+it.vendor+'</strong></td>'+
+            '<td style="color:#7C3AED;font-style:italic">'+(it.detail||'발주처 직접지급')+badges+'</td>'+
             '<td class="right tnum">'+fmt(it.supply)+'</td>'+
             '<td class="right tnum" style="color:var(--text-tertiary)">'+fmt(it.tax)+'</td>'+
             '<td class="right tnum" style="color:#7C3AED"><strong>'+fmt(total)+'</strong></td>'+
             '<td class="right tnum" style="color:var(--text-muted)">—</td>'+
             '<td class="right tnum" style="color:var(--text-muted)">— (지급 제외)</td></tr>';
+        } else {
+          var unpaid = Math.max(0, total - it.paid);
+          rowHtml = '<tr'+click+(hasMeta?' style="cursor:pointer"':'')+'><td>'+dot+cat.name+'</td><td><strong>'+it.vendor+'</strong></td>'+
+            '<td>'+(it.detail||'')+badges+'</td>'+
+            '<td class="right tnum">'+fmt(it.supply)+'</td>'+
+            '<td class="right tnum" style="color:var(--text-tertiary)">'+fmt(it.tax)+'</td>'+
+            '<td class="right tnum"><strong>'+fmt(total)+'</strong></td>'+
+            '<td class="right tnum" style="color:var(--success-700)"><strong>'+fmt(it.paid)+'</strong></td>'+
+            '<td class="right tnum" style="color:'+(unpaid>0?'var(--danger-700)':'var(--success-700)')+'"><strong>'+fmt(unpaid)+'</strong></td></tr>';
         }
-        var unpaid = Math.max(0, total - it.paid);
-        return '<tr><td>'+dot+cat.name+'</td><td><strong>'+it.vendor+'</strong></td>'+
-          '<td>'+(it.detail||'')+'</td>'+
-          '<td class="right tnum">'+fmt(it.supply)+'</td>'+
-          '<td class="right tnum" style="color:var(--text-tertiary)">'+fmt(it.tax)+'</td>'+
-          '<td class="right tnum"><strong>'+fmt(total)+'</strong></td>'+
-          '<td class="right tnum" style="color:var(--success-700)"><strong>'+fmt(it.paid)+'</strong></td>'+
-          '<td class="right tnum" style="color:'+(unpaid>0?'var(--danger-700)':'var(--success-700)')+'"><strong>'+fmt(unpaid)+'</strong></td></tr>';
+        if (hasMeta && it._ci === _expandedCi) rowHtml += pjPurDetailRow(it._ci, it._edate, it._memo);
+        return rowHtml;
       }).join('');
       // 합계행
       rows += '<tr class="row-subtotal" style="font-weight:900;background:var(--bg-subtle)">'+
