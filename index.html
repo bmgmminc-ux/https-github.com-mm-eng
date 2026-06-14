@@ -6842,11 +6842,21 @@ table.data-table {
       +   '<div style="flex:2;min-width:220px"><label style="font-size:12px;color:#64748b;font-weight:600">📝 메모 <span style="color:#94a3b8">(선택 · 꼭 기억할 내용)</span></label>'
       +     '<textarea rows="2" placeholder="예: 추가공사분 — 협의단가 적용 / 하자 재시공 아님 / 발주처 구두승인" onchange="window.pjPurMeta.set('+ci+',\'memo\',this.value)" style="width:100%;margin-top:4px;padding:8px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;box-sizing:border-box;resize:vertical">'+_escA(memo)+'</textarea></div>'
       + '</div>'
-      + '<div style="margin-top:10px;font-size:11px;color:#94a3b8">📎 이 매입 건 증빙 첨부 — 첨부 보안정책 SQL(attachments_rls_schema.sql) 적용 후 활성화됩니다</div>'
+      + '<div style="margin-top:12px;border-top:1px dashed #e2e8f0;padding-top:10px" onclick="event.stopPropagation()">'
+      +   '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">'
+      +     '<span style="font-size:12px;color:#64748b;font-weight:600">📎 증빙 첨부 <span style="color:#94a3b8;font-weight:400">(선택)</span></span>'
+      +     '<select id="pjpur-cat-'+ci+'" style="font-size:12px;padding:4px 6px;border:1px solid #d1d5db;border-radius:6px">'
+      +       '<option>영수증</option><option>세금계산서</option><option>계약서</option><option>현장사진</option><option>기타</option>'
+      +     '</select>'
+      +     '<label style="font-size:12px;padding:5px 10px;border:1px solid #cbd5e1;border-radius:7px;background:#fff;cursor:pointer">📁 파일 선택<input type="file" multiple onchange="window.pjPurAtt.onPick('+ci+', this)" style="display:none"/></label>'
+      +     '<span style="font-size:11px;color:#cbd5e1">최대 10MB · 영수증/세금계산서/계약서 등 유형별로 이 건에 묶임</span>'
+      +   '</div>'
+      +   '<div id="pjpur-att-'+ci+'" style="display:flex;flex-direction:column;gap:5px"><div style="font-size:11px;color:#cbd5e1">불러오는 중…</div></div>'
+      + '</div>'
       + '</td></tr>';
   }
   window.pjPurMeta = {
-    toggle: function(ci){ _expandedCi = (_expandedCi === ci ? null : ci); render(); },
+    toggle: function(ci){ var opening = (_expandedCi !== ci); _expandedCi = opening ? ci : null; render(); if (opening && window.pjPurAtt) window.pjPurAtt.fill(ci); },
     set: function(ci, field, val){
       try {
         var ps = JSON.parse(localStorage.getItem('mm-dash-v4')||'[]');
@@ -6860,6 +6870,118 @@ table.data-table {
       } catch(e){}
     }
   };
+
+  // ── [Piece B] 매입 건별 증빙 파일 첨부 — Supabase Storage(mm-attachments) + attachments.cost_item_id ──
+  (function(){
+    var BUCKET = 'mm-attachments';
+    function sb(){ return window.mmSupabase && window.mmSupabase.getClient && window.mmSupabase.getClient(); }
+    function ready(){ return !!(window.mmSupabase && window.mmSupabase.isReady && window.mmSupabase.isReady()); }
+    function toast(m,t){ if (window.globalToast) window.globalToast(m,t); }
+    function fmtSize(n){ if(n>=1048576)return (n/1048576).toFixed(1)+' MB'; if(n>=1024)return Math.round(n/1024)+' KB'; return (n||0)+' B'; }
+    function fIcon(mime,name){ var n=(name||'').toLowerCase(); if((mime||'').indexOf('pdf')>=0||n.indexOf('.pdf')>=0)return '📄'; if((mime||'').indexOf('image')>=0||/\.(jpg|jpeg|png|webp|heic)$/.test(n))return '🖼️'; return '📎'; }
+    function curProj(){ var ps; try{ps=JSON.parse(localStorage.getItem('mm-dash-v4')||'[]');}catch(e){return null;} var pid=sessionStorage.getItem('mm-selected-pid'); return (pid?ps.find(function(x){return x.id===pid;}):ps[0])||null; }
+    function itemIdOf(ci){ var p=curProj(); return (p && p.costItems && p.costItems[ci] && p.costItems[ci].id) || ''; }
+    // 첨부 시점에 안정 id 생성·영속 (단순 열람만으론 데이터 변형 없음)
+    function ensureItemId(ci){
+      try {
+        var ps=JSON.parse(localStorage.getItem('mm-dash-v4')||'[]');
+        var pid=sessionStorage.getItem('mm-selected-pid');
+        var proj=pid?ps.find(function(x){return x.id===pid;}):ps[0];
+        if(!proj||!proj.costItems||!proj.costItems[ci])return '';
+        var it=proj.costItems[ci];
+        if(!it.id){
+          it.id=(window.crypto&&crypto.randomUUID)?('ci_'+crypto.randomUUID()):('ci_'+Date.now()+'_'+Math.floor(Math.random()*1e6));
+          localStorage.setItem('mm-dash-v4', JSON.stringify(ps));
+          try{ if(window.cloudSave) window.cloudSave(); }catch(e){}
+        }
+        return it.id;
+      } catch(e){ return ''; }
+    }
+    function listHtml(rows, ci){
+      return rows.map(function(r){
+        return '<div style="display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #e5e7eb;border-radius:7px;padding:6px 8px">'
+          + '<span style="font-size:15px">'+fIcon(r.mime_type,r.file_name)+'</span>'
+          + '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+_escA(r.file_name||'')+'</div>'
+          +   '<div style="font-size:10px;color:#94a3b8">'+fmtSize(r.file_size)+' · '+(r.uploaded_at||'').slice(0,10)+'</div></div>'
+          + '<span style="font-size:10px;color:#475569;background:#f1f5f9;padding:2px 7px;border-radius:99px;white-space:nowrap">'+_escA(r.category||'기타')+'</span>'
+          + '<button title="다운로드" onclick="window.pjAttach.download(\''+r.file_path+'\',\''+_escA(r.file_name||'file')+'\')" style="width:28px;height:28px;border-radius:6px;border:1px solid #e5e7eb;background:#fff;cursor:pointer">⬇</button>'
+          + '<button title="삭제" onclick="window.pjPurAtt.remove('+ci+',\''+r.id+'\',\''+r.file_path+'\')" style="width:28px;height:28px;border-radius:6px;border:1px solid #e5e7eb;background:#fff;cursor:pointer">🗑</button>'
+          + '</div>';
+      }).join('');
+    }
+    window.pjPurAtt = {
+      // 패널 열릴 때 그 건의 첨부 목록 채우기
+      fill: async function(ci){
+        var box=document.getElementById('pjpur-att-'+ci); if(!box) return;
+        if(!ready()){ box.innerHTML='<div style="font-size:11px;color:#94a3b8">☁️ 첨부는 Supabase 연동 후 사용 가능합니다 (설정 화면)</div>'; return; }
+        var id=itemIdOf(ci);
+        if(!id){ box.innerHTML='<div style="font-size:11px;color:#cbd5e1">아직 첨부된 증빙이 없습니다</div>'; return; }
+        box.innerHTML='<div style="font-size:11px;color:#cbd5e1">불러오는 중…</div>';
+        try{
+          var res=await sb().from('attachments').select('*').eq('cost_item_id',id).order('uploaded_at',{ascending:false});
+          if(res.error) throw res.error;
+          var rows=res.data||[];
+          box.innerHTML = rows.length ? listHtml(rows,ci) : '<div style="font-size:11px;color:#cbd5e1">아직 첨부된 증빙이 없습니다</div>';
+        }catch(e){ box.innerHTML='<div style="font-size:11px;color:#dc2626">목록 조회 실패: '+_escA(e.message||String(e))+'</div>'; }
+      },
+      onPick: async function(ci, inputEl){
+        if(!ready()){ toast('Supabase 연동 후 사용 가능합니다','warning'); inputEl.value=''; return; }
+        var files=inputEl.files; if(!files||!files.length) return;
+        var id=ensureItemId(ci); if(!id){ toast('대상 매입 건을 찾을 수 없습니다','danger'); return; }
+        var pid=sessionStorage.getItem('mm-selected-pid');
+        var catSel=document.getElementById('pjpur-cat-'+ci);
+        var category=catSel?catSel.value:'기타';
+        var client=sb();
+        var sess=await client.auth.getSession();
+        var uid=sess.data.session&&sess.data.session.user&&sess.data.session.user.id;
+        if(!uid){ toast('로그인이 필요합니다','warning'); return; }
+        var ok=0;
+        for(var i=0;i<files.length;i++){
+          var f=files[i];
+          if(f.size>10485760){ toast(f.name+' — 10MB 초과','danger'); continue; }
+          var path=pid+'/'+id+'/'+Date.now()+'-'+f.name.replace(/[^\w.\-]/g,'_');
+          try{
+            var up=await client.storage.from(BUCKET).upload(path,f); if(up.error) throw up.error;
+            var ins=await client.from('attachments').insert({ owner_id:uid, project_id:pid, cost_item_id:id, category:category, file_name:f.name, file_path:path, file_size:f.size, mime_type:f.type });
+            if(ins.error) throw ins.error;
+            ok++;
+            if(window.mmAudit) window.mmAudit.log('데이터','매입 증빙 첨부 — '+f.name);
+          }catch(e){ toast('업로드 실패('+f.name+'): '+(e.message||e),'danger'); }
+        }
+        inputEl.value='';
+        this.fill(ci); this.refreshCounts();
+        if(ok) toast('📎 증빙 '+ok+'건 첨부 완료','success');
+      },
+      remove: async function(ci, id, path){
+        if(!confirm('이 증빙 파일을 삭제할까요?')) return;
+        var client=sb(); if(!client) return;
+        try{
+          await client.storage.from(BUCKET).remove([path]);
+          await client.from('attachments').delete().eq('id',id);
+          if(window.mmAudit) window.mmAudit.log('데이터','매입 증빙 삭제');
+          this.fill(ci); this.refreshCounts();
+        }catch(e){ toast('삭제 실패: '+(e.message||e),'danger'); }
+      },
+      // 행 📎N 배지 — 프로젝트 전체 첨부를 cost_item_id로 집계해 각 행에 패치
+      refreshCounts: async function(){
+        var spans=document.querySelectorAll('#pjpur-tbody .pjpur-attc'); if(!spans.length) return;
+        if(!ready()) return;
+        var pid=sessionStorage.getItem('mm-selected-pid'); if(!pid) return;
+        try{
+          var res=await sb().from('attachments').select('cost_item_id').eq('project_id',pid);
+          if(res.error) return;
+          var counts={}; (res.data||[]).forEach(function(r){ if(r.cost_item_id) counts[r.cost_item_id]=(counts[r.cost_item_id]||0)+1; });
+          var proj=curProj();
+          spans.forEach(function(sp){
+            var ci=+sp.getAttribute('data-ci');
+            var it=proj&&proj.costItems&&proj.costItems[ci];
+            var n=(it&&it.id&&counts[it.id])||0;
+            sp.innerHTML = n>0 ? '<span style="margin-left:6px;font-size:10px;color:#1d4ed8;background:#dbeafe;padding:2px 6px;border-radius:99px;white-space:nowrap">📎 '+n+'</span>' : '';
+          });
+        }catch(e){}
+      }
+    };
+  })();
 
   function loadProject() {
     var ps; try { ps = JSON.parse(localStorage.getItem('mm-dash-v4')||'[]'); } catch(e){ ps=[]; }
@@ -6941,7 +7063,7 @@ table.data-table {
         var dot = '<span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:'+cat.c+';margin-right:6px;vertical-align:middle"></span>';
         var hasMeta = (it._ci != null && it._ci >= 0);
         var click = hasMeta ? ' data-ci="'+it._ci+'" onclick="window.pjPurMeta.toggle('+it._ci+')"' : '';
-        var badges = hasMeta ? pjPurBadges(it._edate, it._memo) : '';
+        var badges = hasMeta ? (pjPurBadges(it._edate, it._memo) + '<span class="pjpur-attc" data-ci="'+it._ci+'"></span>') : '';
         var rowHtml;
         if (it.direct) {
           rowHtml = '<tr'+click+' style="background:#f5f3ff'+(hasMeta?';cursor:pointer':'')+'"><td>'+dot+cat.name+'</td><td><strong>'+it.vendor+'</strong></td>'+
@@ -6973,6 +7095,7 @@ table.data-table {
         '<td class="right tnum" style="border-top:2px solid var(--border-strong);color:var(--success-700)">'+fmt(paidTotal)+'</td>'+
         '<td class="right tnum" style="border-top:2px solid var(--border-strong);color:var(--danger-700)">'+fmt(unpaidTotal)+'</td></tr>';
       tbody.innerHTML = rows;
+      if (window.pjPurAtt) window.pjPurAtt.refreshCounts();   // 행 📎N 배지 비동기 패치
     }
 
     // ── 매입 세부내역 메타 ──
