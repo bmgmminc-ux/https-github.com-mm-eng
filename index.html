@@ -18369,7 +18369,10 @@ CREATE TABLE system_map_activity (
     'mm-dash-v4','mm-vendors','mm-vendors-v2','mm-vendors-v23',
     'mm-workers','mm-attendance','mm-activity-log',
     'mm-dunning-queue',
-    'mm-thresholds','mm-alert-recipients','mm-auth','mm-theme'
+    'mm-thresholds','mm-alert-recipients','mm-auth','mm-theme',
+    // [백업 누락 수정] 회사 신원(cert·seal은 로컬 전용·클라우드 미동기화 → 복원 시 영구 유실 방지)·동기화 매핑·파생 설정
+    'mm-company','mm-company-cert','mm-company-seal',
+    'mm-cloud-id-map','mm-paste-map','mm-budget-distribution'
   ];
   window.mmBackup = function() {
     try {
