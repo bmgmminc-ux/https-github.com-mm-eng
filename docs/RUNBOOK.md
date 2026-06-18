@@ -43,14 +43,18 @@
 
 ## 3. DB 스키마 변경 (마이그레이션)
 
-- 마이그레이션 .sql = `supabase/migrations/` (타임스탬프 접두, 적용순서 = 파일명순). 전부 멱등(`if not exists`)이라 재실행 안전.
+- 마이그레이션 .sql = `supabase/migrations/` (파일명순 = 적용순서). **단일 소스 — base 스키마까지 포함**:
+  - `00000000_schema_migrations.sql` : 적용추적 테이블(최초 1회 RUN).
+  - `00001_base_schema.sql` / `00002_base_phase1.sql` : 기반 스키마(원본 supabase-schema*.sql 편입). **00001은 신규/빈 DB 전용**(정책 drop-가드 없음 → 기존 DB 재실행 시 정책 중복 오류, 라이브엔 이미 적용됨). 00002·증분은 멱등.
+  - `20260609_*` ~ `20260614_*` : 증분(컬럼/테이블 추가, 전부 `if not exists` 멱등).
 - **신규 변경 절차**: ① `supabase/migrations/YYYYMMDD_name.sql` 작성(AI) ② 파일 끝에 자기기록 1줄 추가:
   ```
   insert into public.schema_migrations(filename) values('YYYYMMDD_name.sql') on conflict (filename) do nothing;
   ```
   ③ **대표가 SQL Editor에서 RUN** ④ commit.
-- **적용현황 확인**: `select * from public.schema_migrations order by filename;` (기억이 아니라 DB로 확인). 최초 1회 `00000000_schema_migrations.sql` RUN 필요.
-- **신규 환경 재구축**: migrations 폴더를 파일명순으로 차례로 RUN(전부 멱등).
+- **적용현황 확인(메모)**: `select * from public.schema_migrations order by filename;`
+- **무결성 점검(실제)**: `99_verify_schema.sql` RUN — 핵심 테이블/컬럼이 라이브 DB에 진짜 있는지(present=true). 기록과 실제를 대조.
+- **신규 환경 재구축**: migrations 를 **파일명순**으로 RUN(00001 base → 00002 → 증분). 빈 DB라 00001 정책도 정상 생성. 끝에 `99_verify_schema.sql`로 확인.
 
 ---
 
