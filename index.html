@@ -6773,9 +6773,20 @@ table.data-table {
 
   window.pjAddr = { search: search, render: render };
 
+  // [팝업 차단 회피] 현장 상세 진입 시 미리 로드 — 클릭 시 동기 open() 이 되어 크롬 팝업 차단에 걸리지 않음
+  // (미리 로드 전에 클릭해도 search()의 비동기 경로가 폴백으로 동작)
+  function preload() {
+    if ((window.daum && window.daum.Postcode) || _loading) return;
+    _loading = true;
+    var s = document.createElement('script');
+    s.src = PC_SRC;
+    s.onload  = function(){ _loading = false; };
+    s.onerror = function(){ _loading = false; };
+    document.head.appendChild(s);
+  }
   function maybeRender() {
     var pd = document.querySelector('[data-screen="project-detail"]');
-    if (pd && pd.classList.contains('active')) render();
+    if (pd && pd.classList.contains('active')) { render(); preload(); }
   }
   window.addEventListener('hashchange', function(){ setTimeout(maybeRender, 150); });
   window.addEventListener('storage', function(e){ if (e.key === 'mm-dash-v4') setTimeout(maybeRender, 150); });
