@@ -5307,6 +5307,7 @@ table.data-table {
               <span id="pjd-hero-date">📅 계약일 —</span>
               <span id="pjd-hero-status"><span class="dot-status live"></span>🟢 양호</span>
               <span id="pjd-hero-client">🏢 —</span>
+              <span id="pjd-hero-address" style="cursor:pointer" title="클릭 — 카카오 주소검색으로 현장 주소 입력·수정 (영업 지도 표시용)" onclick="window.pjAddr&&window.pjAddr.search()">📍 주소 입력</span>
             </div>
           </div>
           <div class="hero-stats">
@@ -6707,6 +6708,79 @@ table.data-table {
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
   window.addEventListener('storage', function(e){ if (e.key==='mm-dash-v4') setTimeout(listFiles, 200); });
+})();
+</script>
+
+<script id="pjaddr-script">
+// [영업 지도 ①] 현장 주소 입력 — 카카오(다음) 우편번호 서비스. API 키 불요·지연 로딩.
+//  · 이 단계는 주소(address)만 저장. 좌표(lat/lng)는 ②단계에서 카카오 지오코더로 변환.
+//  · projects.address 컬럼(20260618_project_address.sql) 미실행이어도 로컬 저장·표시는 정상
+//    (클라우드 push는 disassembleProject 폴백이 해당 필드만 제거).
+(function() {
+  'use strict';
+  var PC_SRC = 'https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
+  var _loading = false;
+  function loadProjects() { try { var a = JSON.parse(localStorage.getItem('mm-dash-v4')||'[]'); return Array.isArray(a)?a:[]; } catch(e){ return []; } }
+  function curProject(ps) { var pid = sessionStorage.getItem('mm-selected-pid') || ''; return (pid ? ps.find(function(x){ return x.id === pid; }) : ps[0]) || null; }
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function render() {
+    var el = document.getElementById('pjd-hero-address');
+    if (!el) return;
+    var p = curProject(loadProjects());
+    var a = (p && p.address) ? String(p.address) : '';
+    el.innerHTML = a ? ('📍 ' + esc(a)) : '📍 주소 입력';
+    el.style.opacity = a ? '' : '0.7';
+  }
+
+  function save(addr) {
+    try {
+      var ps = loadProjects();
+      var p = curProject(ps);
+      if (!p) { if (window.globalToast) window.globalToast('현장을 먼저 선택하세요', 'warning'); return; }
+      p.address = addr;
+      p.lat = null; p.lng = null;   // 주소 변경 시 좌표 무효화 — ②단계 지오코딩에서 재계산
+      localStorage.setItem('mm-dash-v4', JSON.stringify(ps));
+      try { if (window.mmData && window.mmData.push) window.mmData.push(); } catch(e){}
+      try { if (window.mmAudit) window.mmAudit.log('데이터', '현장 주소 입력 — ' + (p.id||'') + ' ' + addr); } catch(e){}
+      render();
+      if (window.globalToast) window.globalToast('📍 현장 주소 저장 — ' + addr, 'success');
+    } catch(e) { if (window.globalToast) window.globalToast('주소 저장 실패: ' + (e.message||e), 'danger'); }
+  }
+
+  function openPostcode() {
+    if (!(window.daum && window.daum.Postcode)) { if (window.globalToast) window.globalToast('주소검색 로드 실패 — 인터넷 연결을 확인하세요', 'danger'); return; }
+    new window.daum.Postcode({
+      oncomplete: function(data) {
+        var addr = data.roadAddress || data.jibunAddress || '';
+        if (addr && data.buildingName) addr += ' (' + data.buildingName + ')';
+        if (addr) save(addr);
+      }
+    }).open();
+  }
+
+  function search() {
+    if (window.daum && window.daum.Postcode) { openPostcode(); return; }
+    if (_loading) return;
+    _loading = true;
+    if (window.globalToast) window.globalToast('주소검색 불러오는 중…');
+    var s = document.createElement('script');
+    s.src = PC_SRC;
+    s.onload  = function(){ _loading = false; openPostcode(); };
+    s.onerror = function(){ _loading = false; if (window.globalToast) window.globalToast('주소검색 스크립트 로드 실패', 'danger'); };
+    document.head.appendChild(s);
+  }
+
+  window.pjAddr = { search: search, render: render };
+
+  function maybeRender() {
+    var pd = document.querySelector('[data-screen="project-detail"]');
+    if (pd && pd.classList.contains('active')) render();
+  }
+  window.addEventListener('hashchange', function(){ setTimeout(maybeRender, 150); });
+  window.addEventListener('storage', function(e){ if (e.key === 'mm-dash-v4') setTimeout(maybeRender, 150); });
+  document.addEventListener('DOMContentLoaded', function(){ setTimeout(maybeRender, 350); });
+  setTimeout(maybeRender, 150);
 })();
 </script>
 
@@ -17470,6 +17544,7 @@ CREATE TABLE system_map_activity (
       contractOrig: num(pr.contract_orig), contractAdd: num(pr.contract_add),
       status: pr.status || '진행중', progress: num(pr.progress) || 0,
       createdAt: pr.created_at || '', budgetItems: Array.isArray(pr.budget_items) ? pr.budget_items : [],
+      address: pr.address || '', lat: (pr.lat == null ? null : Number(pr.lat)), lng: (pr.lng == null ? null : Number(pr.lng)),  // [영업 지도 ①] 현장 주소·좌표
       memo: pr.memo || '', costs: {}, costItems: [], billingItems: [], otherIncomeItems: []
     };
     (costRows||[]).forEach(function(r) {
@@ -17521,6 +17596,7 @@ CREATE TABLE system_map_activity (
       client: p.client||'', start_date: p.startDate||null, end_date: p.endDate||null,
       contract_orig: bint(p.contractOrig), contract_add: bint(p.contractAdd), memo: p.memo||'',
       status: p.status||'진행중', progress: num(p.progress)||0,
+      address: p.address||null, lat: (p.lat == null ? null : Number(p.lat)), lng: (p.lng == null ? null : Number(p.lng)),  // [영업 지도 ①] 컬럼 미생성 시 아래 push 폴백이 자동 제거
       budget_items: (p.budgetItems||[]).filter(function(b){ return b && b.src !== 'derived'; })
     };
     if (p.createdAt) proj.created_at = p.createdAt;  // 있을 때만 — projects.created_at DB default now() 보존
@@ -17602,6 +17678,11 @@ CREATE TABLE system_map_activity (
       for (var i = 0; i < projects.length; i++) {
         var d = disassembleProject(projects[i], ownerId);
         var r1 = await sb.from('projects').upsert(d.project);
+        if (r1.error && /\b(address|lat|lng)\b/i.test(r1.error.message||'')) {
+          // [영업 지도 ①] address/lat/lng 컬럼 미생성 환경 폴백 — 20260618_project_address.sql RUN 전에도 프로젝트 동기화 정상(로컬 주소는 보존)
+          delete d.project.address; delete d.project.lat; delete d.project.lng;
+          r1 = await sb.from('projects').upsert(d.project);
+        }
         if (r1.error) throw r1.error;
         var r2 = await sb.from('project_costs').upsert(d.costs, { onConflict: 'project_id,category' });
         if (r2.error) throw r2.error;
