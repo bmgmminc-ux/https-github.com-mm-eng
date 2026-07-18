@@ -4721,11 +4721,7 @@ table.data-table {
               <span>많음</span>
               <span style="margin-left:14px">⭐ = 연중 최고치</span>
             </div>
-            <div style="display:flex;gap:18px;font-size:11px">
-              <div><span style="color:var(--text-tertiary)">최성수기 </span><strong>4월 (15.6억)</strong></div>
-              <div><span style="color:var(--text-tertiary)">최비수기 </span><strong>1월 (3.7억)</strong></div>
-              <div><span style="color:var(--text-tertiary)">최대 카테고리 </span><strong style="color:var(--primary-700)">외주비 (66.3억)</strong></div>
-            </div>
+            <div style="display:none"><!-- [P2-3 정직화] 정적 인사이트(최성수기 4월 15.6억 등) 제거 — 실집계 인사이트는 추후 연결 --></div>
           </div>
 
           <!-- 호버 툴팁: JS가 동적으로 위치 이동 -->
@@ -4926,26 +4922,7 @@ table.data-table {
           <!-- ════════════════════════════════════════════════
                정보 강화 범례: 색상-이름-합계-추세 4정보 동시 제시
                ════════════════════════════════════════════════ -->
-          <div class="legend-rich">
-            <div class="legend-rich-item">
-              <span class="legend-rich-dot" style="background:linear-gradient(180deg,#4A5C92,#131F45)"></span>
-              <span class="legend-rich-name">수주</span>
-              <strong class="legend-rich-value">84.6억</strong>
-              <span class="legend-rich-trend up">▲12.4%</span>
-            </div>
-            <div class="legend-rich-item">
-              <span class="legend-rich-dot" style="background:linear-gradient(180deg,#608AFA,#1A38D8)"></span>
-              <span class="legend-rich-name">원가</span>
-              <strong class="legend-rich-value">69.0억</strong>
-              <span class="legend-rich-trend up">▲8.7%</span>
-            </div>
-            <div class="legend-rich-item">
-              <span class="legend-rich-dot" style="background:linear-gradient(180deg,#6EE7B7,#047857)"></span>
-              <span class="legend-rich-name">수금</span>
-              <strong class="legend-rich-value">65.0억</strong>
-              <span class="legend-rich-trend up">▲6.2%</span>
-            </div>
-          </div>
+          <div class="legend-rich" style="display:none"><!-- [P2-3 정직화] 정적 범례(수주 84.6억·원가 69.0억·수금 65.0억·가짜 추세) 제거 — 월별 데이터 모델 도입 시 실집계로 부활 --></div>
 
           <!-- ════════════════════════════════════════════════
                자동 인사이트 배너: 데이터에서 도출된 핵심 메시지
@@ -18913,16 +18890,50 @@ CREATE TABLE system_map_activity (
       var bar = document.getElementById('bar-chart-v2');
       if (bar && !bar.dataset.mmEmptied){ bar.dataset.mmEmptied='1'; bar.innerHTML = note('월별 추이 차트', '계약·원가는 프로젝트 총액으로 관리되어 월별 추이를 표시할 데이터가 아직 없습니다.'); bar.style.height='auto'; }
       var strip = document.querySelector('.chart-summary-strip'); if (strip) strip.style.display = 'none';
+      // [P2-3 H6] 매입 활동 히트맵 실구현 — costItems.date(없으면 createdAt) × 9분류, 올해 1~12월 공급가 합계.
+      //           데이터 소스(도입 시점 doc_date)·CSS 그리드는 기존재 — 렌더러만 없던 상태를 연결.
       var hm = document.getElementById('heatmap-v2');
-      if (hm && !hm.dataset.mmEmptied){
-        hm.dataset.mmEmptied='1'; hm.innerHTML = note('매입 활동 히트맵', '매입 건이 월별로 쌓이면 분류×월 히트맵으로 자동 표시됩니다.'); hm.style.display='block';
-        // 히트맵 외 형제(인사이트 줄 '외주비 66.3억·최성수기 4월', 호버 툴팁) 숨김 — 헤더·노트만 유지
+      if (hm) {
         var hmCard = hm.closest('.chart-card');
-        if (hmCard) Array.from(hmCard.children).forEach(function(ch){
+        if (hmCard) Array.from(hmCard.children).forEach(function(ch){   // 가짜 인사이트 줄('외주비 66.3억' 등)·툴팁은 계속 숨김
           if (ch === hm) return;
-          if (ch.querySelector && ch.querySelector('.t-h4')) return;   // 카드 헤더 유지
+          if (ch.querySelector && ch.querySelector('.t-h4')) return;
           ch.style.display = 'none';
         });
+        var CATL = [['outsource','외주비'],['material','자재비'],['product','상품비'],['indirect','간접비'],['cashexp','비증빙'],['labor','인건비'],['safety','안전'],['direct','직불'],['labordirect','인건직불']];
+        var YR = String(new Date().getFullYear());
+        var hmGrid = {}, hmMax = 0, hmAny = false;
+        projects.forEach(function(p){ (p.costItems||[]).forEach(function(it){
+          var d = String(it.date || it.createdAt || '').slice(0,10);
+          if (d.slice(0,4) !== YR) return;
+          var m = parseInt(d.slice(5,7),10); if (!m) return;
+          var k = (it.type||'') + ':' + m, v = num(it.supplyAmt) || 0;
+          hmGrid[k] = (hmGrid[k]||0) + v; if (hmGrid[k] > hmMax) hmMax = hmGrid[k]; if (v > 0) hmAny = true;
+        }); });
+        if (!hmAny) {
+          if (!hm.dataset.mmEmptied){ hm.dataset.mmEmptied='1'; hm.innerHTML = note('매입 활동 히트맵', '매입 건에 날짜가 쌓이면 분류×월 히트맵으로 자동 표시됩니다. ('+YR+'년 기준)'); hm.style.display='block'; }
+        } else {
+          delete hm.dataset.mmEmptied;
+          var fmtMan = function(v){ return v >= 1e8 ? (v/1e8).toFixed(1)+'억' : Math.round(v/1e4).toLocaleString()+'만'; };
+          var hh = '<div class="hm-corner"></div>';
+          for (var hmM = 1; hmM <= 12; hmM++) hh += '<div class="hm-col-label">'+hmM+'월</div>';
+          hh += '<div class="hm-total-label">합계</div>';
+          CATL.forEach(function(c){
+            hh += '<div class="hm-row-label">'+c[1]+'</div>';
+            var rowSum = 0;
+            for (var m3 = 1; m3 <= 12; m3++){
+              var v3 = hmGrid[c[0]+':'+m3] || 0; rowSum += v3;
+              var al = hmMax > 0 ? v3/hmMax : 0;
+              hh += '<div class="hm-cell'+(v3>0&&v3===hmMax?' hm-max':'')+'" title="'+c[1]+' '+m3+'월 — '+v3.toLocaleString()+'원" style="background:'+(v3>0?'rgba(37,99,235,'+(0.12+0.78*al).toFixed(2)+')':'#f1f5f9')+'">'
+                + (v3>0 ? '<span style="font-size:9px;font-weight:800;color:'+(al>0.45?'#fff':'#1E40AF')+'">'+fmtMan(v3)+'</span>' : '')
+                + '</div>';
+            }
+            hh += '<div class="hm-row-label" style="justify-content:center;padding-right:0;color:#1E40AF">'+(rowSum>0?fmtMan(rowSum):'—')+'</div>';
+          });
+          hm.innerHTML = hh; hm.style.display = 'grid';
+          var hd = hmCard && hmCard.querySelector('.t-h4');
+          if (hd && hd.textContent.indexOf(YR) < 0) hd.textContent = '매입 활동 히트맵 — '+YR+'년 (공급가)';
+        }
       }
       // 막대차트 y축 눈금(20억..0)도 숨김 — 빈 노트 옆 빈 축 제거
       var axis = document.querySelector('.chart-with-axis .y-axis'); if (axis) axis.style.display = 'none';
@@ -20160,7 +20171,9 @@ CREATE TABLE system_map_activity (
   function hideOverviewDemo(){
     var screen = document.querySelector('[data-screen="overview"]');
     if (!screen) return;
-    var demoTitles = ['실시간 인터랙티브 시각화','차트 시스템','실시간 경보 & 활동'];
+    // [H6 차트 부활] '실시간 인터랙티브 시각화'(게이지·도넛·히트맵)·'차트 시스템' 섹션은 Stage 3에서 실데이터
+    // 배선 완료 — 이 스위퍼가 계속 통째로 숨겨 대시보드 차트가 0개였던 결함. 데모 잔존인 경보&활동만 유지.
+    var demoTitles = ['실시간 경보 & 활동'];
     var titles = screen.querySelectorAll('.section-title');
     titles.forEach(function(t){
       var txt = t.textContent || '';
