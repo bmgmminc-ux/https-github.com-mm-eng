@@ -7563,9 +7563,20 @@ table.data-table {
         document.body.style.overflow = 'hidden';
       }
     }
+    // [C7] 모달 미저장 편집 침묵 유실 방지 — 모달별 dirty 검사기 레지스트리.
+    //      등록된 검사기가 true(미저장 변경 있음)를 반환하면 확인 후에만 닫힌다. ESC·백드롭·✕ 전 경로 공통 게이트.
+    window.mmModalGuard = window.mmModalGuard || {};
+    window.mmModalCanClose = function(id) {
+      try {
+        var g = id && window.mmModalGuard[id];
+        if (g && g()) return confirm('⚠️ 저장하지 않은 변경이 있습니다.\n저장 없이 닫으면 입력한 내용이 사라집니다. 그래도 닫을까요?');
+      } catch (e) {}
+      return true;
+    };
     function closeModal(id) {
       const modal = document.getElementById(id);
       if (modal) {
+        if (!window.mmModalCanClose(id)) return;   // [C7]
         modal.classList.remove('open');
         document.body.style.overflow = '';
       }
@@ -7574,6 +7585,7 @@ table.data-table {
     document.querySelectorAll('.modal-overlay').forEach(modal => {
       modal.addEventListener('click', e => {
         if (e.target === modal) {
+          if (!window.mmModalCanClose(modal.id)) return;   // [C7]
           modal.classList.remove('open');
           document.body.style.overflow = '';
         }
@@ -7583,6 +7595,7 @@ table.data-table {
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') {
         document.querySelectorAll('.modal-overlay.open').forEach(m => {
+          if (!window.mmModalCanClose(m.id)) return;   // [C7]
           m.classList.remove('open');
           document.body.style.overflow = '';
         });
@@ -12093,6 +12106,7 @@ CREATE TABLE system_map_activity (
       window.__modalListenersAttached = true;
       document.addEventListener('click', function(e) {
         if (e.target.classList && e.target.classList.contains('modal-overlay')) {
+          if (window.mmModalCanClose && !window.mmModalCanClose(e.target.id)) return;   // [C7]
           e.target.classList.remove('open');
           document.body.style.overflow = '';
         }
@@ -12101,6 +12115,7 @@ CREATE TABLE system_map_activity (
         if (e.key === 'Escape') {
           var openModals = document.querySelectorAll('.modal-overlay.open');
           openModals.forEach(function(m) {
+            if (window.mmModalCanClose && !window.mmModalCanClose(m.id)) return;   // [C7]
             m.classList.remove('open');
             document.body.style.overflow = '';
           });
@@ -14354,8 +14369,18 @@ CREATE TABLE system_map_activity (
       if (guess && guess !== row.type) row.type = guess;
     }
     // [정책변경] 거래처는 타이핑 시 자동등록하지 않음 — 저장 시 '미등록 차단 + 지금 등록' 확인으로 일원화
+    var _typeMoved = (state.items[idx] && row.type !== state.items[idx].type);   // type 직접 변경 or desc 추정 승격
     state.items[idx] = row;
-    render();
+    // [C6] 타이핑 편집은 전체 재렌더 없이 파생값(세액·합계·요약·위반표시)만 제자리 갱신 — 포커스·Tab 유지.
+    //      행이 다른 탭으로 이동하는 편집(type 변경)만 전체 렌더.
+    if (_typeMoved) { render(); return; }
+    updateDerivedCells(idx, row);
+    // 숫자칸은 커밋 후 콤마 포맷 재표시 (전체 렌더가 하던 몫)
+    if (field === 'supplyAmt' || field === 'paidAmount' || field === 'contractAmt' || field === 'deduction') {
+      var _tb = document.getElementById('mm-purchase-table');
+      var _ni = _tb && _tb.querySelector('input[data-mm-cell="'+idx+'\\:'+field+'"]');
+      if (_ni && document.activeElement !== _ni) _ni.value = fmt(row[field]);
+    }
   }
 
   function addRow() {
@@ -14392,6 +14417,7 @@ CREATE TABLE system_map_activity (
   }
   function quickFillPaid(idx) {
     editField(idx, 'paidAmount', state.items[idx].total || 0);
+    render();   // [C6 보완] 버튼 클릭 경로는 지급↔미지급 버튼 스왑이 필요해 전체 렌더(입력 포커스 없음 — 무해)
   }
   function markUnpaid(idx) {
     editField(idx, 'paidAmount', 0);  // 지급액 0 → 미지급 전환 (editField가 재렌더)
@@ -14685,9 +14711,82 @@ CREATE TABLE system_map_activity (
   }
 
   // ── 렌더 ──
+  // ── [P2-1 연속입력 기계] 헬퍼 ──
+  function _vnorm(s){ return String(s||'').replace(/\s+/g,'').replace(/[()（）]/g,'').toLowerCase(); }
+  function _refreshRegSets() {   // 등록 업체/일용직 이름 셋 + datalist 옵션 (3키 병합)
+    var vn = {}, vNames = [];
+    ['mm-vendors','mm-vendors-v2','mm-vendors-v23'].forEach(function(k){
+      try { (JSON.parse(localStorage.getItem(k)||'[]')||[]).forEach(function(v){ var n=v&&v.name; if(n && !vn[_vnorm(n)]){ vn[_vnorm(n)]=1; vNames.push(n); } }); } catch(e){}
+    });
+    var wn = {}, wNames = [];
+    try { (JSON.parse(localStorage.getItem('mm-workers')||'[]')||[]).forEach(function(w){ var n=w&&w.name; if(n && !wn[_vnorm(n)]){ wn[_vnorm(n)]=1; wNames.push(n); } }); } catch(e){}
+    state._regV = vn; state._regW = wn;
+    // [H10] 업체명 자동완성 datalist — 선등록 정책을 '반려 벽'이 아니라 입력 보조로
+    var host = document.getElementById('modal-purchase') || document.body;
+    [['mm-dl-vendors', vNames], ['mm-dl-workers', wNames]].forEach(function(pair){
+      var d = document.getElementById(pair[0]);
+      if (!d) { d = document.createElement('datalist'); d.id = pair[0]; host.appendChild(d); }
+      d.innerHTML = pair[1].sort().map(function(n){ return '<option value="'+String(n).replace(/"/g,'&quot;')+'"></option>'; }).join('');
+    });
+  }
+  function _vendorBad(it) {   // [H10] 미등록 하이라이트 판정 — 직불 계열은 자유 입력(정책 그대로)
+    if (!it || !it.vendor) return false;
+    if (it.type === 'direct' || it.type === 'labordirect') return false;
+    return it.type === 'labor' ? !state._regW[_vnorm(it.vendor)] : !state._regV[_vnorm(it.vendor)];
+  }
+  function updateSummary() {
+    var cat = CATS.find(function(c){return c.key===state.activeTab});
+    var tabItems = state.items.filter(function(it){return it.type===state.activeTab});
+    var total=0, paid=0; tabItems.forEach(function(it){total+=num(it.total); paid+=num(it.paidAmount)});
+    var unpaid = Math.max(0, total - paid);
+    document.getElementById('mm-purchase-summary').innerHTML = '<span style="color:'+cat.color+'">'+cat.label+' — 합계: <span style="font-size:23px">'+fmt(total)+'</span></span>';
+    document.getElementById('mm-purchase-paid-summary').innerHTML = isDirect(state.activeTab) ? '' : '<span>지급: <strong style="color:#059669">'+fmt(paid)+'</strong></span><span>미지급: <strong style="color:'+(unpaid>0?'#DC2626':'#059669')+'">'+fmt(unpaid)+'</strong></span>';
+  }
+  // [C6] 셀 타이핑 편집의 파생값만 제자리 갱신 — innerHTML 전체 재렌더로 포커스·Tab 흐름이 끊기던 결함 수정
+  function updateDerivedCells(oi, row) {
+    var tbl = document.getElementById('mm-purchase-table');
+    if (!tbl) { render(); return; }
+    var tset = function(key, txt){ var el = tbl.querySelector('[data-mm-calc="'+oi+'\\:'+key+'"]'); if (el) el.textContent = txt; };
+    tset('tax', fmt(row.tax)); tset('total', fmt(row.total));
+    updateSummary();
+    var vin = tbl.querySelector('input[data-mm-cell="'+oi+'\\:vendor"]');
+    if (vin) {
+      var bad = _vendorBad(row);
+      vin.style.borderColor = bad ? '#DC2626' : '#d1d5db';
+      vin.style.background  = bad ? '#FEF2F2' : '#f8fafc';
+      vin.title = bad ? '미등록 업체 — 저장 시 차단됩니다 (거래처 마스터에 사업자번호까지 선등록 필요)' : '';
+    }
+  }
+  // [P2-1] Enter = 다음 셀 / 마지막 셀에서 새 행 — 키보드만으로 연속 입력
+  function _bindEnterNav(tbl) {
+    if (tbl._mmEnterNav) return; tbl._mmEnterNav = 1;
+    tbl.addEventListener('keydown', function(e){
+      if (e.key !== 'Enter' || e.isComposing) return;   // 한글 IME 조합 중 Enter 제외
+      var t = e.target;
+      if (!t || !t.getAttribute || !t.getAttribute('data-mm-cell')) return;
+      e.preventDefault();
+      var cells = Array.prototype.slice.call(tbl.querySelectorAll('[data-mm-cell]'));
+      var i = cells.indexOf(t);
+      t.blur();   // 값 커밋(onchange/onblur) — 셀 편집은 제자리 갱신이라 DOM 유지
+      setTimeout(function(){
+        var cells2 = Array.prototype.slice.call(tbl.querySelectorAll('[data-mm-cell]'));
+        var next = (cells2[i] === t || cells2.length === cells.length) ? cells2[i+1] : cells2[i];   // desc 분류승격 등으로 전체 렌더 났으면 같은 위치부터
+        if (next) { next.focus(); try { next.select(); } catch(_e){} }
+        else {
+          window.mmPurchase.addRow();
+          var c3 = tbl.querySelectorAll('tbody tr');
+          var lastRow = c3[c3.length - 1];
+          var first = lastRow && lastRow.querySelector('[data-mm-cell]');
+          if (first) { first.focus(); try { first.select(); } catch(_e){} }
+        }
+      }, 0);
+    });
+  }
+
   function render() {
     if (!state.project) return;
     document.getElementById('mm-purchase-pid').textContent = state.project.id;
+    _refreshRegSets();
     // 탭
     var tabs = document.getElementById('mm-purchase-tabs');
     var counts = {}; CATS.forEach(function(c){counts[c.key]=0}); state.items.forEach(function(it){ if (counts[it.type]!=null) counts[it.type]++ });
@@ -14700,8 +14799,7 @@ CREATE TABLE system_map_activity (
     var tabItems = state.items.filter(function(it){return it.type===state.activeTab});
     var total=0, paid=0; tabItems.forEach(function(it){total+=num(it.total); paid+=num(it.paidAmount)});
     var unpaid = Math.max(0, total - paid);
-    document.getElementById('mm-purchase-summary').innerHTML = '<span style="color:'+cat.color+'">'+cat.label+' — 합계: <span style="font-size:23px">'+fmt(total)+'</span></span>';
-    document.getElementById('mm-purchase-paid-summary').innerHTML = isDirect(state.activeTab) ? '' : '<span>지급: <strong style="color:#059669">'+fmt(paid)+'</strong></span><span>미지급: <strong style="color:'+(unpaid>0?'#DC2626':'#059669')+'">'+fmt(unpaid)+'</strong></span>';
+    updateSummary();
     // 배너
     var banner = document.getElementById('mm-purchase-banner');
     if (state.activeTab === 'direct') {
@@ -14745,23 +14843,29 @@ CREATE TABLE system_map_activity (
       ? '<tr><td colspan="10" style="text-align:center;padding:40px;color:#94a3b8;font-size:15px">등록된 항목이 없습니다 — "➕ 항목 추가" 또는 "📋 붙여넣기"로 시작</td></tr>'
       : tabItems.map(function(it){
           var oi = state.items.indexOf(it);
-          var inp = function(field, val, type, extra) { return '<input type="'+(type||'text')+'" value="'+String(val||'').replace(/"/g,'&quot;')+'" onchange="mmPurchase.edit('+oi+',\''+field+'\',this.'+(type==='date'?'value':'value')+')" style="padding:7px 9px;border-radius:8px;border:1px solid #d1d5db;font-size:14px;width:100%;background:#f8fafc;box-sizing:border-box'+(extra||'')+'">' };
-          var nInp = function(field, val) { return '<input type="text" value="'+fmt(val)+'" onblur="mmPurchase.editNum('+oi+',\''+field+'\',this.value)" style="padding:7px 9px;border-radius:8px;border:1px solid #d1d5db;font-size:14px;width:100%;background:#f8fafc;box-sizing:border-box;text-align:right">' };
+          var inp = function(field, val, type, extra) { return '<input type="'+(type||'text')+'" data-mm-cell="'+oi+':'+field+'" value="'+String(val||'').replace(/"/g,'&quot;')+'" onchange="mmPurchase.edit('+oi+',\''+field+'\',this.'+(type==='date'?'value':'value')+')" style="padding:7px 9px;border-radius:8px;border:1px solid #d1d5db;font-size:14px;width:100%;background:#f8fafc;box-sizing:border-box'+(extra||'')+'">' };
+          var nInp = function(field, val) { return '<input type="text" data-mm-cell="'+oi+':'+field+'" value="'+fmt(val)+'" onblur="mmPurchase.editNum('+oi+',\''+field+'\',this.value)" style="padding:7px 9px;border-radius:8px;border:1px solid #d1d5db;font-size:14px;width:100%;background:#f8fafc;box-sizing:border-box;text-align:right">' };
+          // [H10] 업체명 — datalist 자동완성(선등록 마스터에서) + 미등록 인라인 하이라이트(저장 전에 미리 보임)
+          var _vb = _vendorBad(it);
+          var vInp = '<input type="text" data-mm-cell="'+oi+':vendor" list="'+(labor?'mm-dl-workers':'mm-dl-vendors')+'" value="'+String(it.vendor||'').replace(/"/g,'&quot;')+'" onchange="mmPurchase.edit('+oi+',\'vendor\',this.value)"'
+            + (_vb?' title="미등록 업체 — 저장 시 차단됩니다 (거래처 마스터에 사업자번호까지 선등록 필요)"':'')
+            + ' style="padding:7px 9px;border-radius:8px;border:1px solid '+(_vb?'#DC2626':'#d1d5db')+';font-size:14px;width:100%;background:'+(_vb?'#FEF2F2':'#f8fafc')+';box-sizing:border-box">';
           var isUnpaid = (it.total||0)>0 && (it.paidAmount||0)<(it.total||0);
           return '<tr>'
-            + '<td style="padding:14px;border-bottom:1px solid #f1f5f9;min-width:160px">'+inp('vendor',it.vendor)+'</td>'
+            + '<td style="padding:14px;border-bottom:1px solid #f1f5f9;min-width:160px">'+vInp+'</td>'
             + '<td style="padding:14px;border-bottom:1px solid #f1f5f9;min-width:180px">'+inp('desc',it.desc)+'</td>'
             + (direct?(function(){ var _ad=(it.type==='direct')?'outsource':'labor'; var _ac=it.attribCat||_ad; return '<td style="padding:14px;border-bottom:1px solid #f1f5f9;min-width:110px"><select onchange="mmPurchase.edit('+oi+',\'attribCat\',this.value)" style="padding:7px 6px;border-radius:8px;border:1px solid #d1d5db;font-size:13px;width:100%;background:#f8fafc;box-sizing:border-box;cursor:pointer">'+CATS.filter(function(c){return c.key!=='direct'&&c.key!=='labordirect';}).map(function(c){return '<option value="'+c.key+'"'+(c.key===_ac?' selected':'')+'>'+c.label+'</option>';}).join('')+'</select></td>'; })():'')
             + (direct?'<td style="padding:14px;border-bottom:1px solid #f1f5f9;min-width:120px">'+nInp('contractAmt',it.contractAmt)+'</td><td style="padding:14px;border-bottom:1px solid #f1f5f9;min-width:120px">'+nInp('deduction',it.deduction)+'</td>':'')
             + '<td style="padding:14px;border-bottom:1px solid #f1f5f9;min-width:117px">'+nInp('supplyAmt',it.supplyAmt)+'</td>'
-            + (vat0?'':'<td style="padding:14px;border-bottom:1px solid #f1f5f9;text-align:right;color:#64748b">'+fmt(it.tax)+'</td>')
-            + '<td style="padding:14px;border-bottom:1px solid #f1f5f9;text-align:right;font-weight:700">'+fmt(it.total)+'</td>'
+            + (vat0?'':'<td data-mm-calc="'+oi+':tax" style="padding:14px;border-bottom:1px solid #f1f5f9;text-align:right;color:#64748b">'+fmt(it.tax)+'</td>')
+            + '<td data-mm-calc="'+oi+':total" style="padding:14px;border-bottom:1px solid #f1f5f9;text-align:right;font-weight:700">'+fmt(it.total)+'</td>'
             + (direct?'':'<td style="padding:14px;border-bottom:1px solid #f1f5f9;min-width:140px"><div style="display:flex;align-items:center;gap:4px">'+nInp('paidAmount',it.paidAmount||0)+(isUnpaid?'<button onclick="mmPurchase.quickPaid('+oi+')" title="합계를 지급액으로" style="padding:4px 8px;border-radius:6px;border:1px solid #059669;background:#ECFDF5;color:#059669;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">지급</button>':((it.total||0)>0&&(it.paidAmount||0)>0?'<button onclick="mmPurchase.markUnpaid('+oi+')" title="지급액 0으로 — 미지급 전환" style="padding:4px 8px;border-radius:6px;border:1px solid #DC2626;background:#FEF2F2;color:#DC2626;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">미지급</button>':''))+'</div></td>')
             + '<td style="padding:14px;border-bottom:1px solid #f1f5f9">'+inp('memo',it.memo)+'</td>'
             + '<td style="padding:14px;border-bottom:1px solid #f1f5f9"><button onclick="mmPurchase.removeRow('+oi+')" style="background:none;border:none;cursor:pointer;font-size:16px;color:#DC2626">🗑</button></td>'
             + '</tr>';
         }).join('');
     tbl.innerHTML = head + '<tbody>'+rowsHtml+'</tbody>';
+    _bindEnterNav(tbl);   // [P2-1] Enter=다음 셀/새 행 (1회 바인딩)
   }
 
   // ── public API ──
@@ -14782,6 +14886,24 @@ CREATE TABLE system_map_activity (
     save: saveProject,
     init: function() { loadProject(); render() },
   };
+
+  // [C7] 미저장 편집 가드 — 모달의 편집본(state.items)을 저장본(mm-dash-v4)과 대조.
+  //      스냅샷 별도 관리 없이 모든 저장 경로(저장 버튼·삭제 자동저장)를 자동 커버.
+  //      완전 빈 행은 양쪽에서 제외 — '항목 추가만 누르고 닫기'에 경고가 뜨지 않게.
+  try {
+    window.mmModalGuard = window.mmModalGuard || {};
+    window.mmModalGuard['modal-purchase'] = function() {
+      if (!state.project) return false;
+      var nonEmpty = function(it){ return it && (it.vendor || it.desc || num(it.supplyAmt) || num(it.total) || num(it.paidAmount)); };
+      var live = (state.items || []).filter(nonEmpty);
+      var stored = [];
+      try {
+        var sp = (JSON.parse(localStorage.getItem('mm-dash-v4')||'[]')||[]).find(function(x){ return x.id === state.project.id; });
+        stored = ((sp && sp.costItems) || []).filter(nonEmpty);
+      } catch(e){}
+      return JSON.stringify(live) !== JSON.stringify(stored);
+    };
+  } catch(e){}
 
   // 모달 열릴 때 자동 init
   (function watchOpen() {
