@@ -12579,6 +12579,8 @@ CREATE TABLE system_map_activity (
     var VENDOR_KEY = 'mm-vendors-v23';
 
     window.checkDuplicateVendor = function(name) {
+      // [H18] 3키 병합 기준 중복검사 — v23만 보던 탓에 마스터화면 등록분(mm-vendors)을 못 봐 중복 생성하던 결함
+      if (window.mmVendorStore) return window.mmVendorStore.find(name);
       var nm = window.normalizeVendorName(name);
       if (!nm) return null;
       try {
@@ -12599,12 +12601,18 @@ CREATE TABLE system_map_activity (
         return existing;
       }
       try {
-        var vendors = JSON.parse(localStorage.getItem(VENDOR_KEY) || '[]');
         vendor.id = 'v_' + Date.now();
         vendor.createdAt = new Date().toISOString();
         vendor.normalizedName = window.normalizeVendorName(vendor.name);
-        vendors.push(vendor);
-        localStorage.setItem(VENDOR_KEY, JSON.stringify(vendors));
+        if (window.mmVendorStore) {                          // [H18] canonical 단일 저장
+          var vendors = window.mmVendorStore.all();
+          vendors.push(vendor);
+          window.mmVendorStore.save(vendors);
+        } else {
+          var v23 = JSON.parse(localStorage.getItem(VENDOR_KEY) || '[]');
+          v23.push(vendor);
+          localStorage.setItem(VENDOR_KEY, JSON.stringify(v23));
+        }
         if (window.globalToast) globalToast('✓ 거래처 등록: ' + vendor.name, 'success');
         return vendor;
       } catch (e) {
@@ -13090,10 +13098,10 @@ CREATE TABLE system_map_activity (
         newVendors.push(r);
       });
       try {
-        var existing = JSON.parse(localStorage.getItem('mm-vendors-v23') || '[]');
+        var existing = window.mmVendorStore ? window.mmVendorStore.all() : JSON.parse(localStorage.getItem('mm-vendors-v23') || '[]');
         if (!Array.isArray(existing)) existing = [];
         var combined = existing.concat(newVendors);
-        localStorage.setItem('mm-vendors-v23', JSON.stringify(combined));
+        if (window.mmVendorStore) window.mmVendorStore.save(combined); else localStorage.setItem('mm-vendors-v23', JSON.stringify(combined));   // [H18] canonical \uB2E8\uC77C \uC800\uC7A5
         var msg = '\u2713 \uAC70\uB798\uCC98 \uC2E0\uADDC ' + newVendors.length + '\uAC74 \uB4F1\uB85D';
         if (duplicates.length > 0) msg += ' \u00B7 \uC911\uBCF5 ' + duplicates.length + '\uAC74 \uC81C\uC678';
         if (window.globalToast) globalToast(msg, newVendors.length ? 'success' : 'warning', 6000);
@@ -16589,6 +16597,65 @@ CREATE TABLE system_map_activity (
 </script>
 
 
+<script id="mm-vendor-store">
+// [H18] 거래처 단일 관문 — 3키(mm-vendors/-v2/-v23) 분열 종식.
+//  읽기는 이미 전 화면 3키 병합이었으나 쓰기가 6곳(v23 2·mm-vendors 3·클라우드pull v2 1)에 흩어져
+//  ①빠른등록(v23-only 중복검사)이 마스터화면 등록분(mm-vendors)을 못 봐 중복 생성 ②클라우드 pull이 v2 그림자 생성.
+//  → 모든 쓰기를 canonical(mm-vendors-v23) 하나로 모으고 저장 시 레거시 키를 비운다. 필드병합은 기존 감사 로직 보존(로컬 bizNo 우선).
+(function(){
+  'use strict';
+  var CANON = 'mm-vendors-v23';
+  var LEGACY = ['mm-vendors','mm-vendors-v2'];
+  var _seq = 0;
+  function norm(s){ return String(s||'').replace(/\s+/g,'').replace(/[()（）]/g,'').toLowerCase(); }
+  function rd(k){ try{ var a=JSON.parse(localStorage.getItem(k)||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+  // 3키 필드병합 → canonical 리스트. canonical(v23) 먼저 순회 → 로컬 원본 필드가 먼저 확정, 레거시/그림자는 빈칸만 채움.
+  function merge(){
+    var by={}, out=[];
+    [CANON].concat(LEGACY).forEach(function(k){
+      rd(k).forEach(function(v){
+        var nm=((typeof v==='string')?v:(v&&v.name))||''; nm=String(nm).trim(); if(!nm) return;
+        var n=norm(nm), o=by[n];
+        if(!o){ o=by[n]={ id:((v&&typeof v==='object'&&v.id)||('v_'+Date.now()+'_'+(_seq++))), name:nm }; out.push(o); }
+        if(typeof v!=='object'||!v) return;
+        if(!o.bizNo){ var b=String(v.bizNo||v.businessNo||v.bizno||v.biz_no||''); if(b) o.bizNo=b; }
+        ['ceo','phone','category','email','memo','addr','address','createdAt','normalizedName'].forEach(function(f){ if(!o[f]&&v[f]) o[f]=v[f]; });
+      });
+    });
+    return out;
+  }
+  window.mmVendorStore = {
+    norm: norm,
+    all: merge,                                   // 통합 읽기(정규화 dedup·필드병합)
+    find: function(name){ var n=norm(name); if(!n) return null; return merge().find(function(v){ return norm(v.name)===n; })||null; },
+    save: function(list){                          // canonical 저장 + 레거시 정리(재분열 차단)
+      localStorage.setItem(CANON, JSON.stringify(Array.isArray(list)?list:[]));
+      LEGACY.forEach(function(k){ try{ localStorage.removeItem(k); }catch(e){} });
+    },
+    add: function(v){                              // 단건 추가 — 정규화 중복이면 기존 반환(무변경)
+      var list=merge(), n=norm(v&&v.name);
+      var ex=list.find(function(x){ return norm(x.name)===n; });
+      if(ex) return ex;
+      if(!(v&&v.id)) v.id='v_'+Date.now()+'_'+(_seq++);
+      list.unshift(v); this.save(list); return v;
+    },
+    consolidate: function(){                        // 1회 마이그레이션(재실행 안전)
+      var hasLegacy = LEGACY.some(function(k){ return (localStorage.getItem(k)||'[]')!=='[]'; });
+      if(localStorage.getItem('mm-vendors-consolidated')==='1' && !hasLegacy) return;
+      var raw={}; [CANON].concat(LEGACY).forEach(function(k){ raw[k]=localStorage.getItem(k)||'[]'; });
+      var list=merge();
+      if(localStorage.getItem('mm-vendors-consolidated')!=='1'){
+        try{ localStorage.setItem('mm-vendors-legacy-backup', JSON.stringify({ at:new Date().toISOString(), raw:raw })); }catch(e){}
+      }
+      this.save(list);
+      try{ localStorage.setItem('mm-vendors-consolidated','1'); }catch(e){}
+    }
+  };
+  try{ window.mmVendorStore.consolidate(); }catch(e){}
+})();
+</script>
+
+
 <script id="mm-vendors-script">
 // 거래처(vendors) 마스터 [#132] — 등록 + 표 hydration
 (function() {
@@ -16626,7 +16693,10 @@ CREATE TABLE system_map_activity (
     return merged;
   }
   function save(a){
-    try { localStorage.setItem(KEY, JSON.stringify(a)); }
+    try {
+      if (window.mmVendorStore) { window.mmVendorStore.save(a); }   // [H18] canonical 단일 저장 + 레거시 정리
+      else { localStorage.setItem('mm-vendors-v23', JSON.stringify(a)); }
+    }
     catch(e){ alert('거래처 저장 실패 — 브라우저 저장 공간 확인: ' + e.message); }
   }
 
@@ -18088,13 +18158,16 @@ CREATE TABLE system_map_activity (
       // 클라우드는 빈 필드만 채움 — 번호 없는 클라우드 행이 로컬 번호를 가리는 그림자를 만들던 결함 차단.
       var lv={}; ['mm-vendors','mm-vendors-v2','mm-vendors-v23'].forEach(function(key){ _mLoad(key).forEach(function(v){ var nm=((typeof v==='string')?v:(v&&v.name))||''; nm=String(nm).trim(); if(!nm||_mTombHas('v',nm)) return; var n=_mNorm(nm); var ex=lv[n]; if(!ex){ lv[n]=(typeof v==='string')?{ id:'V-'+_uuid().slice(0,8), name:nm }:Object.assign({},v); } else if(typeof v==='object'&&v){ Object.keys(v).forEach(function(f){ if((ex[f]===undefined||ex[f]===null||ex[f]==='')&&v[f]!==undefined&&v[f]!==null&&v[f]!=='') ex[f]=v[f]; }); } }); });
       (rv.data||[]).forEach(function(r){ if(r.name&&!_mTombHas('v',r.name)){ var n=_mNorm(r.name); map['v:'+n]=r.id; var ex=lv[n]||{}; lv[n]=Object.assign({}, ex, { id:ex.id||('V-'+String(r.id).slice(0,8)), name:ex.name||r.name, bizNo:ex.bizNo||String(r.business_no||'').replace(/[^0-9]/g,''), ceo:ex.ceo||r.ceo||'', email:ex.email||r.email||'', addr:ex.addr||r.address||'', phone:r.phone||ex.phone, category:r.category||ex.category, memo:r.memo||ex.memo }); } });
-      localStorage.setItem('mm-vendors-v2', JSON.stringify(Object.keys(lv).map(function(k){ return lv[k]; })));
+      // [H18] v2 그림자 생성 종식 — 병합 결과를 canonical(v23) 단일 저장 + 레거시 정리
+      var _lvArr = Object.keys(lv).map(function(k){ return lv[k]; });
+      if (window.mmVendorStore) window.mmVendorStore.save(_lvArr);
+      else { localStorage.setItem('mm-vendors-v23', JSON.stringify(_lvArr)); localStorage.removeItem('mm-vendors-v2'); localStorage.removeItem('mm-vendors'); }
       var lw={}; _mLoad('mm-workers').forEach(function(w){ if(w&&w.name&&!_mTombHas('w',w.name)) lw[_mNorm(w.name)]=w; });
       // [주민번호 통일 — 전수감사] rrn 폴백 체인에 ex.jumin 추가 — pull 1회로 레거시 jumin 행이 rrn 표준으로 이행
       (rw.data||[]).forEach(function(r){ if(r.name&&!_mTombHas('w',r.name)){ var n=_mNorm(r.name); map['w:'+n]=r.id; var ex=lw[n]||{}; lw[n]=Object.assign({}, ex, { id:ex.id||('WK'+String(r.id).slice(0,8)), name:r.name, rrn:ex.rrn||ex.jumin||r.jumin_masked||'', phone:ex.phone||r.phone||'', address:ex.address||r.address||'', primaryJob:ex.primaryJob||r.primary_job||'일반', primaryWage:ex.primaryWage||r.primary_wage||0, altJobs:(Array.isArray(ex.altJobs)&&ex.altJobs.length)?ex.altJobs:(Array.isArray(r.alt_jobs)?r.alt_jobs:[]), daysWorked:ex.daysWorked||0, totalWage:ex.totalWage||0, createdAt:ex.createdAt||r.created_at }); } });
       localStorage.setItem('mm-workers', JSON.stringify(Object.keys(lw).map(function(k){ return lw[k]; })));
       _mIdMapSave(map);
-      try{ window.dispatchEvent(new StorageEvent('storage',{ key:'mm-vendors-v2' })); }catch(e){}
+      try{ window.dispatchEvent(new StorageEvent('storage',{ key:'mm-vendors-v23' })); }catch(e){}
       try{ if(window.mmVendors&&window.mmVendors.render) window.mmVendors.render(); }catch(e){}
       try{ if(window.mmWorkers&&window.mmWorkers.render) window.mmWorkers.render(); }catch(e){}
       return { ok:true, msg:'거래처 '+(rv.data||[]).length+' · 일용직 '+(rw.data||[]).length };
@@ -18507,10 +18580,13 @@ CREATE TABLE system_map_activity (
       if (_all.some(function(v){ return _norm(typeof v==='string'?v:(v&&v.name)) === _norm(name); })) { alert('이미 등록된 거래처입니다 (표기만 다른 동일 업체 포함)'); return; }
       var _dupBiz = _all.find(function(v){ return String((v&&v.bizNo)||'').replace(/[^0-9]/g,'') === _bizDigits; });
       if (_dupBiz) { alert('이미 등록된 사업자등록번호입니다 — ' + _dupBiz.name + '\n같은 업체는 한 번만 등록하세요.'); return; }
-      var arr = JSON.parse(localStorage.getItem('mm-vendors') || '[]');
-      if (!Array.isArray(arr)) arr = [];
-      arr.unshift({ id:'V'+Date.now(), name:name, bizNo:biz, ceo:ceo, createdAt:new Date().toISOString() });
-      localStorage.setItem('mm-vendors', JSON.stringify(arr));
+      var _nv = { id:'V'+Date.now(), name:name, bizNo:biz, ceo:ceo, createdAt:new Date().toISOString() };
+      if (window.mmVendorStore) {                            // [H18] canonical 단일 저장
+        var arr = window.mmVendorStore.all(); arr.unshift(_nv); window.mmVendorStore.save(arr);
+      } else {
+        var arr0 = JSON.parse(localStorage.getItem('mm-vendors-v23') || '[]'); if (!Array.isArray(arr0)) arr0 = [];
+        arr0.unshift(_nv); localStorage.setItem('mm-vendors-v23', JSON.stringify(arr0));
+      }
       if (window.mmVendors && window.mmVendors.render) window.mmVendors.render();
       toast('🏢 거래처 등록 완료 — ' + name, 'success');
       audit('데이터', '거래처 등록 — ' + name);
@@ -19949,16 +20025,17 @@ CREATE TABLE system_map_activity (
         var count = 0;
         var ts = Date.now();
         if (type === 'vendor') {
-          var arr = JSON.parse(localStorage.getItem('mm-vendors')||'[]');
+          // [H18] canonical(3키 병합) 기준 — mm-vendors만 읽어 중복검사하던 탓에 v23/v2 등록분과 중복 생성하던 결함
+          var _vnc = function(s){ return String(s||'').replace(/\s+/g,'').replace(/[()（）]/g,'').toLowerCase(); };
+          var arr = window.mmVendorStore ? window.mmVendorStore.all() : JSON.parse(localStorage.getItem('mm-vendors-v23')||'[]');
           if (!Array.isArray(arr)) arr = [];
           p.rows.forEach(function(r, i) {
             var name = (r[0]||'').trim(); if (!name) return;
-            var _vnc = function(s){ return String(s||'').replace(/\s+/g,'').replace(/[()（）]/g,'').toLowerCase(); };  // [적대검증 보강] 거래처도 정규화 중복 차단 — 공백 변형이 같은 클라우드 uuid로 충돌하던 비대칭
             if (arr.some(function(v){return _vnc(v.name)===_vnc(name);})) return;
             arr.push({ id:'V'+ts+'_'+i, name:name, bizNo:(r[1]||'').trim(), ceo:(r[2]||'').trim(), category:((r[3]||'외주비').split(' ')[0]||'외주비'), phone:(r[4]||'').trim(), createdAt:new Date().toISOString() });
             count++;
           });
-          localStorage.setItem('mm-vendors', JSON.stringify(arr));
+          if (window.mmVendorStore) window.mmVendorStore.save(arr); else localStorage.setItem('mm-vendors-v23', JSON.stringify(arr));
           if (window.mmVendors && window.mmVendors.render) window.mmVendors.render();
         } else if (type === 'worker') {
           var arr = JSON.parse(localStorage.getItem('mm-workers')||'[]');
