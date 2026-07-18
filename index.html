@@ -9196,23 +9196,23 @@ table.data-table {
         <div class="hero-grid">
           <div>
             <div class="hero-eyebrow">마스터 분석 · 업체별 매입 통합 추적</div>
-            <div class="hero-title">거래처 매입·결제 현황<br/>42개 협력 업체 분석</div>
+            <div class="hero-title">거래처 매입·결제 현황<br/>협력 업체 분석</div>
             <div class="hero-meta">
               <span data-mm-today>📅 —</span>
-              <span><span class="dot-status live"></span>이번 달 거래 38건</span>
+              <span><span class="dot-status live"></span>매입 데이터 기준 자동 집계</span>
               <span>⚡ 9분류 자동 매핑</span>
             </div>
           </div>
           <div class="hero-stats">
             <div class="hero-stat">
               <div class="hero-stat-label">활동 업체</div>
-              <div class="hero-stat-value t-num">42</div>
+              <div class="hero-stat-value t-num">0</div><!-- [C4 정직화] 정적 42 제거 — 렌더러 실집계로만 -->
               <div class="hero-stat-trend">최근 90일 거래</div>
             </div>
             <div class="hero-stat accent">
               <div class="hero-stat-label">누적 매입</div>
-              <div class="hero-stat-value t-num">45.2억</div>
-              <div class="hero-stat-trend">▲ +12.4%</div>
+              <div class="hero-stat-value t-num">—</div><!-- [C4 정직화] 정적 45.2억 제거 -->
+              <div class="hero-stat-trend"></div>
             </div>
             <div class="hero-stat success">
               <div class="hero-stat-label">평균 거래</div>
@@ -9420,59 +9420,12 @@ table.data-table {
             </div>
           </div>
 
-          <div class="col gap-3">
-            <!-- 즉시 결제 -->
-            <div>
-              <div class="row" style="justify-content:space-between;margin-bottom:6px">
-                <div style="font-size:13px;font-weight:800">⚡ 즉시 결제 (당일~7일)</div>
-                <div style="font-size:13px;font-weight:800;color:var(--success-700)" class="t-num">8개 업체 (19%)</div>
-              </div>
-              <div style="height:24px;border-radius:6px;background:#ECFDF5;overflow:hidden;display:flex;align-items:center">
-                <div style="width:19%;height:100%;background:var(--success-700);display:flex;align-items:center;padding:0 10px;color:#fff;font-size:11px;font-weight:700">19%</div>
-              </div>
-              <div class="t-xs" style="margin-top:4px">○○ 보험, ○○ 외 6개</div>
-            </div>
-
-            <!-- 30일 이내 -->
-            <div>
-              <div class="row" style="justify-content:space-between;margin-bottom:6px">
-                <div style="font-size:13px;font-weight:800">📅 30일 이내</div>
-                <div style="font-size:13px;font-weight:800;color:var(--primary-700)" class="t-num">22개 업체 (52%)</div>
-              </div>
-              <div style="height:24px;border-radius:6px;background:#DBEAFE;overflow:hidden;display:flex;align-items:center">
-                <div style="width:52%;height:100%;background:var(--primary-600);display:flex;align-items:center;padding:0 10px;color:#fff;font-size:11px;font-weight:700">52%</div>
-              </div>
-              <div class="t-xs" style="margin-top:4px">데이터 누적 시 자동 표시</div><!-- [가짜값 제거] -->
-            </div>
-
-            <!-- 60일+ -->
-            <div>
-              <div class="row" style="justify-content:space-between;margin-bottom:6px">
-                <div style="font-size:13px;font-weight:800">⚠️ 30~60일</div>
-                <div style="font-size:13px;font-weight:800;color:#D97706" class="t-num">9개 업체 (21%)</div>
-              </div>
-              <div style="height:24px;border-radius:6px;background:#FEF3C7;overflow:hidden;display:flex;align-items:center">
-                <div style="width:21%;height:100%;background:#D97706;display:flex;align-items:center;padding:0 10px;color:#fff;font-size:11px;font-weight:700">21%</div>
-              </div>
-              <div class="t-xs" style="margin-top:4px">○○, 안전제일 외 7개</div>
-            </div>
-
-            <!-- 60일+ 위험 -->
-            <div>
-              <div class="row" style="justify-content:space-between;margin-bottom:6px">
-                <div style="font-size:13px;font-weight:800;color:var(--danger-700)">🚨 60일 초과</div>
-                <div style="font-size:13px;font-weight:800;color:var(--danger-700)" class="t-num">3개 업체 (7%)</div>
-              </div>
-              <div style="height:24px;border-radius:6px;background:#FEE2E2;overflow:hidden;display:flex;align-items:center">
-                <div style="width:7%;height:100%;background:var(--danger-700);display:flex;align-items:center;padding:0 10px;color:#fff;font-size:11px;font-weight:700">7%</div>
-              </div>
-              <div class="t-xs" style="margin-top:4px;color:var(--danger-700)">데이터 누적 시 자동 표시</div><!-- [가짜값 제거] -->
-            </div>
-          </div>
-
-          <div style="margin-top:16px;padding:12px 14px;background:var(--bg-subtle);border-radius:8px;font-size:12px;color:var(--text-secondary);line-height:1.7">
-            💡 <strong>인사이트</strong>: 회사 평균 결제 일수 32일 — 업계 평균 (35일) 대비 양호.<br/>
-            60일 초과 업체 3곳은 거래 신뢰도 유지를 위해 우선 정산 권장.
+          <!-- [C4 정직화] 하드코딩 데모 분포(8개 19%·22개 52%·평균 32일 등)가 실데이터 존재 시에도 노출되던 결함 —
+               실구현(매입 date↔지급 paidDate 간격 집계) 전까지 정직한 준비중 상태로 교체 -->
+          <div style="text-align:center;padding:36px 20px;color:#94a3b8">
+            <div style="font-size:28px;margin-bottom:8px">📊</div>
+            <div style="font-size:14px;font-weight:700;margin-bottom:4px">결제 행태 분석 준비 중</div>
+            <div style="font-size:12px;line-height:1.7">매입일↔지급일 데이터가 누적되면 업체별 결제 소요 일수 분포가<br/>이 자리에 자동 표시됩니다. (현재 표시되는 수치 없음 — 가짜 데이터 아님)</div>
           </div>
         </div>
 
@@ -9481,118 +9434,16 @@ table.data-table {
           <div class="card-base-header">
             <div>
               <h3 class="t-h4">🔧 9분류별 매입 분포 (도메인 룰 4)</h3>
-              <div class="t-xs">전체 누적 45.2억 기준</div>
+              <div class="t-xs">매입 실집계 기준</div>
             </div>
           </div>
 
-          <div class="col gap-2">
-            <div>
-              <div class="row" style="justify-content:space-between;margin-bottom:4px">
-                <div style="font-size:13px;font-weight:800">
-                  <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#2563EB;margin-right:6px;vertical-align:middle"></span>
-                  외주비
-                </div>
-                <div style="font-size:13px;font-weight:800;color:#1E40AF" class="t-num">19.5억 (43%)</div>
-              </div>
-              <div style="height:14px;border-radius:4px;background:#DBEAFE;overflow:hidden">
-                <div style="width:43%;height:100%;background:#2563EB"></div>
-              </div>
-            </div>
-
-            <div>
-              <div class="row" style="justify-content:space-between;margin-bottom:4px">
-                <div style="font-size:13px;font-weight:800">
-                  <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#7C3AED;margin-right:6px;vertical-align:middle"></span>
-                  자재비
-                </div>
-                <div style="font-size:13px;font-weight:800;color:#5B21B6" class="t-num">12.4억 (27%)</div>
-              </div>
-              <div style="height:14px;border-radius:4px;background:#EDE9FE;overflow:hidden">
-                <div style="width:27%;height:100%;background:#7C3AED"></div>
-              </div>
-            </div>
-
-            <div>
-              <div class="row" style="justify-content:space-between;margin-bottom:4px">
-                <div style="font-size:13px;font-weight:800">
-                  <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#D97706;margin-right:6px;vertical-align:middle"></span>
-                  상품비
-                </div>
-                <div style="font-size:13px;font-weight:800;color:#92400E" class="t-num">7.8억 (17%)</div>
-              </div>
-              <div style="height:14px;border-radius:4px;background:#FEF3C7;overflow:hidden">
-                <div style="width:17%;height:100%;background:#D97706"></div>
-              </div>
-            </div>
-
-            <div>
-              <div class="row" style="justify-content:space-between;margin-bottom:4px">
-                <div style="font-size:13px;font-weight:800">
-                  <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#059669;margin-right:6px;vertical-align:middle"></span>
-                  인건비
-                </div>
-                <div style="font-size:13px;font-weight:800;color:#065F46" class="t-num">2.8억 (6%)</div>
-              </div>
-              <div style="height:14px;border-radius:4px;background:#D1FAE5;overflow:hidden">
-                <div style="width:6%;height:100%;background:#059669"></div>
-              </div>
-            </div>
-
-            <div>
-              <div class="row" style="justify-content:space-between;margin-bottom:4px">
-                <div style="font-size:13px;font-weight:800">
-                  <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#EA580C;margin-right:6px;vertical-align:middle"></span>
-                  간접비
-                </div>
-                <div style="font-size:13px;font-weight:800;color:#9A3412" class="t-num">1.5억 (3%)</div>
-              </div>
-              <div style="height:14px;border-radius:4px;background:#FED7AA;overflow:hidden">
-                <div style="width:3%;height:100%;background:#EA580C"></div>
-              </div>
-            </div>
-
-            <div>
-              <div class="row" style="justify-content:space-between;margin-bottom:4px">
-                <div style="font-size:13px;font-weight:800">
-                  <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#3730A3;margin-right:6px;vertical-align:middle"></span>
-                  직불금 <span class="badge" style="font-size:9px;background:#E0E7FF;color:#3730A3">캐시 제외</span>
-                </div>
-                <div style="font-size:13px;font-weight:800;color:#3730A3" class="t-num">0.8억 (2%)</div>
-              </div>
-              <div style="height:14px;border-radius:4px;background:#E0E7FF;overflow:hidden">
-                <div style="width:2%;height:100%;background:#3730A3"></div>
-              </div>
-            </div>
-
-            <div>
-              <div class="row" style="justify-content:space-between;margin-bottom:4px">
-                <div style="font-size:13px;font-weight:800">
-                  <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#0E7490;margin-right:6px;vertical-align:middle"></span>
-                  인건직불 <span class="badge" style="font-size:9px;background:#CFFAFE;color:#155E75">캐시 제외</span>
-                </div>
-                <div style="font-size:13px;font-weight:800;color:#155E75" class="t-num">0.4억 (1%)</div>
-              </div>
-              <div style="height:14px;border-radius:4px;background:#CFFAFE;overflow:hidden">
-                <div style="width:1%;height:100%;background:#0E7490"></div>
-              </div>
-            </div>
-
-            <div>
-              <div class="row" style="justify-content:space-between;margin-bottom:4px">
-                <div style="font-size:13px;font-weight:800">
-                  <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#475569;margin-right:6px;vertical-align:middle"></span>
-                  비증빙·안전 합계
-                </div>
-                <div style="font-size:13px;font-weight:800;color:#334155" class="t-num">0.4억 (1%)</div>
-              </div>
-              <div style="height:14px;border-radius:4px;background:#F1F5F9;overflow:hidden">
-                <div style="width:1%;height:100%;background:#475569"></div>
-              </div>
-            </div>
-          </div>
-
-          <div style="margin-top:16px;padding:12px 14px;background:#E0E7FF;border-radius:8px;font-size:12px;color:#3730A3;line-height:1.7">
-            💡 <strong>도메인 룰 1</strong>: 직불금 + 인건직불 합산 1.2억은 발주처 직접지급으로 명문이엔지 캐시플로우에서 제외됩니다.
+          <!-- [C4 정직화] 하드코딩 9분류 분포(19.5억 43% 등 전 수치 가짜)가 실데이터 존재 시에도 노출되던 결함 —
+               실구현(매입 byCat 실집계 연결) 전까지 정직한 준비중 상태로 교체 -->
+          <div style="text-align:center;padding:36px 20px;color:#94a3b8">
+            <div style="font-size:28px;margin-bottom:8px">🔧</div>
+            <div style="font-size:14px;font-weight:700;margin-bottom:4px">9분류별 매입 분포 준비 중</div>
+            <div style="font-size:12px;line-height:1.7">매입 데이터의 9분류 실집계가 이 자리에 자동 표시됩니다.<br/>(현재 표시되는 수치 없음 — 가짜 데이터 아님)</div>
           </div>
         </div>
       </div>
@@ -9646,27 +9497,27 @@ table.data-table {
         <div class="hero-grid">
           <div>
             <div class="hero-eyebrow">마스터 관리 · 협력업체 통합 등록</div>
-            <div class="hero-title">거래처 마스터<br/>87개 협력업체 관리</div>
+            <div class="hero-title">거래처 마스터<br/>협력업체 관리</div>
             <div class="hero-meta">
               <span data-mm-today>📅 —</span>
-              <span><span class="dot-status live"></span>이번 달 신규 +5건</span>
+              <span><span class="dot-status live"></span>선등록(사업자번호) 정책 운영</span>
               <span>⚡ 매입 등록 시 자동완성 검색 지원</span>
             </div>
           </div>
           <div class="hero-stats">
             <div class="hero-stat">
               <div class="hero-stat-label">등록 업체</div>
-              <div class="hero-stat-value t-num">87</div>
-              <div class="hero-stat-trend">▲ +5 (이번 달)</div>
+              <div class="hero-stat-value t-num">0</div><!-- [C4 정직화] 정적 87 제거 — 하이드레이터 실집계 -->
+              <div class="hero-stat-trend">마스터 기준</div>
             </div>
             <div class="hero-stat accent">
               <div class="hero-stat-label">누적 거래액</div>
-              <div class="hero-stat-value t-num">45.2억</div>
-              <div class="hero-stat-trend">▲ +12.4%</div>
+              <div class="hero-stat-value t-num">—</div><!-- [C4 정직화] 정적 45.2억 제거 -->
+              <div class="hero-stat-trend"></div>
             </div>
             <div class="hero-stat success">
               <div class="hero-stat-label">활동 업체</div>
-              <div class="hero-stat-value t-num">42개</div>
+              <div class="hero-stat-value t-num">0</div><!-- [C4 정직화] 정적 42개 제거 -->
               <div class="hero-stat-trend">최근 90일 거래</div>
             </div>
           </div>
@@ -9741,10 +9592,10 @@ table.data-table {
             </svg>
           </div>
           <div class="kpi-label">누적 거래액 <span class="t-xs" style="color:var(--text-muted)">VAT포함</span></div>
-          <div class="kpi-value t-num">45.2<span style="font-size:18px;font-weight:700">억</span></div>
+          <div class="kpi-value t-num">0<span style="font-size:18px;font-weight:700">억</span></div><!-- [C4 정직화] 정적 45.2억·+12.4%·전년 40.2억 제거 — 하이드레이터 실집계 -->
           <div class="kpi-meta">
-            <span class="kpi-trend up">▲ +12.4%</span>
-            <span>전년 40.2억</span>
+            <span class="kpi-trend up" style="display:none"></span>
+            <span>매입 실집계 기준</span>
           </div>
           <svg class="kpi-spark" viewBox="0 0 100 40" preserveAspectRatio="none">
             <defs>
@@ -20661,13 +20512,11 @@ CREATE TABLE system_map_activity (
     try { nukeDemoTokens(); } catch(e){}
   }
   window.mmDemoCleanup = runAll;
-  var _mo = null, _busy = false;
+  var _busy = false;
   function runSafe(){
     if (_busy) return;
     _busy = true;
-    if (_mo) { try { _mo.disconnect(); } catch(e){} }  // 자기 변경 재트리거 방지
     try { runAll(); } catch(e){}
-    if (_mo) { try { _mo.observe(document.body, { childList:true, subtree:true }); } catch(e){} }
     _busy = false;
   }
   runSafe();
@@ -20675,12 +20524,9 @@ CREATE TABLE system_map_activity (
   window.addEventListener('hashchange', function(){ runSafe(); setTimeout(runSafe, 250); });
   window.addEventListener('storage', function(e){ if(/mm-/.test(e.key||'')) setTimeout(runSafe, 250); });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', runSafe);
-  // DOM 변경 감지 — 외부 렌더가 정적 데모를 다시 그려도 재정리 (디바운스)
-  try {
-    var _mt = null;
-    _mo = new MutationObserver(function(){ if(_mt) return; _mt = setTimeout(function(){ _mt=null; runSafe(); }, 200); });
-    _mo.observe(document.body, { childList:true, subtree:true });
-  } catch(e){}
+  // [H13 스위퍼 은퇴 1단계] body 전역 MutationObserver(모든 DOM 변경마다 200ms 후 전문서 스캔+전 데이터 재파싱) 제거 —
+  // 하이드레이션은 화면 진입(hashchange)·데이터 변경(storage)·초기 타임아웃 시점만으로 충분.
+  // 정적 가짜값은 HTML에서 직접 청산 중(C4·C5)이라 '재렌더로 되살아난 가짜를 상시 감시'할 필요가 사라짐.
 
   // settings 진입 시 폼 채우기
   window.addEventListener('hashchange', function(){ if((location.hash||'').slice(1)==='settings') setTimeout(function(){ window.mmRates && window.mmRates.applyToForm(); }, 400); });
