@@ -6990,13 +6990,23 @@ table.data-table {
   // ── [매입 건별 증빙·메모·날짜 — 대표 요청] 행 클릭 → 선택 입력 패널 (전부 선택, 강제 없음) ──
   var _expandedCi = null;
   function _escA(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-  function pjPurBadges(edate, memo){
+  function pjPurBadges(edate, memo, tinv){
     var b = '';
     if (edate) b += '<span style="margin-left:6px;font-size:10px;color:#475569;background:#f1f5f9;padding:2px 6px;border-radius:99px;white-space:nowrap">📅 '+_escA(String(edate).slice(5))+'</span>';
+    if (tinv==='received') b += '<span title="세금계산서 수취완료" style="margin-left:6px;font-size:10px;color:#065F46;background:#D1FAE5;padding:2px 6px;border-radius:99px;white-space:nowrap">🧾 계산서</span>';
+    else if (tinv==='pending') b += '<span title="세금계산서 미수취 — 요청 필요" style="margin-left:6px;font-size:10px;color:#B91C1C;background:#FEE2E2;padding:2px 6px;border-radius:99px;white-space:nowrap">🧾 미수취</span>';
     if (memo)  b += '<span title="'+_escA(memo)+'" style="margin-left:6px;font-size:10px;color:#92400E;background:#FEF3C7;padding:2px 6px;border-radius:99px;white-space:nowrap">📝 메모</span>';
     return b;
   }
-  function pjPurDetailRow(ci, edate, memo){
+  // [H17] 계산서 수취 상태 세그먼트 버튼 (다시 클릭하면 해제)
+  function _taxInvBtn(ci, val, label, fg, bg, cur){
+    var on = cur === val, next = on ? '' : val;
+    return '<button onclick="window.pjPurMeta.set('+ci+',\'taxInvoice\',\''+next+'\')" '
+      + 'style="padding:6px 12px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid '
+      + (on?fg:'#e2e8f0')+';background:'+(on?bg:'#fff')+';color:'+(on?fg:'#94a3b8')+'">'+label+'</button>';
+  }
+  function pjPurDetailRow(ci, edate, memo, tinv, tdate, ctype){
+    var isExempt = (ctype==='labor'||ctype==='cashexp'||ctype==='labordirect');
     return '<tr class="pjpur-detail"><td colspan="8" style="background:#f8fafc;padding:14px 18px;border-bottom:1px solid #e5e7eb">'
       + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'
       +   '<div style="font-size:12px;color:#64748b">ℹ️ 선택 입력 — 비워둬도 저장됩니다. 꼭 기억할 것만 기재.</div>'
@@ -7007,6 +7017,19 @@ table.data-table {
       +     '<input type="date" value="'+_escA(edate)+'" onchange="window.pjPurMeta.set('+ci+',\'evidenceDate\',this.value)" style="width:100%;margin-top:4px;padding:8px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;box-sizing:border-box"/></div>'
       +   '<div style="flex:2;min-width:220px"><label style="font-size:12px;color:#64748b;font-weight:600">📝 메모 <span style="color:#94a3b8">(선택 · 꼭 기억할 내용)</span></label>'
       +     '<textarea rows="2" placeholder="예: 추가공사분 — 협의단가 적용 / 하자 재시공 아님 / 발주처 구두승인" onchange="window.pjPurMeta.set('+ci+',\'memo\',this.value)" style="width:100%;margin-top:4px;padding:8px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;box-sizing:border-box;resize:vertical">'+_escA(memo)+'</textarea></div>'
+      + '</div>'
+      + '<div style="margin-top:12px;border-top:1px dashed #e2e8f0;padding-top:10px" onclick="event.stopPropagation()">'
+      +   '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">'
+      +     '<span style="font-size:12px;color:#64748b;font-weight:600">🧾 세금계산서 <span style="color:#94a3b8;font-weight:400">(수취 여부 · 홈택스 대사)</span></span>'
+      +     _taxInvBtn(ci,'received','✓ 수취완료','#065F46','#D1FAE5', tinv)
+      +     _taxInvBtn(ci,'pending','⏳ 미수취','#B91C1C','#FEE2E2', tinv)
+      +     _taxInvBtn(ci,'none','— 해당없음','#475569','#F1F5F9', tinv)
+      +   '</div>'
+      +   '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">'
+      +     '<label style="font-size:12px;color:#64748b;font-weight:600">작성일자'
+      +       '<input type="date" value="'+_escA(tdate)+'" onchange="window.pjPurMeta.set('+ci+',\'taxInvoiceDate\',this.value)" style="margin-left:6px;padding:6px 8px;border:1px solid #d1d5db;border-radius:8px;font-size:13px"/></label>'
+      +     (isExempt ? '<span style="font-size:11px;color:#0369a1;background:#E0F2FE;padding:3px 8px;border-radius:6px">면세·비증빙 — 세금계산서 대상 아님(계산서 또는 해당없음)</span>' : '')
+      +   '</div>'
       + '</div>'
       + '<div style="margin-top:12px;border-top:1px dashed #e2e8f0;padding-top:10px" onclick="event.stopPropagation()">'
       +   '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">'
@@ -7172,7 +7195,7 @@ table.data-table {
         var tax = (it.type==='labordirect'||it.type==='labor'||it.type==='cashexp') ? 0 : (it.tax!=null?num(it.tax):Math.round(supply*0.1));
         var ded = isDirect ? num(it.deduction||0) : 0;  // [직불차감] 직불공제 — 집계는 유효액(공급가−공제), 행 표시는 gross+공제 병기
         if (isDirect) directRows.push({ vendor:it.vendor||'—', type:it.type, supply:supply, tax:tax, ded:ded, detail:it.desc||'' });
-        return { type:it.type||'outsource', vendor:it.vendor||'—', detail:it.desc||it.memo||'', supply:supply, tax:tax, ded:ded, paid:num(it.paidAmount), direct:isDirect, _ci:_idx, _edate:(it.evidenceDate||''), _memo:(it.memo||'') };
+        return { type:it.type||'outsource', vendor:it.vendor||'—', detail:it.desc||it.memo||'', supply:supply, tax:tax, ded:ded, paid:num(it.paidAmount), direct:isDirect, _ci:_idx, _edate:(it.evidenceDate||''), _memo:(it.memo||''), _tinv:(it.taxInvoice||''), _tdate:(it.taxInvoiceDate||'') };
       });
     } else if (p && p.costs) {
       ORDER.forEach(function(k){
@@ -7229,7 +7252,7 @@ table.data-table {
         var dot = '<span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:'+cat.c+';margin-right:6px;vertical-align:middle"></span>';
         var hasMeta = (it._ci != null && it._ci >= 0);
         var click = hasMeta ? ' data-ci="'+it._ci+'" onclick="window.pjPurMeta.toggle('+it._ci+')"' : '';
-        var badges = hasMeta ? (pjPurBadges(it._edate, it._memo) + '<span class="pjpur-attc" data-ci="'+it._ci+'"></span>') : '';
+        var badges = hasMeta ? (pjPurBadges(it._edate, it._memo, it._tinv) + '<span class="pjpur-attc" data-ci="'+it._ci+'"></span>') : '';
         var rowHtml;
         if (it.direct) {
           rowHtml = '<tr'+click+' style="background:#f5f3ff'+(hasMeta?';cursor:pointer':'')+'"><td>'+dot+cat.name+'</td><td><strong>'+it.vendor+'</strong></td>'+
@@ -7249,7 +7272,7 @@ table.data-table {
             '<td class="right tnum" style="color:var(--success-700)"><strong>'+fmt(it.paid)+'</strong></td>'+
             '<td class="right tnum" style="color:'+(unpaid>0?'var(--danger-700)':'var(--success-700)')+'"><strong>'+fmt(unpaid)+'</strong></td></tr>';
         }
-        if (hasMeta && it._ci === _expandedCi) rowHtml += pjPurDetailRow(it._ci, it._edate, it._memo);
+        if (hasMeta && it._ci === _expandedCi) rowHtml += pjPurDetailRow(it._ci, it._edate, it._memo, it._tinv, it._tdate, it.type);
         return rowHtml;
       }).join('');
       // 합계행
@@ -13207,11 +13230,12 @@ CREATE TABLE system_map_activity (
       var ps = []; try { ps = JSON.parse(localStorage.getItem('mm-dash-v4')||'[]')||[]; } catch(e){}
       if (type === 'project_detail') {
         var p = ps.find(function(x){ return x.id === pjId || x.name === pjId; }) || ps[0] || { costItems:[] };
-        var lines = [['거래일','업체명','분류','귀속공종','세부내역','공급가','세액','합계','지급액','지급일','메모'].join(',')];
+        var TINV = { received:'수취완료', pending:'미수취', none:'해당없음' };
+        var lines = [['거래일','업체명','분류','귀속공종','세부내역','공급가','세액','합계','지급액','지급일','계산서','작성일자','메모'].join(',')];
         (p.costItems||[]).forEach(function(it){
           var attrib = (it.type==='direct'||it.type==='labordirect') ? (CATL[it.attribCat] || CATL[it.type==='direct'?'outsource':'labor']) : '';
           lines.push([ String(it.date||it.createdAt||'').slice(0,10), it.vendor||it.workerName||'', CATL[it.type]||it.type||'', attrib,
-            it.desc||'', _n(it.supplyAmt), _n(it.tax), _n(it.total), _n(it.paidAmount), it.paidDate||'', it.memo||'' ].map(csvEsc).join(','));
+            it.desc||'', _n(it.supplyAmt), _n(it.tax), _n(it.total), _n(it.paidAmount), it.paidDate||'', TINV[it.taxInvoice]||'', it.taxInvoiceDate||'', it.memo||'' ].map(csvEsc).join(','));
         });
         return { name: '매입대장-' + (p.id||'전체'), text: lines.join('\n') };
       }
