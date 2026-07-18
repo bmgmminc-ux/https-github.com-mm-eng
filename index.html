@@ -13163,28 +13163,73 @@ CREATE TABLE system_map_activity (
         annual: '연간 비교 분석',
       }[type] || type;
 
-      var fmtLabel = format === 'pdf' ? 'PDF' : 'Excel';
-
-      if (window.globalToast) globalToast('📄 ' + typeLabel + ' ' + fmtLabel + ' 생성 중...', 'info');
-
-      // mock 다운로드 - Phase 3에서 jsPDF / SheetJS로 실제 생성
-      setTimeout(function() {
+      // [H16 보고서 일원화] 'PDF 생성 중' 후 txt를 주던 mock 폐기.
+      //  · PDF = 회사 도장 헤더(mmCompany.reportHeader — 그동안 호출 0곳) + 실데이터 본문 인쇄 뷰
+      //          → 브라우저 인쇄 다이얼로그에서 "PDF로 저장" = 무빌드 환경의 진짜 PDF
+      //  · Excel = 서사 텍스트가 아닌 진짜 표 CSV(BOM — 엑셀 한글 호환): 상세=매입 대장(일자·귀속공종 포함), 종합=전 현장 KPI
+      if (format === 'pdf') {
         var content = generateReportContent(type, format, projectId);
-        var ext = format === 'pdf' ? 'txt' : 'csv';  // mock — Phase 3에서 .pdf/.xlsx
-        var mimeType = 'text/plain;charset=utf-8';
-
-        var blob = new Blob([content], { type: mimeType });
-        var url = URL.createObjectURL(blob);
-        var a = document.createElement('a');
-        a.href = url;
-        a.download = 'mm-report-' + type + '-' + new Date().toISOString().slice(0, 10) + '.' + ext;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        if (window.globalToast) globalToast('✓ ' + typeLabel + ' 다운로드 완료', 'success');
-      }, 1500);
+        var head = '';
+        try { if (window.mmCompany && window.mmCompany.reportHeader) head = window.mmCompany.reportHeader(); } catch(e){}
+        var w = window.open('', '_blank');
+        if (!w) { alert('팝업이 차단되었습니다 — 주소창의 팝업 허용 후 다시 시도하세요.'); return; }
+        w.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>' + typeLabel + '</title></head>'
+          + '<body style="font-family:\'Malgun Gothic\',\'Apple SD Gothic Neo\',sans-serif;padding:28px;max-width:820px;margin:0 auto;color:#0f172a">'
+          + head
+          + '<pre style="font-family:inherit;font-size:13px;line-height:1.75;white-space:pre-wrap;margin:0">'
+          + content.replace(/&/g,'&amp;').replace(/</g,'&lt;')
+          + '</pre>'
+          + '<div style="margin-top:24px;padding-top:10px;border-top:1px solid #e2e8f0;font-size:10px;color:#94a3b8">㈜명문이엔지 통합 관리 시스템 · 생성 ' + new Date().toLocaleString() + '</div>'
+          + '</body></html>');
+        w.document.close();
+        setTimeout(function(){ try { w.focus(); w.print(); } catch(e){} }, 350);
+        if (window.globalToast) globalToast('🖨️ 인쇄 창에서 "PDF로 저장"을 선택하세요 (도장 헤더 포함)', 'info', 6000);
+        try { if (window.mmAudit) window.mmAudit.log('데이터', '보고서 인쇄 — ' + typeLabel); } catch(e){}
+        return;
+      }
+      var csv = buildReportCsv(type, projectId);
+      var blob = new Blob(['﻿' + csv.text], { type: 'text/csv;charset=utf-8' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = csv.name + '-' + new Date().toISOString().slice(0, 10) + '.csv';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      if (window.globalToast) globalToast('✓ ' + csv.name + ' CSV 다운로드 — 엑셀에서 바로 열립니다', 'success');
+      try { if (window.mmAudit) window.mmAudit.log('데이터', '보고서 CSV — ' + csv.name); } catch(e){}
     };
+
+    // [H16] 진짜 표 형태 CSV — 상세: 매입 대장(일자·업체·분류·귀속공종·금액·지급·메모) / 종합: 전 현장 KPI
+    function csvEsc(v){ v = String(v == null ? '' : v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g,'""') + '"' : v; }
+    function buildReportCsv(type, pjId) {
+      var _n = function(v){ return Number(String(v==null?0:v).replace(/[^0-9.-]/g,''))||0; };
+      var CATL = { outsource:'외주비', material:'자재비', product:'상품비', indirect:'간접비', cashexp:'비증빙경비', labor:'인건비', safety:'안전관리비', direct:'직불금', labordirect:'인건비직불금' };
+      var ps = []; try { ps = JSON.parse(localStorage.getItem('mm-dash-v4')||'[]')||[]; } catch(e){}
+      if (type === 'project_detail') {
+        var p = ps.find(function(x){ return x.id === pjId || x.name === pjId; }) || ps[0] || { costItems:[] };
+        var lines = [['거래일','업체명','분류','귀속공종','세부내역','공급가','세액','합계','지급액','지급일','메모'].join(',')];
+        (p.costItems||[]).forEach(function(it){
+          var attrib = (it.type==='direct'||it.type==='labordirect') ? (CATL[it.attribCat] || CATL[it.type==='direct'?'outsource':'labor']) : '';
+          lines.push([ String(it.date||it.createdAt||'').slice(0,10), it.vendor||it.workerName||'', CATL[it.type]||it.type||'', attrib,
+            it.desc||'', _n(it.supplyAmt), _n(it.tax), _n(it.total), _n(it.paidAmount), it.paidDate||'', it.memo||'' ].map(csvEsc).join(','));
+        });
+        return { name: '매입대장-' + (p.id||'전체'), text: lines.join('\n') };
+      }
+      var lines2 = [['현장ID','현장명','발주처','계약(공급가)','기타수익(공급가)','매출','원가','이익','원가율%','유효직불','실수금대상','기성신청(공급)','수금'].join(',')];
+      ps.forEach(function(p){
+        var contract=_n(p.contractOrig)+_n(p.contractAdd);
+        var oi=(p.otherIncomeItems||[]).reduce(function(s,o){return s+(_n(o.supplyAmt)||(_n(o.total)-_n(o.tax)));},0);
+        var cost=0; Object.keys(CATL).forEach(function(c){ if(p.costs&&p.costs[c]) cost+=_n(p.costs[c].actual); });
+        var ds=_n(p.costs&&p.costs.direct&&p.costs.direct.actual)+_n(p.costs&&p.costs.labordirect&&p.costs.labordirect.actual);
+        if(Array.isArray(p.costItems)&&p.costItems.length){ ds=0; p.costItems.forEach(function(it){ if(it.type==='direct'||it.type==='labordirect') ds+=Math.max(0,_n(it.supplyAmt||it.total||0)-_n(it.deduction||0)); }); }
+        var rev=contract+oi;
+        var bs=(p.billingItems||[]).reduce(function(s,b){return s+_n(b.applySupply);},0);
+        var br=(p.billingItems||[]).reduce(function(s,b){return s+_n(b.billingAmount);},0);
+        lines2.push([ p.id||'', p.name||'', p.client||'', contract, oi, rev, cost, rev-cost,
+          rev>0?(cost/rev*100).toFixed(1):'0.0', ds, Math.max(0,contract-ds), bs, br ].map(csvEsc).join(','));
+      });
+      return { name: type==='annual' ? '연간종합-전현장' : '월간종합-전현장', text: lines2.join('\n') };
+    }
 
     function generateReportContent(type, format, pjId) {
       // [전수조사 H3] 하드코딩 가짜 수치(매출5억·원가율89.2% 등) 전면 제거 — 실데이터(mm-dash-v4) 기반, 지표는 전 화면 통일 공식과 동일
@@ -15194,7 +15239,10 @@ CREATE TABLE system_map_activity (
       var p = report.project, wb = XLSX.utils.book_new();
       // 매입
       var lbl = {}; CATS.forEach(function(c){lbl[c.key]=c.label});
-      var cost = (p.costItems||[]).map(function(it){return{'구분':lbl[it.type]||it.type,'업체명':it.vendor||'','세부내역':it.desc||'','공급가':it.supplyAmt||0,'세액':it.tax||0,'합계':it.total||0,'지급액':it.paidAmount||0,'비고':it.memo||''}});
+      // [H16] 실무 필수 컬럼 보강 — 거래일·귀속공종·지급일 (세무 대사·예산 귀속 분석에 필요)
+      var cost = (p.costItems||[]).map(function(it){
+        var attrib = (it.type==='direct'||it.type==='labordirect') ? (lbl[it.attribCat] || lbl[it.type==='direct'?'outsource':'labor']) : '';
+        return{'거래일':String(it.date||it.createdAt||'').slice(0,10),'구분':lbl[it.type]||it.type,'귀속공종':attrib,'업체명':it.vendor||it.workerName||'','세부내역':it.desc||'','공급가':it.supplyAmt||0,'세액':it.tax||0,'합계':it.total||0,'지급액':it.paidAmount||0,'지급일':it.paidDate||'','비고':it.memo||''}});
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(cost), '매입');
       // 기성
       var bill = (p.billingItems||[]).map(function(it,i){return{'차수':i+1,'신청일':it.applyDate||'','신청공급가':it.applySupply||0,'세액':it.applyTax||0,'신청합계':it.applyTotal||0,'수금일':it.receiveDate||'','선급금':it.advanceAmount||0,'수금액':it.billingAmount||0}});
