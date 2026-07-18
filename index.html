@@ -3,13 +3,29 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>㈜명문이엔지 v23 — 통합 데모 (Phase 1 완료)</title>
+<title>㈜명문이엔지 — 통합 관리 시스템</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232563EB'/%3E%3Ctext x='32' y='44' font-size='34' font-weight='900' text-anchor='middle' fill='white' font-family='Arial'%3EM%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css">
 <!-- Supabase JS Client v2 [#121] -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js" crossorigin></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" crossorigin></script>
+<script>
+// [H12] xlsx(≈290KB — 앱 본체 전송량보다 큼)를 head 동기 로드에서 지연 로드로 전환 — 첫 화면 파서 블로킹 제거.
+// 사용처(엑셀 붙여넣기·업로드·내보내기·보고서)는 전부 버튼 핸들러 내부 → mmEnsureXlsx() 경유로 필요 시점 1회 로드.
+window.mmEnsureXlsx = function() {
+  return new Promise(function(res, rej) {
+    if (typeof XLSX !== 'undefined') return res();
+    if (window.__xlsxQ) { window.__xlsxQ.push([res, rej]); return; }   // 동시 호출 큐잉
+    window.__xlsxQ = [[res, rej]];
+    var s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+    s.crossOrigin = 'anonymous';
+    s.onload  = function(){ var q = window.__xlsxQ || []; window.__xlsxQ = null; q.forEach(function(p){ p[0](); }); };
+    s.onerror = function(){ var q = window.__xlsxQ || []; window.__xlsxQ = null; q.forEach(function(p){ p[1](new Error('엑셀 모듈 로드 실패')); }); };
+    document.head.appendChild(s);
+  });
+};
+</script>
 <style>
 /* ═══════════════════════════════════════════════════════════════
    MM E.N.G v23 PREMIUM DESIGN SYSTEM v2
@@ -543,7 +559,8 @@ body::before {
 }
 
 .theme-pill {
-  display: inline-flex; padding: 3px;
+  display: none !important;   /* [전수검사] 다크모드 스코프 규칙이 10줄뿐이라 켜면 테이블 파손 — 토큰 정리 캠페인 완료 전까지 토글 숨김(스타일·스크립트는 보존, 이 줄만 지우면 재개방) */
+  padding: 3px;
   background: var(--bg-subtle);
   border: 1px solid var(--border-default);
   border-radius: var(--r-full);
@@ -3968,7 +3985,7 @@ table.data-table {
     <div class="mm-login-brand">
       <div class="logo">M</div>
       <h1>㈜명문이엔지</h1>
-      <p>프로젝트 수익성 통합 관리 시스템 v3</p>
+      <p>프로젝트 수익성 통합 관리 시스템 v23</p>
     </div>
     <form class="mm-login-form" id="mm-login-form" autocomplete="off">
       <div class="mm-login-msg info" id="mm-login-info" style="display:none"></div>
@@ -4159,7 +4176,7 @@ table.data-table {
       <div class="hero animate-slide">
         <div class="hero-grid">
           <div>
-            <div class="hero-eyebrow">MYUNGMOON E.N.G · DESIGN SYSTEM v23 FINAL</div>
+            <div class="hero-eyebrow">MYUNGMOON E.N.G · 통합 관리 시스템 v23</div>
             <div class="hero-title">㈜명문이엔지<br/>프로젝트 수익성 통합 관리</div>
             <div class="hero-meta">
               <span data-mm-today>📅 —</span>
@@ -5885,7 +5902,7 @@ table.data-table {
     // netContract = 실수금 대상 (발주처 직불금 제외)
     var netContract = Math.max(0, contract - directSupply);
     // [H7 지표통일] 기타수익 매출 포함 — 매출=계약+기타수익, 이익=매출-원가, 원가율=원가/매출 (전 화면 동일 공식)
-    var otherIncome = (p.otherIncomeItems||[]).reduce(function(s,o){ return s + num(o.total||o.supplyAmt||0); }, 0);
+    var otherIncome = (p.otherIncomeItems||[]).reduce(function(s,o){ return s + (num(o.supplyAmt) || (num(o.total) - num(o.tax))); }, 0);  /* [H2] 매출 산입은 공급가 기준 — VAT는 이익 아님. 레거시(total만 있는 행)는 total-tax 폴백 */
     var revenue = contract + otherIncome;
     var profit = revenue - costActual;
     var profitRate = revenue>0 ? profit/revenue : 0;
@@ -6311,7 +6328,7 @@ table.data-table {
     DIRECT.forEach(function(c){ var k = (p.costs&&p.costs[c.key])?p.costs[c.key]:{contract:0,actual:0}; dirC += num(k.contract); dirA += num(k.actual) });
     var allActual = genA + dirA;
     var allContract = genC + dirC;  // 계약분산 합 = 원가예산
-    var otherIncome = (p.otherIncomeItems||[]).reduce(function(s,o){ return s + num(o.total||o.supplyAmt||0); }, 0);
+    var otherIncome = (p.otherIncomeItems||[]).reduce(function(s,o){ return s + (num(o.supplyAmt) || (num(o.total) - num(o.tax))); }, 0);  /* [H2] 매출 산입은 공급가 기준 — VAT는 이익 아님. 레거시(total만 있는 행)는 total-tax 폴백 */
     var revenue = totalContract + otherIncome;
     var profit = revenue - allActual;  // [지표통일] 이익=매출-원가
     var profitRate = revenue>0 ? (profit/revenue*100) : 0;
@@ -10655,18 +10672,18 @@ table.data-table {
           <div class="hero-stats">
             <div class="hero-stat">
               <div class="hero-stat-label">활성 사용자</div>
-              <div class="hero-stat-value t-num">24<span style="font-size:14px;font-weight:700">명</span></div>
-              <div class="hero-stat-trend">CEO 1·회계 1·관리자 2·현장 20</div>
+              <div class="hero-stat-value t-num">1<span style="font-size:14px;font-weight:700">명</span></div>
+              <div class="hero-stat-trend">CEO 단독 운영</div>
             </div>
             <div class="hero-stat accent">
-              <div class="hero-stat-label">연동 API</div>
-              <div class="hero-stat-value t-num">3<span style="font-size:14px;font-weight:700">개</span></div>
-              <div class="hero-stat-trend">Claude · 다우오피스 · 경리나라</div>
+              <div class="hero-stat-label">연동 서비스</div>
+              <div class="hero-stat-value t-num">2<span style="font-size:14px;font-weight:700">개</span></div>
+              <div class="hero-stat-trend">Supabase · SMS 발송</div>
             </div>
             <div class="hero-stat success">
               <div class="hero-stat-label">시스템 버전</div>
-              <div class="hero-stat-value t-num" style="font-size:24px">v23<span style="font-size:14px;font-weight:700"> · Phase 1</span></div>
-              <div class="hero-stat-trend">React 진입 대기</div>
+              <div class="hero-stat-value t-num" style="font-size:24px">v23</div>
+              <div class="hero-stat-trend">단일 HTML · 무빌드</div>
             </div>
           </div>
         </div>
@@ -11709,14 +11726,15 @@ CREATE TABLE system_map_activity (
       </div>
       <div class="modal-body">
         <div class="form-grid">
-          <label class="form-label">🏢 발주처</label>
-          <input type="text" class="form-input" value="삼성물산 (현장)" readonly style="background:var(--bg-subtle)"/>
+          <!-- [H15] 하드코딩 데모값(가짜 발주처·금액·경과일) 제거 — submit이 이 입력값을 그대로 독촉 큐에 등록·push하므로 실입력 폼으로 교체 -->
+          <label class="form-label">🏢 발주처 *</label>
+          <input type="text" class="form-input" placeholder="예: ○○건설 (△△현장)"/>
 
-          <label class="form-label">💰 미수 금액</label>
-          <input type="text" class="form-input" value="85,000,000" readonly style="background:var(--bg-subtle)"/>
+          <label class="form-label">💰 미수 금액 (원)</label>
+          <input type="text" class="form-input" placeholder="예: 12,345,000"/>
 
-          <label class="form-label">📅 약속일</label>
-          <input type="text" class="form-input" value="2026-04-15 (67일 경과)" readonly style="background:#FEF2F2;color:#991B1B"/>
+          <label class="form-label">📅 수금 약속일</label>
+          <input type="date" class="form-input"/>
 
           <label class="form-label">📧 발송 채널</label>
           <select class="form-input">
@@ -11735,10 +11753,10 @@ CREATE TABLE system_map_activity (
         </div>
 
         <div class="modal-section" style="margin-top:14px">
-          <div class="modal-section-title">발송 미리보기</div>
+          <div class="modal-section-title">발송 문구 양식 (발송 시 위 입력값이 채워집니다)</div>
           <div style="padding:14px 16px;background:var(--bg-subtle);border-radius:8px;font-size:12px;line-height:1.7;color:var(--text-secondary)">
-            <strong>제목:</strong> [명문이엔지] 현장 기성 7회차 미수금 안내<br/><br/>
-            귀사와 진행 중인 <strong>○○현장 신축 기계설비</strong> 프로젝트의 7회차 기성금 <strong>85,000,000원</strong>이 약속일(2026-04-15) 후 67일 경과되었습니다.<br/><br/>
+            <strong>제목:</strong> [명문이엔지] 기성금 미수 안내<br/><br/>
+            귀사와 진행 중인 프로젝트의 기성금 <strong>[미수 금액]원</strong>이 약속일([수금 약속일]) 이후 미입금 상태입니다.<br/><br/>
             확인 후 회신 부탁드립니다.
           </div>
         </div>
@@ -12892,8 +12910,13 @@ CREATE TABLE system_map_activity (
     // 견적서 Excel/CSV 업로드 → 9분류 자동 분배 (표준품셈 내역서 / 단순목록 모두 지원)
     window.processEstimateExcel = function(file, contractAmount) {
       if (!file) return;
-      var reader = new FileReader();
       var isExcel = /\.xlsx?$/i.test(file.name || '');
+      // [H12] xlsx 지연 로드 — 엑셀 파일인데 모듈 미로드면 먼저 로드 후 재진입 (미로드 상태로 CSV 분기 타서 깨진 파싱되는 것 방지)
+      if (isExcel && typeof XLSX === 'undefined') {
+        if (window.mmEnsureXlsx) { window.mmEnsureXlsx().then(function(){ window.processEstimateExcel(file, contractAmount); }).catch(function(){ if (window.globalToast) globalToast('엑셀 모듈 로드 실패 — 인터넷 연결을 확인하세요', 'error'); }); }
+        return;
+      }
+      var reader = new FileReader();
       reader.onload = function(e) {
         var rows = [];
         try {
@@ -13243,7 +13266,7 @@ CREATE TABLE system_map_activity (
       var _ps = []; try { _ps = JSON.parse(localStorage.getItem('mm-dash-v4')||'[]'); } catch(e) {} if (!Array.isArray(_ps)) _ps = [];
       var _kpi = function(p){
         var contract=_n(p.contractOrig)+_n(p.contractAdd);
-        var oi=(p.otherIncomeItems||[]).reduce(function(s,o){return s+_n(o.total||o.supplyAmt||0);},0);
+        var oi=(p.otherIncomeItems||[]).reduce(function(s,o){return s+(_n(o.supplyAmt)||(_n(o.total)-_n(o.tax)));},0);  /* [H2] 공급가 기준 */
         var cost=0; C9.forEach(function(c){ if(p.costs&&p.costs[c[0]]) cost+=_n(p.costs[c[0]].actual); });
         var ds=_n(p.costs&&p.costs.direct&&p.costs.direct.actual)+_n(p.costs&&p.costs.labordirect&&p.costs.labordirect.actual);
         if(Array.isArray(p.costItems)&&p.costItems.length){ ds=0; p.costItems.forEach(function(it){ if(it.type==='direct'||it.type==='labordirect') ds+=Math.max(0,_n(it.supplyAmt||it.total||0)-_n(it.deduction||0)); }); }  /* [직불차감] */
@@ -13947,27 +13970,27 @@ CREATE TABLE system_map_activity (
           return;
         }
 
+        // [H8 정직화] 아래 폴백 배선들은 실동작 없이 성공 토스트만 띄우던 거짓 피드백 —
+        //             "등록된 줄 알고 넘어가는" 오인을 막기 위해 전부 미연결 정직 안내로 교체 (실기능 배선 시 개별 제거)
         // 수신자 관리
         if (text.includes('수신자 관리')) {
-          btn.onclick = function() { globalToast('👥 알림 수신자 관리 패널', 'info'); };
+          btn.onclick = function() { globalToast('⚠️ 이 화면의 수신자 관리는 아직 연결되지 않았습니다', 'warning'); };
           return;
         }
 
         // 필터
         if (text === '필터 적용' || text === '검색') {
-          btn.onclick = function() { globalToast('🔍 필터 적용됨', 'info'); };
+          btn.onclick = function() { globalToast('⚠️ 이 화면의 필터는 아직 연결되지 않았습니다 (적용되지 않음)', 'warning'); };
           return;
         }
         if (text === '필터 초기화') {
-          btn.onclick = function() { globalToast('🔄 필터 초기화', 'info'); };
+          btn.onclick = function() { globalToast('⚠️ 이 화면의 필터는 아직 연결되지 않았습니다', 'warning'); };
           return;
         }
 
         // 표 행 액션
         if (text === '상세') {
           btn.onclick = function() {
-            globalToast('📋 상세 보기', 'info');
-            // 행에서 데이터 추출하여 모달에 표시 (간단 버전)
             var row = btn.closest('tr');
             if (row) {
               var firstCell = row.querySelector('td');
@@ -13977,8 +14000,7 @@ CREATE TABLE system_map_activity (
                 if (titleEl && bodyEl) {
                   titleEl.textContent = '📋 ' + (firstCell.textContent || '').trim().split('\n')[0];
                   bodyEl.innerHTML = '<div class="t-xs" style="color:var(--text-secondary);line-height:1.8">' +
-                    '실제 React 구현 시 Supabase에서 해당 항목의 전체 데이터를 조회하여 상세 정보를 표시합니다.<br/>' +
-                    '연관 데이터 (출역 이력 / 매입 거래 / 평가 등) 함께 노출.</div>';
+                    '⚠️ 이 표의 상세 보기는 아직 연결되지 않았습니다.<br/>추후 항목별 전체 데이터(출역 이력 / 매입 거래 등) 조회로 연결 예정.</div>';
                   openModal('global-detail');
                 }
               }
@@ -13989,17 +14011,17 @@ CREATE TABLE system_map_activity (
 
         // 펼침
         if (text.includes('펼침')) {
-          btn.onclick = function() { globalToast('📂 매입 세부내역 펼침', 'info'); };
+          btn.onclick = function() { globalToast('⚠️ 이 화면의 펼침 버튼은 아직 연결되지 않았습니다', 'warning'); };
           return;
         }
 
-        // 항목 / 회차 추가
+        // 항목 / 회차 추가 — 실동작 없는데 '추가됨' 성공 표시하던 대표적 거짓 토스트
         if (text.includes('항목 추가') || text === '➕ 항목 추가') {
-          btn.onclick = function() { globalToast('➕ 신규 항목 입력 행 추가됨', 'info'); };
+          btn.onclick = function() { globalToast('⚠️ 이 화면의 항목 추가는 아직 연결되지 않았습니다 (추가되지 않음)', 'warning'); };
           return;
         }
         if (text.includes('회차 추가') || text === '➕ 회차 추가') {
-          btn.onclick = function() { globalToast('➕ 신규 회차 행 추가됨', 'info'); };
+          btn.onclick = function() { globalToast('⚠️ 이 화면의 회차 추가는 아직 연결되지 않았습니다 (추가되지 않음)', 'warning'); };
           return;
         }
 
@@ -14550,7 +14572,10 @@ CREATE TABLE system_map_activity (
     return utf8;
   }
   function parseXlsxBuffer(buf) {
-    if (typeof XLSX === 'undefined') { alert('엑셀 라이브러리 로딩 중 — 잠시 후 다시 시도하세요.'); return; }
+    if (typeof XLSX === 'undefined') {   // [H12] 지연 로드 후 자동 재진입
+      if (window.mmEnsureXlsx) { window.mmEnsureXlsx().then(function(){ parseXlsxBuffer(buf); }).catch(function(){ alert('엑셀 모듈 로드 실패 — 인터넷 연결을 확인하세요.'); }); }
+      return;
+    }
     try {
       var wb = XLSX.read(new Uint8Array(buf), { type:'array' });
       var ws = wb.Sheets[wb.SheetNames[0]];
@@ -14641,7 +14666,10 @@ CREATE TABLE system_map_activity (
 
   // ── 엑셀 export ──
   function exportExcel() {
-    if (typeof XLSX === 'undefined') { alert('엑셀 라이브러리 로딩 중'); return; }
+    if (typeof XLSX === 'undefined') {   // [H12] 지연 로드 후 자동 재진입
+      if (window.mmEnsureXlsx) { window.mmEnsureXlsx().then(function(){ exportExcel(); }).catch(function(){ alert('엑셀 모듈 로드 실패 — 인터넷 연결을 확인하세요.'); }); }
+      return;
+    }
     var lbl = {}; CATS.forEach(function(c){lbl[c.key]=c.label});
     var rows = state.items.map(function(it){ return {
       '구분': lbl[it.type]||it.type, '업체명':it.vendor||'', '이름':it.workerName||'',
@@ -15098,7 +15126,7 @@ CREATE TABLE system_map_activity (
     CATS.forEach(function(c) { if (p.costs && p.costs[c.key]) { costActual += num(p.costs[c.key].actual); costContract += num(p.costs[c.key].contract) } });
     var billingApplied = (p.billingItems || []).reduce(function(s,b){return s+num(b.applySupply)}, 0);
     var billingReceived = (p.billingItems || []).reduce(function(s,b){return s+num(b.billingAmount)}, 0);
-    var oiTotal = (p.otherIncomeItems || []).reduce(function(s,o){return s+num(o.total)}, 0);
+    var oiTotal = (p.otherIncomeItems || []).reduce(function(s,o){return s+(num(o.supplyAmt)||(num(o.total)-num(o.tax)))}, 0);  /* [H2] 매출 산입은 공급가 기준 */
     var oiReceived = (p.otherIncomeItems || []).reduce(function(s,o){return s+num(o.received)}, 0);
     var revenue = cTotal + oiTotal, profit = revenue - costActual;
     document.getElementById('mm-report-kpi').innerHTML =
@@ -15110,7 +15138,10 @@ CREATE TABLE system_map_activity (
   }
   window.mmReport = {
     exportAll: function() {
-      if (typeof XLSX === 'undefined') { alert('엑셀 라이브러리 로딩 중'); return }
+      if (typeof XLSX === 'undefined') {   // [H12] 지연 로드 후 자동 재진입
+        if (window.mmEnsureXlsx) { window.mmEnsureXlsx().then(function(){ window.mmReport.exportAll(); }).catch(function(){ alert('엑셀 모듈 로드 실패 — 인터넷 연결을 확인하세요.'); }); }
+        return;
+      }
       var p = report.project, wb = XLSX.utils.book_new();
       // 매입
       var lbl = {}; CATS.forEach(function(c){lbl[c.key]=c.label});
@@ -15651,7 +15682,7 @@ CREATE TABLE system_map_activity (
     var esc = function(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };  // [H9] 사용자입력 이스케이프
     tbody.innerHTML = projects.map(function(p) {
       var contract = num(p.contractOrig) + num(p.contractAdd);
-      var otherIncome = (p.otherIncomeItems||[]).reduce(function(s,o){ return s + num(o.total||o.supplyAmt||0); }, 0);
+      var otherIncome = (p.otherIncomeItems||[]).reduce(function(s,o){ return s + (num(o.supplyAmt) || (num(o.total) - num(o.tax))); }, 0);  /* [H2] 매출 산입은 공급가 기준 — VAT는 이익 아님. 레거시(total만 있는 행)는 total-tax 폴백 */
       var revenue = contract + otherIncome;  // [H7 지표통일] 매출=계약+기타수익 — computeKpi/aggregate/alerts와 동일
       var cost = 0;
       CATS.forEach(function(c){ if (p.costs && p.costs[c]) cost += num(p.costs[c].actual) });
@@ -15732,14 +15763,19 @@ CREATE TABLE system_map_activity (
     try { var a = JSON.parse(raw); return Array.isArray(a)?a:[] } catch(e) { return [] }
   }
 
+  // [H1] 기간 판정은 로컬 달력일 'YYYY-MM-DD' 문자열 사전식 비교로 통일 —
+  //      new Date('YYYY-MM-DD')는 UTC 자정, 프리셋 d(Y,M,D)는 로컬 자정이라 KST에서 9시간 어긋나
+  //      분기말(3/31·6/30·12/31) 신청 기성과 경계일 시작 현장이 집계에서 누락되던 결함 수정.
+  function ymdLoc(d) { return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+  function dstr(v, def) { var s = String(v||'').slice(0,10); return /^\d{4}-\d{2}-\d{2}$/.test(s) ? s : def; }  // [H8] 무효 날짜는 기본범위로 방어(기존 유지)
+
   // 프로젝트 1건의 기간 내 집계
   function aggregateProject(p, start, end) {
-    var ps = new Date(p.startDate || '2024-01-01');
-    var pe = new Date(p.endDate   || '2030-12-31');
-    // [H8] 무효 날짜(비어있지 않은 잘못된 값: '2026-13-45','미정' 등)도 기본범위로 방어 — 현장이 집계에서 통째 누락되는 것 방지
-    if (isNaN(ps)) ps = new Date('2024-01-01');
-    if (isNaN(pe)) pe = new Date('2030-12-31');
-    if (pe < start || ps > end) return null; // 안 겹침
+    var _s = ymdLoc(start), _e = ymdLoc(end);
+    var psS = dstr(p.startDate, '2024-01-01');
+    var peS = dstr(p.endDate,   '2030-12-31');
+    if (peS < _s || psS > _e) return null; // 안 겹침
+    var ps = new Date(psS), pe = new Date(peS);   // 이하 ratio(안분) 계산용 — 지표는 안분 미사용이라 무영향
 
     // 겹침 비율 (선형 분배 가정)
     var overlapStart = ps > start ? ps : start;
@@ -15749,7 +15785,7 @@ CREATE TABLE system_map_activity (
     var ratio = Math.min(1, overlapDays / projectDays);
 
     var contract = num(p.contractOrig) + num(p.contractAdd);
-    var otherIncome = (p.otherIncomeItems||[]).reduce(function(s,o){ return s + num(o.total||o.supplyAmt||0); }, 0);
+    var otherIncome = (p.otherIncomeItems||[]).reduce(function(s,o){ return s + (num(o.supplyAmt) || (num(o.total) - num(o.tax))); }, 0);  /* [H2] 매출 산입은 공급가 기준 — VAT는 이익 아님. 레거시(total만 있는 행)는 total-tax 폴백 */
     var cost = 0;
     CATS.forEach(function(c){ if (p.costs && p.costs[c]) cost += num(p.costs[c].actual) });
     // 직불금(netContract용)
@@ -15760,8 +15796,8 @@ CREATE TABLE system_map_activity (
     // 기성: 회차의 applyDate가 기간 안에 들어가는 것만 (기성만 날짜 귀속)
     var billSupply = 0, billTotal = 0, billReceived = 0;
     (p.billingItems || []).forEach(function(b) {
-      var bd = new Date(b.applyDate || p.startDate || p.createdAt || '2024-01-01');
-      if (isNaN(bd) || bd < start || bd > end) return;
+      var bds = dstr(b.applyDate || p.startDate || p.createdAt, '2024-01-01');   // [H1] 로컬 달력일 문자열 비교
+      if (bds < _s || bds > _e) return;
       billSupply   += num(b.applySupply);
       billTotal    += num(b.applyTotal);
       billReceived += num(b.billingAmount);
@@ -15871,8 +15907,14 @@ CREATE TABLE system_map_activity (
     set('[data-ov-trend="contract"]', '프로젝트 ' + totals.count + '건');
     set('[data-ov-extra="contract"]', 'VAT포함 ' + fmtBil(vatTotal) + '억');
     set('[data-ov-trend="cost"]',     '원가율 ' + totals.costRate.toFixed(1) + '%');
-    set('[data-ov-trend="profit"]',   '▲ 이익률 ' + totals.profitRate.toFixed(1) + '%');
+    set('[data-ov-trend="profit"]',   (totals.profit < 0 ? '▼' : '▲') + ' 이익률 ' + totals.profitRate.toFixed(1) + '%');
     set('[data-ov-trend="billing"]',  '신청률 ' + totals.billRate.toFixed(1) + '%');
+
+    // [H5] 적자 시각 정상화 — 이익 카드 색·배지를 부호 연동(흑자 ▲초록 / 적자 ▼빨강). 정적 success 클래스가 적자에도 초록▲로 보이던 결함 수정
+    var _pv = document.querySelector('[data-ov-kpi="profit"]');
+    if (_pv && _pv.parentElement) { _pv.parentElement.classList.toggle('danger', totals.profit < 0); _pv.parentElement.classList.toggle('success', totals.profit >= 0); }
+    var _pt = document.querySelector('[data-ov-trend="profit"]');
+    if (_pt) { _pt.classList.toggle('down', totals.profit < 0); _pt.classList.toggle('up', totals.profit >= 0); }
 
     set('#ov-period-label', label);
     set('#ov-period-range', rangeStr);
@@ -17181,7 +17223,7 @@ CREATE TABLE system_map_activity (
     var alerts = [];
     projects.forEach(function(p) {
       var contract = num(p.contractOrig) + num(p.contractAdd);
-      var otherIncome = (p.otherIncomeItems||[]).reduce(function(s,o){ return s + num(o.total||o.supplyAmt||0); }, 0);
+      var otherIncome = (p.otherIncomeItems||[]).reduce(function(s,o){ return s + (num(o.supplyAmt) || (num(o.total) - num(o.tax))); }, 0);  /* [H2] 매출 산입은 공급가 기준 — VAT는 이익 아님. 레거시(total만 있는 행)는 total-tax 폴백 */
       var revenue = contract + otherIncome;
       var cost = 0;
       CATS.forEach(function(c){ if (p.costs && p.costs[c]) cost += num(p.costs[c].actual) });
@@ -17637,17 +17679,31 @@ CREATE TABLE system_map_activity (
     return { project: proj, costs: costs, costItems: costItems, billingItems: billingItems, otherIncomeItems: otherIncomeItems };
   }
 
+  // [C1] Supabase 응답 기본 상한(1000행) 대응 — id 정렬 + range 페이지네이션으로 전량 수집.
+  //      절단본이 로컬을 덮고 3초 워처가 delete-insert push로 클라우드에 역기록하던 소실 경로 차단.
+  async function fetchAllRows(sb, table) {
+    var PAGE = 1000, all = [], from = 0;
+    for (;;) {
+      var r = await sb.from(table).select('*').order('id').range(from, from + PAGE - 1);
+      if (r.error) return r;                       // 에러는 호출측에서 기존과 동일하게 처리
+      all = all.concat(r.data || []);
+      if (!r.data || r.data.length < PAGE) break;  // 마지막 페이지
+      from += PAGE;
+    }
+    return { data: all, error: null };
+  }
+
   // ── PULL: Supabase → localStorage ──
   async function pull() {
     var sb = sbClient();
     if (!sb) return { ok:false, msg:'Supabase 미설정' };
     try {
-      var pRes  = await sb.from('projects').select('*').order('id');
+      var pRes  = await fetchAllRows(sb, 'projects');
       if (pRes.error) throw pRes.error;
-      var cRes  = await sb.from('project_costs').select('*');
-      var ciRes = await sb.from('cost_items').select('*');
-      var bRes  = await sb.from('billing_items').select('*');
-      var oiData = []; try { var oiRes = await sb.from('other_income_items').select('*'); if (oiRes && !oiRes.error && oiRes.data) oiData = oiRes.data; } catch(e) {}
+      var cRes  = await fetchAllRows(sb, 'project_costs');
+      var ciRes = await fetchAllRows(sb, 'cost_items');
+      var bRes  = await fetchAllRows(sb, 'billing_items');
+      var oiData = []; try { var oiRes = await fetchAllRows(sb, 'other_income_items'); if (oiRes && !oiRes.error && oiRes.data) oiData = oiRes.data; } catch(e) {}
 
       var projects = (pRes.data||[]).map(function(pr) {
         return assembleProject(pr,
@@ -17678,11 +17734,11 @@ CREATE TABLE system_map_activity (
   // ── PUSH: localStorage → Supabase (전체) ──
   async function push() {
     var sb = sbClient();
-    if (!sb) return { ok:false, msg:'Supabase 미설정' };
+    if (!sb) { _dashPushFailed('Supabase 미설정', true); return { ok:false, msg:'Supabase 미설정' }; }   // [H7] silent — 로컬 전용 모드(프리뷰 등)는 소음 없이 dirty만
     try {
       var sess = await sb.auth.getSession();
       var ownerId = sess.data.session && sess.data.session.user && sess.data.session.user.id;
-      if (!ownerId) return { ok:false, msg:'로그인 필요 (Supabase 세션 없음)' };
+      if (!ownerId) { _dashPushFailed('로그인 필요'); return { ok:false, msg:'로그인 필요 (Supabase 세션 없음)' }; }
 
       var projects = loadLocal();
       window._mmSelfWriteAt = Date.now();  // [전수조사] realtime 셀프-에코 가드용 스탬프
@@ -17723,8 +17779,9 @@ CREATE TABLE system_map_activity (
         } catch(oiErr) { if (window.console) console.warn('[기타수익 sync 건너뜀]', (oiErr && oiErr.message) || oiErr); }
       }
       window._mmSelfWriteAt = Date.now();  // [전수조사] push 완료 직후 도착하는 반향까지 커버
+      try{ localStorage.removeItem('mm-dash-dirty'); }catch(e){}   // [H7] 업로드 성공 → dirty 해제
       return { ok:true, msg:'업로드 완료 — 프로젝트 ' + projects.length + '건' };
-    } catch(e) { return { ok:false, msg:'PUSH 실패: ' + (e.message||e) } }
+    } catch(e) { _dashPushFailed((e && e.message) || String(e)); return { ok:false, msg:'PUSH 실패: ' + (e.message||e) } }
   }
 
   // ── 자동 동기화 (저장 변경 감지 → 디바운스 push) ──
@@ -17732,12 +17789,25 @@ CREATE TABLE system_map_activity (
   var lastHash = localStorage.getItem(DASH_KEY) || '';
   var pushTimer = null;
   function debouncedPush() {
+    try{ localStorage.setItem('mm-dash-dirty','1'); }catch(e){}   // [H7] 디바운스 중 새로고침해도 다음 부팅이 push 선행(masters·출역과 동일 패턴)
     if (pushTimer) clearTimeout(pushTimer);
     pushTimer = setTimeout(function() {
       push().then(function(r) {
         if (window.globalToast) window.globalToast(r.ok ? '☁️ 자동 동기화 완료' : '⚠️ ' + r.msg, r.ok?'success':'error');
       });
     }, 2500);
+  }
+  // [H7] push 실패 표면화 — fire-and-forget 호출부(저장 직후 등)가 결과를 버려도 실패가 침묵하지 않게
+  //      push() 내부에서 dirty 기록 + 토스트(8초 중복 억제). 성공 시 dirty 해제.
+  function _dashPushFailed(msg, silent) {
+    try{ localStorage.setItem('mm-dash-dirty','1'); }catch(e){}
+    if (silent) return;
+    try {
+      if (window.globalToast && !window.__mmPushFailMuted) {
+        window.__mmPushFailMuted = true; setTimeout(function(){ window.__mmPushFailMuted = false; }, 8000);
+        window.globalToast('⚠️ 클라우드 업로드 실패 — 변경분은 이 기기에 보관됨, 다음 동기화 때 재시도: ' + msg, 'error', 6000);
+      }
+    } catch(e){}
   }
   // [감사 2단계] 마스터(거래처·일용직) 키 변경 감지 → pushMasters (autoSync 워처가 mm-dash-v4만 보던 한계 보강)
   function _mastersHash(){ return (localStorage.getItem('mm-vendors-v2')||'') + '|' + (localStorage.getItem('mm-workers')||'') + '|' + (localStorage.getItem('mm-vendors')||'') + '|' + (localStorage.getItem('mm-vendors-v23')||''); }
@@ -17766,7 +17836,15 @@ CREATE TABLE system_map_activity (
   // ── 로그인 후 자동 PULL + Realtime 시작 ──
   async function syncOnLogin() {
     if (!sbReady()) return;
-    var r = await pull();
+    // [H7] 미전송 프로젝트 변경 선push — 실패하면 pull 보류(클라우드 구본이 로컬 변경을 덮어쓰는 유실 차단, 출역과 동일 정책)
+    var r;
+    try {
+      if (localStorage.getItem('mm-dash-dirty') === '1') {
+        var _dp = await push();
+        if (_dp && _dp.ok) { r = await pull(); }
+        else { r = { ok:false, msg:'미전송 변경 보호 — 클라우드 복원 보류 (업로드 실패: ' + ((_dp&&_dp.msg)||'?') + ', 다음 동기화에서 재시도)' }; }
+      } else { r = await pull(); }
+    } catch(_se) { r = { ok:false, msg:'동기화 실패: ' + ((_se&&_se.message)||_se) }; }
     try { if (localStorage.getItem('mm-masters-dirty')==='1') await pushMasters(); } catch(e){}   // [번호증발 수정] 미전송 마스터 변경 선push — 디바운스 중 새로고침/개명 레이스로 클라우드가 로컬을 역덮어쓰던 결함 봉쇄
     try { await pullMasters(); } catch(e){}   // [감사 2단계] 거래처·일용직도 로그인 시 클라우드에서 복원
     try { if (window.mmSyncPullPhase1) await window.mmSyncPullPhase1(); } catch(e){}   // [감사 4단계] 경보수신자·독촉 클라우드 복원
@@ -17942,7 +18020,7 @@ CREATE TABLE system_map_activity (
   async function pullAttendance(){
     var sb=sbClient(); if(!sb) return { ok:false };
     try{
-      var r=await sb.from('attendance').select('*'); if(r.error) throw r.error;
+      var r=await fetchAllRows(sb, 'attendance'); if(r.error) throw r.error;   // [C1] 1000행 절단 방지 — 출역도 페이지네이션
       var workers=_mLoad('mm-workers');
       function wByCid(cid){ for(var i=0;i<workers.length;i++){ if(_mCloudId('w', workers[i].name)===cid) return workers[i]; } return null; }
       var arr=(r.data||[]).filter(function(row){ return !_mTombHas('a', String(row.id)); }).map(function(row){ var w=wByCid(row.worker_id); return { id:'AT'+row.id, date:row.work_date, workerId:w?w.id:row.worker_id, workerName:w?w.name:'(미상)', jobType:row.job_type||'일반', wage:row.wage||0, projectLabel:row.memo||'', createdAt:row.created_at }; });
@@ -18221,9 +18299,11 @@ CREATE TABLE system_map_activity (
     });
   }
   // 저장된 테마 복원
+  // [전수검사] 다크 토글 숨김 기간엔 라이트 강제 — 과거 dark 저장 사용자가 깨진 화면에 갇히는 것 방지(토큰 정리 후 원복)
   try {
     var saved = localStorage.getItem('mm-theme');
-    if (saved === 'dark' || saved === 'light' || saved === 'auto') applyTheme(saved);
+    if (saved === 'dark' || saved === 'auto') { saved = 'light'; try { localStorage.setItem('mm-theme','light'); } catch(e2){} }
+    if (saved === 'light') applyTheme(saved);
   } catch(err) {}
 })();
 </script>
@@ -18649,7 +18729,7 @@ CREATE TABLE system_map_activity (
     var alerts = [];
     projects.forEach(function(p) {
       var contract = num(p.contractOrig) + num(p.contractAdd);
-      var otherIncome = (p.otherIncomeItems||[]).reduce(function(s,o){ return s + num(o.total||o.supplyAmt||0); }, 0);
+      var otherIncome = (p.otherIncomeItems||[]).reduce(function(s,o){ return s + (num(o.supplyAmt) || (num(o.total) - num(o.tax))); }, 0);  /* [H2] 매출 산입은 공급가 기준 — VAT는 이익 아님. 레거시(total만 있는 행)는 total-tax 폴백 */
       var revenue = contract + otherIncome;  // [지표통일] 매출=계약+기타수익 — computeKpi/전체현황/경보표와 동일
       var costActual = 0;
       ['outsource','material','product','indirect','cashexp','labor','safety','direct','labordirect'].forEach(function(c){
@@ -18818,19 +18898,11 @@ CREATE TABLE system_map_activity (
         billingReceived += num(b.billingAmount);
       });
     });
-    var costRate = contract>0 ? Math.round(costActual/contract*100*10)/10 : 0;
-    var billRate = contract>0 ? Math.round(billingApplied/contract*100*10)/10 : 0;
-    var collectRate = billingApplied>0 ? Math.round(billingReceived/billingApplied*100*10)/10 : 0;
     var ovScreen = document.querySelector('[data-screen="overview"]');
     if (!ovScreen) return;
-    ovScreen.querySelectorAll('[data-ov-rate]').forEach(function(el){
-      var key = el.getAttribute('data-ov-rate');
-      if (key === 'cost') el.textContent = costRate + '%';
-      else if (key === 'bill') el.textContent = billRate + '%';
-      else if (key === 'collect') el.textContent = collectRate + '%';
-    });
-    // [Stage 3] 멀티링 게이지(원가율·신청률·수금률·종합점수) 실데이터 연결 — 가짜 84%·76점 제거
-    if (window.mmRenderGauge) window.mmRenderGauge({ costRate: costRate, billRate: billRate, collectRate: collectRate, revenue: contract, billTotal: billingApplied });
+    // [H3 게이지 단일 소스화] 이 함수의 자체 집계(원가/계약·VAT포함·직불 미공제)가 통일 공식
+    // (ovPeriod.applyPeriod→renderKPI→renderOverviewGauge, 매출=계약+기타수익·netContract 기준)을
+    // 250ms 뒤 덮어쓰던 경쟁 제거 — 게이지는 통일 파이프라인만 그린다. (죽은 [data-ov-rate] 루프도 함께 제거)
 
     // [Stage 3b] 원가 구성비 도넛 실데이터 연결 (5개 주요 분류 슬라이스 + 범례 + 중앙/요약) — 가짜 39.8%·128억 제거
     (function donut(){
@@ -18882,7 +18954,7 @@ CREATE TABLE system_map_activity (
       // 막대차트 y축 눈금(20억..0)도 숨김 — 빈 노트 옆 빈 축 제거
       var axis = document.querySelector('.chart-with-axis .y-axis'); if (axis) axis.style.display = 'none';
     })();
-    try { localStorage.setItem('mm-overview-stats', JSON.stringify({contract:contract,costActual:costActual,costRate:costRate,billRate:billRate,collectRate:collectRate,ts:new Date().toISOString()})); } catch(e) {}
+    /* [H3] mm-overview-stats 캐시 제거 — 읽는 곳 0(쓰기 전용 죽은 코드)이었고 이탈 공식 잔존 지점이라 폐기 */
   };
 
   // ─── 6. 일용직 직종별 인건비 + TOP 5 집계 ─── [#141.6]
