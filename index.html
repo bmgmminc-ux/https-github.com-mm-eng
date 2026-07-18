@@ -17347,6 +17347,21 @@ CREATE TABLE system_map_activity (
     arr.unshift(entry);
     saveLocal(arr);
     render();
+    // [C3] 서버 감사로그 — 기기 로컬 200건 한계 보완(캐시 삭제·기기 교체에도 보존, 멀티유저 책임 추적의 기반).
+    //      fire-and-forget·실패 무해(미로그인/정책 미적용/프리뷰 localhost 가드 → 조용히 스킵).
+    try {
+      var sb = window.mmSupabase && window.mmSupabase.getClient && window.mmSupabase.getClient();
+      if (sb) {
+        sb.auth.getSession().then(function(s){
+          var uid = s && s.data && s.data.session && s.data.session.user && s.data.session.user.id;
+          if (!uid) return;
+          sb.from('audit_log').insert({
+            user_id: uid, action: entry.action, table_name: 'app', record_id: null,
+            after_data: { detail: entry.detail, user: entry.user, ts: entry.ts }
+          }).then(function(){}, function(){});
+        }, function(){});
+      }
+    } catch(e){}
     return entry;
   }
 
