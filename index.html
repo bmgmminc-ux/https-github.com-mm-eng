@@ -4955,7 +4955,7 @@ table.data-table {
           <div class="flex-between mb-3">
             <div>
               <div class="t-caption">원가 구성비 분석</div>
-              <div class="t-h4">128억 분포 — 9개 분류</div>
+              <div class="t-h4" id="donut-card-title">원가 구성비 — 9분류</div><!-- [P2-4 핫픽스] 정적 가짜 총액 제거 — 실총액은 도넛 중앙(실집계)에 표시 -->
             </div>
             <span class="t-xs">슬라이스 또는 항목에 호버</span>
           </div>
@@ -18903,7 +18903,14 @@ CREATE TABLE system_map_activity (
       var sparks = document.querySelectorAll('.kpi-spark'); for (var i=0;i<sparks.length;i++) sparks[i].style.display = 'none';  // 가짜 추세선 숨김 (위 KPI 숫자는 실값)
       function note(title, sub){ return '<div style="padding:40px 20px;text-align:center;color:#94a3b8;font-size:14px;line-height:1.7;border:1px dashed #e2e8f0;border-radius:12px;background:#fafbfc">📊 <b style="color:#64748b">'+title+'</b><br><span style="font-size:12.5px">'+sub+'</span></div>'; }
       var bar = document.getElementById('bar-chart-v2');
-      if (bar && !bar.dataset.mmEmptied){ bar.dataset.mmEmptied='1'; bar.innerHTML = note('월별 추이 차트', '계약·원가는 프로젝트 총액으로 관리되어 월별 추이를 표시할 데이터가 아직 없습니다.'); bar.style.height='auto'; }
+      if (bar && !bar.dataset.mmEmptied){
+        bar.dataset.mmEmptied='1';
+        // [P2-4 핫픽스] note를 #bar-chart-v2에 넣으면 y축 숨김 시 44px 그리드 첫 트랙으로 밀려 세로 한 글자씩 깨짐
+        //               → 그리드 컨테이너(.chart-with-axis) 자체를 노트로 교체(display:block)
+        var barWrap = bar.closest('.chart-with-axis') || bar;
+        barWrap.innerHTML = note('월별 추이 차트', '계약·원가는 프로젝트 총액으로 관리되어 월별 추이를 표시할 데이터가 아직 없습니다.');
+        barWrap.style.display = 'block'; barWrap.style.height = 'auto';
+      }
       var strip = document.querySelector('.chart-summary-strip'); if (strip) strip.style.display = 'none';
       // [P2-3 H6] 매입 활동 히트맵 실구현 — costItems.date(없으면 createdAt) × 9분류, 올해 1~12월 공급가 합계.
       //           데이터 소스(도입 시점 doc_date)·CSS 그리드는 기존재 — 렌더러만 없던 상태를 연결.
