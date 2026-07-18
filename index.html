@@ -6789,6 +6789,93 @@ table.data-table {
 })();
 </script>
 
+<script id="mm-closing-script">
+// [C2 월 마감] 마감월까지의 매입·기성 소급 수정을 잠금 — 부가세 신고분과 장부가 조용히 어긋나는 것을 차단.
+//  · mm-closed-through='YYYY-MM' (그 달까지 잠김). SETTING_KEYS 편입으로 멀티기기 동기화.
+//  · 마감 시 KPI 스냅샷(mm-close-snapshots) 기록, 해제는 CEO 전용 + 타이핑 확인 + 감사로그.
+(function(){
+  'use strict';
+  var KEY = 'mm-closed-through', SNAP = 'mm-close-snapshots';
+  function num(v){ return Number(String(v==null?'0':v).replace(/[^0-9.-]/g,''))||0; }
+  function get(){ try { return localStorage.getItem(KEY)||''; } catch(e){ return ''; } }
+  function isLocked(d){ var ct=get(); if(!ct) return false; var ym=String(d||'').slice(0,7); return /^\d{4}-\d{2}$/.test(ym) && ym <= ct; }
+  function lockedSlice(arr, df){ return (arr||[]).filter(function(x){ return x && isLocked(x[df]); }); }
+  // 잠긴 달 항목이 추가·수정·삭제됐는지 — 직렬화 비교. true=차단
+  function guardItems(oldArr, newArr, df, label){
+    if (!get()) return false;
+    if (JSON.stringify(lockedSlice(oldArr, df)) === JSON.stringify(lockedSlice(newArr, df))) return false;
+    alert('⛔ 마감된 기간(' + get() + '까지)의 ' + label + ' 항목이 변경·추가·삭제되었습니다.\n월 마감 잠금으로 저장이 차단됩니다.\n\n수정이 꼭 필요하면: 설정 → 월 마감 → 해제(CEO) 후 수정하고 다시 마감하세요.');
+    try { if (window.mmAudit) window.mmAudit.log('데이터', '월 마감 차단 — ' + label + ' 소급 수정 시도 (' + get() + ' 이전)'); } catch(e){}
+    return true;
+  }
+  function snapshot(ym){
+    var ps = []; try { ps = JSON.parse(localStorage.getItem('mm-dash-v4')||'[]')||[]; } catch(e){}
+    var t = { contract:0, cost:0, purchase:0, billSupply:0, received:0 };
+    ps.forEach(function(p){
+      t.contract += num(p.contractOrig)+num(p.contractAdd);
+      ['outsource','material','product','indirect','cashexp','labor','safety','direct','labordirect'].forEach(function(c){ if (p.costs && p.costs[c]) t.cost += num(p.costs[c].actual); });
+      (p.costItems||[]).forEach(function(it){ t.purchase += num(it.supplyAmt); });
+      (p.billingItems||[]).forEach(function(b){ t.billSupply += num(b.applySupply); t.received += num(b.billingAmount); });
+    });
+    var arr = []; try { arr = JSON.parse(localStorage.getItem(SNAP)||'[]')||[]; } catch(e){}
+    arr.unshift({ ym: ym, closedAt: new Date().toISOString(), projects: ps.length, totals: t });
+    try { localStorage.setItem(SNAP, JSON.stringify(arr.slice(0, 36))); } catch(e){}
+  }
+  function close(ym){
+    if (!/^\d{4}-\d{2}$/.test(ym||'')) { alert('마감월을 선택하세요 (YYYY-MM)'); return false; }
+    var cur = get();
+    if (cur && ym <= cur) { alert('이미 ' + cur + '까지 마감되어 있습니다.'); return false; }
+    if (!confirm('📕 ' + ym + '월까지 마감합니다.\n\n· 마감된 달(거래일 기준)의 매입·기성은 수정·추가·삭제가 차단됩니다\n· 현재 시점 KPI 스냅샷이 저장됩니다\n· 해제는 CEO만 가능합니다\n\n진행할까요?')) return false;
+    try { localStorage.setItem(KEY, ym); } catch(e){}
+    snapshot(ym);
+    try { if (window.mmAudit) window.mmAudit.log('데이터', '월 마감 — ' + ym + '까지 잠금 + KPI 스냅샷'); } catch(e){}
+    renderCard();
+    if (window.globalToast) window.globalToast('📕 ' + ym + '까지 마감 완료 — 스냅샷 저장', 'success');
+    return true;
+  }
+  function reopen(){
+    var cur = get(); if (!cur) { alert('마감된 기간이 없습니다.'); return; }
+    try { if (window.mmPerm && window.mmPerm.isCeo && !window.mmPerm.isCeo()) { alert('마감 해제는 CEO만 가능합니다.'); return; } } catch(e){}
+    var typed = prompt('⚠️ 마감 해제 — 신고분과 장부가 어긋날 수 있습니다.\n해제하려면 "해제" 라고 입력하세요. (현재 마감: ' + cur + ')');
+    if (typed !== '해제') return;
+    try { localStorage.removeItem(KEY); } catch(e){}
+    try { if (window.mmAudit) window.mmAudit.log('데이터', '월 마감 해제 — 이전 마감 ' + cur + ' (CEO)'); } catch(e){}
+    renderCard();
+    if (window.globalToast) window.globalToast('마감 해제됨 — 전 기간 수정 가능 (감사로그 기록됨)', 'warning', 6000);
+  }
+  // 설정 화면 카드 (히어로 뒤 주입 — injectInfraCard 패턴)
+  function renderCard(){
+    var scr = document.querySelector('[data-screen="settings"]'); if (!scr) return;
+    var card = document.getElementById('mm-closing-card');
+    if (!card) {
+      var hero = scr.querySelector('.hero'); if (!hero) return;
+      hero.insertAdjacentHTML('afterend',
+        '<div id="mm-closing-card" class="card-base" style="margin:18px 0;padding:18px 22px">'
+        + '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">'
+        +   '<div><div style="font-size:16px;font-weight:800">📕 월 마감 <span style="font-size:11px;color:#94a3b8;font-weight:600">(CEO 전용)</span></div>'
+        +   '<div id="mm-closing-status" style="font-size:12.5px;color:#64748b;margin-top:4px">—</div></div>'
+        +   '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'
+        +     '<input type="month" id="mm-closing-month" style="padding:8px 10px;border:1px solid #d1d5db;border-radius:8px;font-size:13px">'
+        +     '<button class="btn btn-primary btn-sm" onclick="mmClosing.close(document.getElementById(\'mm-closing-month\').value)">마감</button>'
+        +     '<button class="btn btn-ghost btn-sm" onclick="mmClosing.reopen()">해제</button>'
+        +   '</div>'
+        + '</div>'
+        + '<div style="font-size:11.5px;color:#94a3b8;margin-top:8px">마감하면 그 달까지(거래일 기준)의 매입·기성 수정이 차단되고 KPI 스냅샷이 저장됩니다 — 부가세 신고 후 장부 어긋남 방지.</div>'
+        + '</div>');
+      card = document.getElementById('mm-closing-card');
+      var mi = document.getElementById('mm-closing-month');
+      if (mi) { var d = new Date(); d.setMonth(d.getMonth()-1); mi.value = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); }  // 기본=지난달
+    }
+    var st = document.getElementById('mm-closing-status');
+    var ct = get();
+    if (st) st.innerHTML = ct ? ('현재 <b style="color:#DC2626">' + ct + '까지 마감</b> — 그 이전 매입·기성 수정 차단 중' ) : '마감된 기간 없음 — 전 기간 수정 가능';
+  }
+  window.mmClosing = { get: get, isLocked: isLocked, guardItems: guardItems, close: close, reopen: reopen };
+  window.addEventListener('hashchange', function(){ if ((location.hash||'').slice(1) === 'settings') setTimeout(renderCard, 250); });
+  setTimeout(function(){ if ((location.hash||'').slice(1) === 'settings') renderCard(); }, 800);
+})();
+</script>
+
 <script id="pjbill-script">
 (function() {
   'use strict';
@@ -14109,6 +14196,13 @@ CREATE TABLE system_map_activity (
 
   // [매입삭제 미반영 수정] 영속+C1시드+push+재렌더 공용 — saveProject·removeRow(삭제 자동저장)가 공유. 성공 시 true.
   function persistItemsNow() {
+    // [C2 월 마감 게이트] 마감월 이하(거래일 date 기준) 매입의 추가·수정·삭제 차단 — 영속 단일 관문 1곳에서 검사
+    try {
+      if (window.mmClosing && window.mmClosing.get()) {
+        var _cp = (JSON.parse(localStorage.getItem('mm-dash-v4')||'[]')||[]).find(function(x){ return x.id === state.project.id; });
+        if (window.mmClosing.guardItems((_cp && _cp.costItems) || [], state.items || [], 'date', '매입')) return false;
+      }
+    } catch(_ce){}
     // [선등록 정책 백스톱] 영속 단일 관문 검증 — 삭제 자동저장이 붙여넣기 미등록 행을 정책 우회로 영속하던 구멍 봉쇄
     try {
       var _pv = [];
@@ -14788,6 +14882,11 @@ CREATE TABLE system_map_activity (
   function persistProject(updated) {
     var ps = loadProjects();
     var idx = ps.findIndex(function(p){return p.id===updated.id});
+    // [C2 월 마감 게이트] 마감월 이하(신청일 applyDate 기준) 기성 변경 차단
+    try {
+      var _old = idx >= 0 ? ps[idx] : null;
+      if (window.mmClosing && window.mmClosing.guardItems((_old && _old.billingItems) || [], (updated && updated.billingItems) || [], 'applyDate', '기성')) return;
+    } catch(_ce){}
     if (idx >= 0) ps[idx] = updated; else ps.push(updated);
     saveProjects(ps);
     // [H1] 저장 후 대시보드 재렌더 + 즉시 클라우드 push (토스트만 뜨고 표/KPI가 옛 값으로 남는 것 방지)
@@ -15218,6 +15317,11 @@ CREATE TABLE system_map_activity (
   }
   function persistProject(p) {
     var ps = loadProjects(); var i = ps.findIndex(function(x){return x.id===p.id});
+    // [C2 월 마감 게이트] 마감월 이하(신청일 applyDate 기준) 기성 변경 차단
+    try {
+      var _old2 = i >= 0 ? ps[i] : null;
+      if (window.mmClosing && window.mmClosing.guardItems((_old2 && _old2.billingItems) || [], (p && p.billingItems) || [], 'applyDate', '기성')) return;
+    } catch(_ce){}
     if (i>=0) ps[i]=p; else ps.push(p);
     saveProjects(ps);
     // [H1] 저장 후 대시보드 재렌더 (토스트만 뜨고 표/KPI가 옛 값으로 남는 것 방지)
@@ -17776,7 +17880,7 @@ CREATE TABLE system_map_activity (
   }
   // [감사 2단계] 마스터(거래처·일용직) 키 변경 감지 → pushMasters (autoSync 워처가 mm-dash-v4만 보던 한계 보강)
   function _mastersHash(){ return (localStorage.getItem('mm-vendors-v2')||'') + '|' + (localStorage.getItem('mm-workers')||'') + '|' + (localStorage.getItem('mm-vendors')||'') + '|' + (localStorage.getItem('mm-vendors-v23')||''); }
-  function _settingsHash(){ return ['mm-company','mm-alert-thresholds'].map(function(k){ return localStorage.getItem(k)||''; }).join('|'); }
+  function _settingsHash(){ return ['mm-company','mm-alert-thresholds','mm-closed-through'].map(function(k){ return localStorage.getItem(k)||''; }).join('|'); }   // [C2] 마감월 변경도 자동 push
   function _attendHash(){ return localStorage.getItem('mm-attendance')||''; }
   var lastMastersHash = _mastersHash(), lastSettingsHash = _settingsHash(), lastAttendHash = _attendHash();
   var mPushTimer = null, sPushTimer = null, aPushTimer = null;
@@ -17939,7 +18043,7 @@ CREATE TABLE system_map_activity (
   }
 
   // ── 설정(회사정보·보험요율·임계값) 클라우드 동기화 [감사 4단계] — app_settings 키-값. 테이블 없으면 자동 no-op ──
-  var SETTING_KEYS = ['mm-company','mm-alert-thresholds'];
+  var SETTING_KEYS = ['mm-company','mm-alert-thresholds','mm-closed-through'];   // [C2] 마감월 멀티기기 동기화
   async function pushSettings(){
     var sb=sbClient(); if(!sb) return { ok:false, msg:'no-cloud' };
     try{
