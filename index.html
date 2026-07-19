@@ -12014,6 +12014,42 @@ CREATE TABLE system_map_activity (
       setTimeout(dismiss, ms);
     };
 
+    // [H9] 소프트삭제 undo — 삭제 직후 '실행취소' 버튼 토스트. onUndo는 스냅샷 복원 콜백.
+    //  DOM API(textContent)로만 조립 → 메시지 XSS 불가. 기본 8초, 미클릭 시 확정.
+    window.mmUndoToast = function(message, onUndo, ms) {
+      var container = document.getElementById('toast-container');
+      if (!container) { return null; }
+      var t = document.createElement('div');
+      t.className = 'toast warning';
+      var content = document.createElement('div');
+      content.className = 'toast-content';
+      content.textContent = message;
+      var undoBtn = document.createElement('button');
+      undoBtn.type = 'button';
+      undoBtn.textContent = '↩ 실행취소';
+      undoBtn.style.cssText = 'margin-left:12px;background:#fff;color:#B45309;border:1px solid #F59E0B;border-radius:6px;padding:4px 12px;font-weight:800;cursor:pointer;font-size:13px;white-space:nowrap';
+      var closeBtn = document.createElement('button');
+      closeBtn.type = 'button';
+      closeBtn.className = 'toast-close';
+      closeBtn.textContent = '✕';
+      var done = false;
+      var dismiss = function() {
+        t.classList.add('toast-out');
+        setTimeout(function() { if (t.parentNode) t.parentNode.removeChild(t); }, 250);
+      };
+      undoBtn.addEventListener('click', function() {
+        if (done) return; done = true;
+        try { if (typeof onUndo === 'function') onUndo(); } catch(e){}
+        dismiss();
+        if (window.globalToast) window.globalToast('↩ 복원되었습니다', 'success');
+      });
+      closeBtn.addEventListener('click', dismiss);
+      t.appendChild(content); t.appendChild(undoBtn); t.appendChild(closeBtn);
+      container.appendChild(t);
+      setTimeout(dismiss, (typeof ms === 'number' && ms > 0) ? ms : 8000);
+      return t;
+    };
+
     // [가짜 날짜 제거 — Stage 2] 정적 데모 날짜를 실제 오늘 날짜로. 모든 [data-mm-today] 채움.
     (function fillToday(){
       try {
@@ -14416,11 +14452,18 @@ CREATE TABLE system_map_activity (
       var _rk = _k2(_removed || {});
       _isStored = _st2.some(function(it){ return _k2(it) === _rk; });
     } catch(e) { _isStored = true; }
-    if (!_isStored) { render(); return; }
+    if (!_isStored) {
+      render();
+      // [H9] 저장 안 된 행 — 메모리 복원만
+      if (window.mmUndoToast) window.mmUndoToast('🗑 매입 항목 삭제됨', function(){ state.items.splice(idx, 0, _removed); render(); });
+      return;
+    }
     // [H12 계열] 삭제 즉시 자동저장. [백스톱] 정책 차단 시 행 롤백 — 모달·저장소 어긋남 방지
     if (!persistItemsNow()) { if (_removed !== undefined) state.items.splice(idx, 0, _removed); render(); return; }
-    if (window.globalToast) globalToast('🗑 항목 삭제 저장됨', 'success');
     render();
+    // [H9] 소프트삭제 undo — 복원 시 원위치 재삽입 + 재저장
+    if (window.mmUndoToast) window.mmUndoToast('🗑 매입 항목 삭제됨', function(){ state.items.splice(idx, 0, _removed); persistItemsNow(); render(); });
+    else if (window.globalToast) globalToast('🗑 항목 삭제 저장됨', 'success');
   }
   function quickFillPaid(idx) {
     editField(idx, 'paidAmount', state.items[idx].total || 0);
@@ -15052,7 +15095,7 @@ CREATE TABLE system_map_activity (
       billing.items.push({ round: billing.items.length+1, applyDate:new Date().toISOString().slice(0,10), applySupply:0, applyTax:0, applyTotal:0, receiveDate:'', advanceAmount:0, billingAmount:0 });
       billingRender();
     },
-    remove: function(i) { if (confirm('이 회차를 삭제하시겠습니까?')) { billing.items.splice(i,1); billingRender() } },
+    remove: function(i) { if (confirm('이 회차를 삭제하시겠습니까?')) { var _r = billing.items[i]; billing.items.splice(i,1); billingRender(); if (window.mmUndoToast) window.mmUndoToast('🗑 기성 회차 삭제됨 (저장 시 확정)', function(){ billing.items.splice(i,0,_r); billingRender(); }); } },
     edit: billingEdit,
     editNum: function(i,f,v) { billingEdit(i, f, num(v)) },
     save: function() { billing.project.billingItems = billing.items; persistProject(billing.project) },
@@ -15113,7 +15156,7 @@ CREATE TABLE system_map_activity (
   }
   window.mmOtherIncome = {
     addRow: function() { oi.items.push({ vendor:'', desc:'', supplyAmt:0, tax:0, total:0, received:0, receivedDate:'', memo:'', createdAt:today() }); oiRender() },
-    remove: function(i) { if (confirm('삭제하시겠습니까?')) { oi.items.splice(i,1); oiRender() } },
+    remove: function(i) { if (confirm('삭제하시겠습니까?')) { var _r = oi.items[i]; oi.items.splice(i,1); oiRender(); if (window.mmUndoToast) window.mmUndoToast('🗑 기타수익 삭제됨 (저장 시 확정)', function(){ oi.items.splice(i,0,_r); oiRender(); }); } },
     edit: oiEdit,
     editNum: function(i,f,v) { oiEdit(i,f,num(v)) },
     save: function() { oi.project.otherIncomeItems = oi.items; persistProject(oi.project) },
