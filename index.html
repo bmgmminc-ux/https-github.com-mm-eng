@@ -2589,6 +2589,24 @@ table.data-table {
   .hero-grid { grid-template-columns: 1fr; }
   .hero-stats { width: 100%; }
 }
+/* [C8] 모바일 하단 탭바 — 기본은 숨김(데스크톱), 모바일(≤640px)에서만 표시. 기본 규칙이 @media보다 앞서야 순서상 media override가 이김 */
+.mm-tabbar {
+  display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 900;
+  background: var(--bg-surface, #fff); border-top: 1px solid var(--border, #e5e7eb);
+  box-shadow: 0 -2px 12px rgba(0,0,0,0.08);
+  padding: 6px 2px calc(6px + env(safe-area-inset-bottom, 0px));
+  justify-content: space-around; align-items: stretch;
+}
+.mm-tab {
+  flex: 1 1 0; display: flex; flex-direction: column; align-items: center; gap: 3px;
+  background: none; border: 0; cursor: pointer; padding: 4px 2px; min-width: 0;
+  color: var(--text-tertiary, #94a3b8); font-size: 10px; font-weight: 700; line-height: 1.1;
+  -webkit-tap-highlight-color: transparent;
+}
+.mm-tab .mm-tab-ico { width: 22px; height: 22px; stroke: currentColor; fill: none; }
+.mm-tab .mm-tab-lbl { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.mm-tab.active { color: var(--primary-700, #1d4ed8); }
+.mm-tab:active { opacity: .6; }
 @media (max-width: 640px) {
   /* 모바일: 사이드바 완전 숨김, 메인 영역은 전체 폭 사용 */
   .app-shell { padding-left: 0; }
@@ -2601,6 +2619,9 @@ table.data-table {
   .hero-title { font-size: 22px; }
   .hero-stats { flex-direction: column; gap: var(--s-2); }
   .hero-stat { width: 100%; }
+  /* [C8] 모바일 하단 탭바 표시 + 본문 하단 여백(탭바 높이만큼) */
+  .mm-tabbar { display: flex; }
+  .main-area { padding-bottom: 76px; }
 }
 
 /* === REDUCED MOTION === */
@@ -4146,6 +4167,30 @@ table.data-table {
       </button>
     </div>
   </aside>
+
+  <!-- [C8] 모바일 하단 탭바 — 사이드바가 모바일에서 숨겨져 내비가 없던 문제 해소. data-nav로 기존 라우팅(location.hash) 재사용 -->
+  <nav class="mm-tabbar" id="mm-tabbar" aria-label="모바일 내비게이션">
+    <button class="mm-tab" data-nav="overview" type="button">
+      <svg class="mm-tab-ico" viewBox="0 0 24 24"><use href="#i-dashboard"/></svg>
+      <span class="mm-tab-lbl">현황</span>
+    </button>
+    <button class="mm-tab" data-nav="project-detail" type="button">
+      <svg class="mm-tab-ico" viewBox="0 0 24 24"><use href="#i-projects"/></svg>
+      <span class="mm-tab-lbl">프로젝트</span>
+    </button>
+    <button class="mm-tab" data-nav="attendance" type="button">
+      <svg class="mm-tab-ico" viewBox="0 0 24 24"><use href="#i-attendance"/></svg>
+      <span class="mm-tab-lbl">일용직</span>
+    </button>
+    <button class="mm-tab" data-nav="vendor-status" type="button">
+      <svg class="mm-tab-ico" viewBox="0 0 24 24"><use href="#i-vendors"/></svg>
+      <span class="mm-tab-lbl">거래처</span>
+    </button>
+    <button class="mm-tab" data-nav="settings" type="button">
+      <svg class="mm-tab-ico" viewBox="0 0 24 24"><use href="#i-settings"/></svg>
+      <span class="mm-tab-lbl">설정</span>
+    </button>
+  </nav>
 
 
   <!-- ════════════════ 9개 화면 + 인덱스 (data-screen 별 전환) ════════════════ -->
@@ -14186,6 +14231,22 @@ CREATE TABLE system_map_activity (
 
   const initialId = (window.location.hash || '#overview').slice(1);
   showScreen(initialId);
+
+  // [C8] 모바일 하단 탭바 — 클릭 라우팅 + 활성 동기화 (기존 hashchange→showScreen 파이프 재사용)
+  (function(){
+    var bar = document.getElementById('mm-tabbar');
+    if (!bar) return;
+    var tabs = bar.querySelectorAll('.mm-tab[data-nav]');
+    tabs.forEach(function(t){
+      t.addEventListener('click', function(){ var id = t.getAttribute('data-nav'); if (screens.includes(id)) window.location.hash = id; });
+    });
+    function syncTabs(){
+      var id = (window.location.hash || '#overview').slice(1);
+      tabs.forEach(function(t){ t.classList.toggle('active', t.getAttribute('data-nav') === id); });
+    }
+    window.addEventListener('hashchange', syncTabs);
+    syncTabs();
+  })();
 })();
 </script>
 
