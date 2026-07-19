@@ -20826,8 +20826,8 @@ CREATE TABLE system_map_activity (
     }
   }
 
-  // [C8] 범용 데모 토큰 스위퍼(FAKE_RE·inLive·nukeDemoTokens) 은퇴 — 정적 데모 행/카드가 소스에서 전부 청산되어
-  //      런타임 정규식 숨김이 불필요. 실데이터 하이드레이터(clean*)만 유지.
+  // [C8] 범용 데모 토큰 런타임 숨김기(정규식 매칭 + 라이브컨테이너 예외 판정) 은퇴 — 정적 데모 행/카드가
+  //      소스에서 전부 청산되어 런타임 정규식 숨김이 불필요. 실데이터 하이드레이터(clean*)만 유지.
 
   // ─── workers 직종별 인력 분포 도넛 (배관공 14명 등) [#151] ───
   function cleanWorkersDonut(){
@@ -20881,8 +20881,8 @@ CREATE TABLE system_map_activity (
     try { nukeShowcases(); } catch(e){}
     try { cleanWorkersDonut(); } catch(e){}
     try { cleanSearchChips(); } catch(e){}
-    // [C8] nukeDemoTokens(FAKE_RE) 은퇴 — 정적 데모 행/카드가 소스에서 전부 청산(C4·C5·C8)되어 숨길 대상이 0.
-    //      오히려 설정의 정규화 설명 예시("주식회○○○")를 오탐 숨김하던 부작용 제거. 정의도 삭제(아래).
+    // [C8] 데모 토큰 런타임 숨김기 은퇴 — 정적 데모 행/카드가 소스에서 전부 청산(C4·C5·C8)되어 숨길 대상이 0.
+    //      오히려 설정의 정규화 설명 예시를 오탐 숨김하던 부작용 제거. 정의도 삭제(아래).
   }
   window.mmDemoCleanup = runAll;
   var _busy = false;
