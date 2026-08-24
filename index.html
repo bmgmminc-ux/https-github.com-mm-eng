@@ -7,6 +7,10 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232563EB'/%3E%3Ctext x='32' y='44' font-size='34' font-weight='900' text-anchor='middle' fill='white' font-family='Arial'%3EM%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css">
+<!-- [HX] 힉스필드 재디자인 라틴/데이터 서체 — 한글은 위 Pretendard가 담당(글리프 단위 폴백) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <!-- Supabase JS Client v2 [#121] -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js" crossorigin></script>
 <script>
@@ -161,6 +165,53 @@ window.mmEsc = function(s){
   --z-sticky: 200; --z-overlay: 900;
   --z-modal: 1000; --z-toast: 1100;
 }
+
+/* ══════════════════════════════════════════════════════════════════
+   [HX] 힉스필드 재디자인 토큰 레이어 — 2026-08-23 · 1단계
+   · 전부 --hx- 네임스페이스. 기존 141개 커스텀 프로퍼티와 충돌 0건 확인.
+     (--accent / --r-sm / --r-lg 는 이미 사용 중이라 반드시 접두 필요)
+   · 이 단계는 **정의만** 한다. 참조하는 규칙이 없으므로 화면 변화 0.
+   · 색 스윕(2~4단계)에서 기존 토큰을 이 값들의 별칭으로 재정의한다.
+   설계: 플랫 컬러 · 일렉트릭 시안 액센트(절제) · 여백으로 구분 · 미세 라운드
+   ══════════════════════════════════════════════════════════════════ */
+:root{
+  /* ground */
+  --hx-paper:#FFFFFF;
+  --hx-paper-2:#FAFAFA;
+  --hx-surface:#FFFFFF;
+  --hx-surface-2:#F6F6F7;
+  --hx-surface-3:#EFEFF1;
+  /* ink */
+  --hx-ink:#0A0A0A;
+  --hx-ink-2:#565659;
+  --hx-ink-3:#8E8E93;
+  --hx-ink-4:#B4B4B8;
+  /* line — 최소한만 */
+  --hx-line:rgba(10,10,10,.07);
+  --hx-line-2:rgba(10,10,10,.13);
+  /* 액센트 = 일렉트릭 시안 (절제해서 사용) */
+  --hx-accent:#00C2FF;
+  --hx-accent-deep:#0086B3;
+  --hx-accent-ink:#005B7A;
+  --hx-accent-wash:#E8F9FF;
+  /* 시맨틱 — 플랫. 빨강은 오직 '위험'에만 */
+  --hx-good:#00875A;  --hx-good-wash:#E6F5EF;
+  --hx-warn:#B45309;  --hx-warn-wash:#FDF3E7;
+  --hx-crit:#DC2626;  --hx-crit-wash:#FDECEC;
+  --hx-steel:#6B7280; --hx-steel-wash:#F1F2F4;
+  /* 타이포 — 라틴 Inter Tight, 한글 Pretendard(글리프 단위 폴백) */
+  --hx-font:'Inter Tight','Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+  --hx-mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  /* radius — 미세 */
+  --hx-r:10px; --hx-r-s:7px; --hx-r-l:14px;
+  /* elevation — 은은하게 */
+  --hx-e1:0 1px 2px rgba(10,10,10,.04);
+  --hx-e2:0 1px 3px rgba(10,10,10,.05), 0 8px 24px -12px rgba(10,10,10,.14);
+  --hx-e3:0 2px 6px rgba(10,10,10,.06), 0 20px 48px -20px rgba(10,10,10,.22);
+  /* 레일 폭 — 5단계에서 3중 동기화(260/2580/2612행) 대체 */
+  --hx-rail:248px;
+}
+
 
 [data-theme="dark"] {
   --bg-canvas: #060912;
