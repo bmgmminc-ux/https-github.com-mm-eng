@@ -254,13 +254,13 @@ html, body {
 /* === TYPOGRAPHY === */
 .t-display {
   font-size: var(--fs-6xl);
-  font-weight: 900;
+  font-weight: 700;
   letter-spacing: -0.04em;
   line-height: 1;
   color: var(--hx-ink);
 }
-.t-h1 { font-size: var(--fs-4xl); font-weight: 800; letter-spacing: -0.025em; line-height: 1.1; }
-.t-h2 { font-size: var(--fs-3xl); font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; }
+.t-h1 { font-size: var(--fs-4xl); font-weight: 700; letter-spacing: -0.025em; line-height: 1.1; }
+.t-h2 { font-size: var(--fs-3xl); font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; }
 .t-h3 { font-size: var(--fs-2xl); font-weight: 700; letter-spacing: -0.015em; line-height: 1.25; }
 .t-h4 { font-size: var(--fs-xl); font-weight: 700; }
 .t-body { font-size: var(--fs-md); }
@@ -268,7 +268,7 @@ html, body {
 .t-xs { font-size: var(--fs-xs); color: var(--text-tertiary); }
 .t-caption {
   font-size: var(--fs-2xs); color: var(--text-muted);
-  font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  font-weight: 700; letter-spacing: 0.1em;
 }
 .t-num { font-variant-numeric: tabular-nums; font-feature-settings: 'tnum' on; }
 
@@ -350,7 +350,7 @@ html, body {
 .brand-mark svg { width: 100%; height: 100%; filter: drop-shadow(0 4px 16px rgba(0, 194, 255, 0.5)); }
 
 .brand-name {
-  color: var(--hx-surface); font-size: 17px; font-weight: 800;
+  color: var(--hx-surface); font-size: 17px; font-weight: 700;
   letter-spacing: 1.5px; line-height: 1.1;
   color: var(--hx-surface);
 }
@@ -403,7 +403,7 @@ html, body {
 .sidebar-section { padding: var(--s-2) var(--s-3); }
 .sidebar-label {
   font-size: 10px; font-weight: 700; color: var(--hx-ink-2);
-  letter-spacing: 2.5px; text-transform: uppercase;
+  letter-spacing: 2.5px;
   padding: var(--s-3) var(--s-3) var(--s-1);
 }
 
@@ -579,7 +579,7 @@ html, body {
 .avatar {
   width: 30px; height: 30px; border-radius: 50%;
   display: grid; place-items: center;
-  font-size: 11px; font-weight: 800; color: var(--hx-surface);
+  font-size: 11px; font-weight: 700; color: var(--hx-surface);
   border: 2.5px solid var(--bg-surface);
   margin-left: -10px;
   box-shadow: var(--shadow-sm);
@@ -905,7 +905,7 @@ html, body {
   font-size: 11px; color: var(--text-tertiary); font-weight: 600;
 }
 .bar-count {
-  font-size: 10px; font-weight: 800;
+  font-size: 10px; font-weight: 700;
   background: var(--primary-50); color: var(--primary-700);
   padding: 1px 7px; border-radius: var(--r-full);
   border: 1px solid var(--primary-200);
@@ -952,15 +952,15 @@ html, body {
 .strip-content { min-width: 0; }
 .strip-label {
   font-size: 10px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--text-tertiary);
   letter-spacing: 1.2px;
-  text-transform: uppercase;
+
   margin-bottom: 2px;
 }
 .strip-value {
   font-size: 19px;
-  font-weight: 900;
+  font-weight: 700;
   color: var(--text-primary);
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.025em;
@@ -1038,7 +1038,7 @@ html, body {
   background: var(--primary-700);
   color: var(--hx-surface);
   font-size: 10px;
-  font-weight: 800;
+  font-weight: 700;
   padding: 2px 8px;
   border-radius: var(--r-full);
   white-space: nowrap;
@@ -1068,7 +1068,7 @@ html, body {
   display: flex;
   gap: 3px;
   font-size: 9.5px;
-  font-weight: 800;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.04em;
   margin-top: 22px;  /* count 배지 아래 여유 */
@@ -1151,7 +1151,7 @@ html, body {
 }
 .legend-rich-value {
   font-size: 14px;
-  font-weight: 900;
+  font-weight: 700;
   color: var(--text-primary);
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.02em;
@@ -1180,7 +1180,7 @@ html, body {
   gap: 10px;
   line-height: 1.5;
 }
-.chart-insight strong { color: var(--primary-700); font-weight: 800; }
+.chart-insight strong { color: var(--primary-700); font-weight: 700; }
 .chart-insight-icon { font-size: 16px; flex-shrink: 0; }
 
 /* 막대 차트 호버 툴팁: 히트맵과 동일한 디자인 패턴으로 통일 */
@@ -1205,7 +1205,7 @@ html, body {
 }
 .bar-tt-title {
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--hx-accent-s);
   letter-spacing: 0.5px;
   margin-bottom: 8px;
@@ -1242,7 +1242,7 @@ html, body {
   font-size: 11px;
   color: rgba(255,255,255,0.7);
 }
-.bar-tt-divider strong { color: var(--hx-good-s); font-weight: 800; }
+.bar-tt-divider strong { color: var(--hx-good-s); font-weight: 700; }
 .legend-dot { width: 14px; height: 14px; border-radius: 4px; box-shadow: var(--shadow-xs); }
 
 /* === Animated Donut === */
@@ -1265,7 +1265,7 @@ html, body {
 }
 .donut-name { flex: 1; font-size: 13px; color: var(--text-secondary); font-weight: 600; }
 .donut-value { font-size: 12px; color: var(--text-tertiary); font-variant-numeric: tabular-nums; }
-.donut-pct { font-size: 14px; font-weight: 800; color: var(--text-primary); font-variant-numeric: tabular-nums; min-width: 50px; text-align: right; }
+.donut-pct { font-size: 14px; font-weight: 700; color: var(--text-primary); font-variant-numeric: tabular-nums; min-width: 50px; text-align: right; }
 
 /* === Progress (Animated) === */
 .progress-bar {
@@ -1330,7 +1330,7 @@ html, body {
   position: absolute;
   bottom: 0; left: 50%;
   transform: translateX(-50%);
-  font-size: 28px; font-weight: 900;
+  font-size: 28px; font-weight: 700;
   color: var(--text-primary);
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.02em;
@@ -1340,7 +1340,7 @@ html, body {
   bottom: -24px; left: 50%;
   transform: translateX(-50%);
   font-size: 11px; color: var(--text-tertiary);
-  font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  font-weight: 700; letter-spacing: 0.1em;
 }
 
 /* === HEATMAP — Information-rich version ===
@@ -1377,9 +1377,9 @@ html, body {
 .heatmap-v2 .hm-total-label {
   font-size: 9px;
   color: var(--text-muted);
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 1px;
-  text-transform: uppercase;
+
   text-align: center;
   padding-bottom: 4px;
 }
@@ -1422,7 +1422,7 @@ html, body {
 /* 셀 내부 금액 표시. 강도에 따라 폰트 색상 자동 조정. */
 .hm-cell-value {
   font-size: 11px;
-  font-weight: 800;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
   line-height: 1;
 }
@@ -1457,7 +1457,7 @@ html, body {
 }
 .hm-row-total-value {
   font-size: 13px;
-  font-weight: 900;
+  font-weight: 700;
   color: var(--text-primary);
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.02em;
@@ -1483,7 +1483,7 @@ html, body {
 }
 .hm-col-total-value {
   font-size: 12px;
-  font-weight: 900;
+  font-weight: 700;
   color: var(--text-primary);
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.02em;
@@ -1510,17 +1510,17 @@ html, body {
 }
 .hm-grand-total-value {
   font-size: 13px;
-  font-weight: 900;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.02em;
 }
 .hm-grand-total-label {
   font-size: 8px;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 1.5px;
   margin-top: 1px;
   opacity: 0.85;
-  text-transform: uppercase;
+
 }
 
 /* 툴팁: 호버 시 상세 정보 표시.
@@ -1837,15 +1837,15 @@ table.data-table {
 }
 .project-eyebrow {
   font-size: 10px;
-  font-weight: 800;
+  font-weight: 700;
   color: rgba(127, 220, 245,0.85);
   letter-spacing: 2.5px;
   margin-bottom: 8px;
-  text-transform: uppercase;
+
 }
 .project-title {
   font-size: 26px;
-  font-weight: 900;
+  font-weight: 700;
   color: var(--hx-surface);
   letter-spacing: -0.025em;
   line-height: 1.15;
@@ -1873,7 +1873,7 @@ table.data-table {
   background: rgba(0, 194, 255,0.25);
   border-color: rgba(127, 220, 245,0.3);
   color: var(--hx-accent-s);
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0.3px;
 }
 .project-pill .pill-label {
@@ -1901,7 +1901,7 @@ table.data-table {
 .psb-icon { font-size: 20px; line-height: 1; }
 .psb-label {
   font-size: 14px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--hx-good-s);
   letter-spacing: 0.5px;
   margin-top: 4px;
@@ -1992,14 +1992,14 @@ table.data-table {
 }
 .dual-section-title {
   font-size: 15px;
-  font-weight: 900;
+  font-weight: 700;
   letter-spacing: -0.01em;
 }
 .dual-section.section-supply .dual-section-title { color: var(--hx-accent-ink); }
 .dual-section.section-vat .dual-section-title { color: var(--hx-warn-d); }
 .dual-section-tag {
   font-size: 11px;
-  font-weight: 800;
+  font-weight: 700;
   padding: 3px 10px;
   border-radius: var(--r-full);
   letter-spacing: 0.5px;
@@ -2033,15 +2033,15 @@ table.data-table {
 }
 .kpi-mini-label {
   font-size: 11px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--text-tertiary);
   letter-spacing: 0.05em;
-  text-transform: uppercase;
+
   margin-bottom: 4px;
 }
 .kpi-mini-value {
   font-size: 22px;
-  font-weight: 900;
+  font-weight: 700;
   color: var(--text-primary);
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.025em;
@@ -2082,7 +2082,7 @@ table.data-table {
 .quadrant-card.q-d { border-top-color: var(--success-700); }
 .quadrant-title {
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: -0.01em;
   margin-bottom: 12px;
   display: flex;
@@ -2110,7 +2110,7 @@ table.data-table {
 }
 .quadrant-row-value {
   font-size: 14px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--text-primary);
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.01em;
@@ -2138,7 +2138,7 @@ table.data-table {
 }
 .dpb-title {
   font-size: 14px;
-  font-weight: 900;
+  font-weight: 700;
   color: var(--hx-violet);
   display: flex;
   align-items: center;
@@ -2146,7 +2146,7 @@ table.data-table {
 }
 .dpb-amount {
   font-size: 18px;
-  font-weight: 900;
+  font-weight: 700;
   color: var(--hx-violet-d);
   font-variant-numeric: tabular-nums;
 }
@@ -2175,7 +2175,7 @@ table.data-table {
 }
 .dpb-item-amt {
   color: var(--hx-violet);
-  font-weight: 800;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
 .dpb-note {
@@ -2215,12 +2215,12 @@ table.data-table {
 }
 .cost-cat-name {
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--text-secondary);
 }
 .cost-cat-pct {
   font-size: 22px;
-  font-weight: 900;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.025em;
 }
@@ -2269,7 +2269,7 @@ table.data-table {
 }
 .budget-progress-pct {
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
   min-width: 38px;
   text-align: right;
@@ -2290,7 +2290,7 @@ table.data-table {
 }
 .cash-side-title {
   font-size: 14px;
-  font-weight: 900;
+  font-weight: 700;
   color: var(--text-primary);
   margin-bottom: 14px;
   letter-spacing: -0.01em;
@@ -2334,7 +2334,7 @@ table.data-table {
 .payment-stat.stat-unpaid .payment-stat-label { color: var(--danger-700); }
 .payment-stat-value {
   font-size: 16px;
-  font-weight: 900;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.02em;
 }
@@ -2362,7 +2362,7 @@ table.data-table {
   align-items: flex-start;
   gap: 8px;
 }
-.project-memo strong { font-weight: 800; }
+.project-memo strong { font-weight: 700; }
 
 /* 반응형: 1024px 이하에서 4분면을 2x2로, 듀얼 KPI를 2x2로 */
 @media (max-width: 1024px) {
@@ -2429,7 +2429,7 @@ table.data-table {
   gap: var(--s-3);
 }
 .empty-illust { width: 180px; height: 140px; margin-bottom: var(--s-2); }
-.empty-title { font-size: 18px; font-weight: 800; color: var(--text-primary); }
+.empty-title { font-size: 18px; font-weight: 700; color: var(--text-primary); }
 .empty-desc { font-size: 14px; color: var(--text-tertiary); max-width: 320px; }
 
 /* === GRID === */
@@ -2631,17 +2631,17 @@ table.data-table {
 }
 .multiring-eyebrow-v2 {
   font-size: 10px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--text-tertiary);
   letter-spacing: 2px;
-  text-transform: uppercase;
+
 }
 /* 메인 수치는 차분한 검정으로 처리.
    강한 색상은 우측 카드와 외곽 링이 담당하고,
    중앙은 정보의 구조를 보여주는 데 집중. */
 .multiring-main-v2 {
   font-size: 38px;
-  font-weight: 900;
+  font-weight: 700;
   color: var(--text-primary);
   letter-spacing: -0.03em;
   line-height: 1;
@@ -2650,7 +2650,7 @@ table.data-table {
 }
 .multiring-main-v2 sup {
   font-size: 16px;
-  font-weight: 800;
+  font-weight: 700;
   vertical-align: super;
   margin-left: 2px;
   color: var(--text-tertiary);
@@ -2668,7 +2668,7 @@ table.data-table {
   padding: 4px 12px;
   border-radius: var(--r-full);
   font-size: 11px;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0.3px;
   transition: all var(--dur-fast);
 }
@@ -2746,7 +2746,7 @@ table.data-table {
 }
 .ring-card-pct-num {
   font-size: 19px;
-  font-weight: 900;
+  font-weight: 700;
   color: var(--ring-color);
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.02em;
@@ -2794,9 +2794,9 @@ table.data-table {
 .ring-summary-label {
   font-size: 10px;
   color: var(--text-tertiary);
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 1.5px;
-  text-transform: uppercase;
+
 }
 .ring-summary-text {
   font-size: 13px;
@@ -2868,14 +2868,14 @@ table.data-table {
 }
 .donut-center-eyebrow {
   font-size: 10px;
-  font-weight: 800;
+  font-weight: 700;
   fill: var(--text-tertiary);
   letter-spacing: 2px;
   text-anchor: middle;
 }
 .donut-center-main {
   font-size: 38px;
-  font-weight: 900;
+  font-weight: 700;
   fill: var(--text-primary);
   letter-spacing: -0.03em;
   text-anchor: middle;
@@ -2977,7 +2977,7 @@ table.data-table {
 }
 .donut-meta-pct-num {
   font-size: 19px;
-  font-weight: 900;
+  font-weight: 700;
   color: var(--item-color);
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.02em;
@@ -3016,11 +3016,11 @@ table.data-table {
   color: var(--text-tertiary);
   font-weight: 700;
   letter-spacing: 1.5px;
-  text-transform: uppercase;
+
 }
 .donut-summary-value {
   font-size: 18px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--text-primary);
   font-variant-numeric: tabular-nums;
   margin-top: 4px;
@@ -3099,10 +3099,10 @@ table.data-table {
 .cal-dow {
   text-align: center;
   font-size: 11px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--text-tertiary);
   padding: 8px 0;
-  text-transform: uppercase;
+
   letter-spacing: 0.8px;
   background: var(--bg-subtle);
   border-radius: 6px;
@@ -3136,7 +3136,7 @@ table.data-table {
 }
 .cal-day {
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--text-primary);
   font-variant-numeric: tabular-nums;
   position: absolute;
@@ -3148,7 +3148,7 @@ table.data-table {
 .cal-cell.sun .cal-day { color: var(--hx-crit); }
 .cal-count {
   font-size: 14px;
-  font-weight: 800;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
   position: absolute;
   bottom: 8px;
@@ -3390,10 +3390,10 @@ table.data-table {
   to { opacity: 0; transform: translateX(120%); }
 }
 .toast.success { border-left-color: var(--success-700); }
-.toast.success::before { content: '✓'; color: var(--success-700); font-size: 18px; font-weight: 900; }
-.toast.info::before { content: 'ℹ'; color: var(--primary-600); font-size: 18px; font-weight: 900; }
+.toast.success::before { content: '✓'; color: var(--success-700); font-size: 18px; font-weight: 700; }
+.toast.info::before { content: 'ℹ'; color: var(--primary-600); font-size: 18px; font-weight: 700; }
 .toast.warning { border-left-color: var(--hx-warn); }
-.toast.warning::before { content: '⚠'; color: var(--hx-warn); font-size: 18px; font-weight: 900; }
+.toast.warning::before { content: '⚠'; color: var(--hx-warn); font-size: 18px; font-weight: 700; }
 .toast.danger { border-left-color: var(--hx-crit); }
 .toast.danger::before { content: '🚨'; font-size: 16px; }
 .toast-content { flex: 1; line-height: 1.5; }
@@ -3444,10 +3444,10 @@ table.data-table {
 }
 .filter-bar-label {
   font-size: 10px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--text-secondary);
   letter-spacing: 0.6px;
-  text-transform: uppercase;
+
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -3541,10 +3541,10 @@ table.data-table {
 }
 .settings-toc-label {
   font-size: 10px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--text-tertiary);
   letter-spacing: 0.8px;
-  text-transform: uppercase;
+
   padding: 0 16px 8px;
   border-bottom: 1px solid var(--border-subtle);
   margin-bottom: 6px;
@@ -3569,7 +3569,7 @@ table.data-table {
   background: var(--primary-50);
   color: var(--primary-700);
   border-left-color: var(--primary-500);
-  font-weight: 800;
+  font-weight: 700;
 }
 
 </style>
@@ -3615,11 +3615,11 @@ table.data-table {
   }
   .index-hero-content { position: relative; z-index: 1; max-width: 900px; }
   .index-eyebrow {
-    font-size: 12px; font-weight: 800; letter-spacing: 1.5px;
-    text-transform: uppercase; opacity: 0.85; margin-bottom: 12px;
+    font-size: 12px; font-weight: 700; letter-spacing: 1.5px;
+ opacity: 0.85; margin-bottom: 12px;
   }
   .index-title {
-    font-size: 44px; font-weight: 900; line-height: 1.15;
+    font-size: 44px; font-weight: 700; line-height: 1.15;
     letter-spacing: -0.03em; margin-bottom: 16px;
   }
   .index-sub {
@@ -3637,7 +3637,7 @@ table.data-table {
     border-radius: 12px; padding: 16px;
   }
   .index-stat-label { font-size: 11px; opacity: 0.8; font-weight: 700; }
-  .index-stat-value { font-size: 28px; font-weight: 900; margin-top: 4px; }
+  .index-stat-value { font-size: 28px; font-weight: 700; margin-top: 4px; }
 
   /* 화면 카드 그리드 */
   .screen-grid {
@@ -3691,7 +3691,7 @@ table.data-table {
     top: 12px; left: 12px;
     background: rgba(255,255,255,0.95);
     color: var(--primary-700);
-    font-size: 11px; font-weight: 900;
+    font-size: 11px; font-weight: 700;
     padding: 4px 10px; border-radius: 12px;
     backdrop-filter: blur(8px);
   }
@@ -3707,7 +3707,7 @@ table.data-table {
     flex-direction: column;
   }
   .screen-card-name {
-    font-size: 17px; font-weight: 900;
+    font-size: 17px; font-weight: 700;
     color: var(--text-primary);
     margin-bottom: 6px;
   }
@@ -3851,26 +3851,26 @@ table.data-table {
   body[data-role="demo"]  .perm-admin,
   body[data-role="demo"]  .perm-edit { display:none !important; }
   /* 사이드바 사용자 칩 */
-  .mm-user-chip { display:flex; align-items:center; gap:10px; padding:10px 12px;
-    margin-bottom:6px; border-radius:10px; background:rgba(255,255,255,.05); }
-  .mm-user-avatar { width:34px; height:34px; border-radius:9px; flex-shrink:0;
-    background:linear-gradient(135deg,var(--hx-accent-deep),var(--hx-accent-ink)); color:var(--hx-surface);
-    display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:900; }
+  .mm-user-chip { display:flex; align-items:center; gap:11px; padding:12px 13px;
+    margin-bottom:10px; border-radius:var(--hx-r); background:rgba(255,255,255,.05); }
+  .mm-user-avatar { width:34px; height:34px; border-radius:var(--hx-r-s); flex-shrink:0;
+    background:var(--hx-accent-ink); color:var(--hx-surface);
+    display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:700; }
   .mm-user-info { min-width:0; }
-  .mm-user-name { font-size:12px; font-weight:800; color:var(--hx-surface-3); white-space:nowrap;
+  .mm-user-name { font-size:13px; font-weight:600; letter-spacing:-.015em; color:var(--hx-surface-3); white-space:nowrap;
     overflow:hidden; text-overflow:ellipsis; }
-  .mm-user-role { font-size:10px; font-weight:700; margin-top:1px; }
+  .mm-user-role { font-size:10.5px; font-weight:600; letter-spacing:.01em; margin-top:3px; }
   .mm-user-role.ceo   { color:#FBBF24; }
   .mm-user-role.admin { color:var(--hx-accent-s); }
   .mm-user-role.user  { color:#86EFAC; }
   .mm-user-role.demo  { color:var(--hx-ink-4); }
   /* 데모 역할 선택 (로그인 화면) */
-  .mm-login-roles { display:none; flex-direction:column; gap:6px; margin-top:6px; }
+  .mm-login-roles { display:none; flex-direction:column; gap:8px; margin-top:10px; }
   .mm-login-roles.show { display:flex; }
   .mm-login-roles .role-opt { display:flex; gap:8px; }
-  .mm-login-roles .role-opt button { flex:1; padding:9px 6px; border-radius:8px;
-    border:1.5px solid var(--hx-surface-3); background:var(--hx-surface); cursor:pointer; font-family:inherit;
-    font-size:11px; font-weight:800; color:var(--hx-ink-2); transition:all .12s; }
+  .mm-login-roles .role-opt button { flex:1; padding:11px 8px; border-radius:var(--hx-r-s);
+    border:1px solid var(--hx-line-2); background:var(--hx-surface); cursor:pointer; font-family:inherit;
+    font-size:11px; font-weight:600; color:var(--hx-ink-2); transition:border-color .12s, color .12s, background .12s; }
   .mm-login-roles .role-opt button:hover { border-color:var(--hx-accent-deep); color:var(--hx-accent-deep); background:var(--hx-accent-wash); }
 </style>
 
@@ -3880,53 +3880,50 @@ table.data-table {
      ═══════════════════════════════════════════════════════════════ -->
 <style id="login-screen-style">
   .mm-login-overlay { position:fixed; inset:0; z-index:9999;
-    background:linear-gradient(135deg,var(--hx-ink) 0%,var(--hx-ink) 50%,var(--hx-ink) 100%);
+    background:var(--hx-ink);
     display:none; align-items:center; justify-content:center; padding:20px;
-    font-family:'Pretendard Variable', -apple-system, sans-serif; }
+    font-family:var(--hx-font); }
   .mm-login-overlay.show { display:flex; }
-  .mm-login-overlay::before { content:''; position:absolute; inset:0; opacity:.4;
-    background-image:
-      radial-gradient(circle at 20% 30%, rgba(59,130,246,.4), transparent 40%),
-      radial-gradient(circle at 80% 70%, rgba(124, 92, 255,.3), transparent 40%); }
-  .mm-login-card { position:relative; background:rgba(255,255,255,.98); border-radius:20px;
-    padding:36px 32px; width:100%; max-width:400px; box-shadow:0 25px 60px -10px rgba(0,0,0,.5);
-    backdrop-filter:blur(20px); }
-  .mm-login-brand { text-align:center; margin-bottom:24px; }
-  .mm-login-brand .logo { width:64px; height:64px; margin:0 auto 12px;
-    background:linear-gradient(135deg,var(--hx-accent-deep),var(--hx-accent-ink)); border-radius:16px;
+  .mm-login-overlay::before { content:''; position:absolute; inset:0;
+    background-image:none; }
+  .mm-login-card { position:relative; background:var(--hx-paper); border-radius:var(--hx-r-l);
+    padding:42px 36px; width:100%; max-width:400px; box-shadow:var(--hx-e3); }
+  .mm-login-brand { text-align:center; margin-bottom:28px; }
+  .mm-login-brand .logo { width:64px; height:64px; margin:0 auto 12px; font-family:var(--hx-mono);
+    background:var(--hx-ink); border-radius:var(--hx-r);
     display:flex; align-items:center; justify-content:center; color:var(--hx-surface);
-    font-size:30px; font-weight:900; box-shadow:0 8px 20px -4px rgba(0, 134, 179,.4); }
-  .mm-login-brand h1 { font-size:20px; font-weight:900; color:var(--hx-ink); letter-spacing:-.02em; margin:0 0 4px; }
+    font-size:28px; font-weight:600; }
+  .mm-login-brand h1 { font-size:19px; font-weight:700; color:var(--hx-ink); letter-spacing:-.02em; margin:0 0 4px; }
   .mm-login-brand p { font-size:12px; color:var(--hx-ink-3); font-weight:600; margin:0; }
-  .mm-login-form { display:flex; flex-direction:column; gap:12px; }
-  .mm-login-form label { font-size:11px; font-weight:800; color:var(--hx-ink-2); letter-spacing:-.005em;
+  .mm-login-form { display:flex; flex-direction:column; gap:14px; }
+  .mm-login-form label { font-size:11.5px; font-weight:600; color:var(--hx-ink-2); letter-spacing:-.015em;
     margin-bottom:-4px; }
-  .mm-login-form input { padding:12px 14px; border:1.5px solid var(--hx-surface-3); border-radius:10px;
-    font-size:14px; font-weight:700; font-family:inherit; color:var(--hx-ink); transition:all .15s; }
-  .mm-login-form input:focus { outline:none; border-color:var(--hx-accent-deep); box-shadow:0 0 0 3px rgba(0, 134, 179,.12); }
-  .mm-login-form .btn-login { padding:14px; border-radius:10px; border:0; cursor:pointer;
-    background:linear-gradient(135deg,var(--hx-accent-deep),var(--hx-accent-ink)); color:var(--hx-surface); font-size:14px; font-weight:900;
-    letter-spacing:-.005em; font-family:inherit; box-shadow:0 8px 20px -4px rgba(0, 134, 179,.4);
+  .mm-login-form input { padding:12px 14px; border:1px solid var(--hx-line-2); border-radius:var(--hx-r);
+    font-size:14px; font-weight:600; font-family:inherit; color:var(--hx-ink); transition:all .15s; }
+  .mm-login-form input:focus { outline:none; border-color:var(--hx-accent-deep); box-shadow:0 0 0 3px var(--hx-accent-wash); }
+  .mm-login-form .btn-login { padding:14px; border-radius:var(--hx-r); border:0; cursor:pointer;
+    background:var(--hx-accent-ink); color:var(--hx-surface); font-size:14px; font-weight:700;
+    letter-spacing:-.005em; font-family:inherit; box-shadow:var(--hx-e1);
     transition:all .15s; margin-top:6px; }
-  .mm-login-form .btn-login:hover { transform:translateY(-1px); box-shadow:0 12px 24px -4px rgba(0, 134, 179,.5); }
-  .mm-login-form .btn-demo { padding:12px; border-radius:10px; cursor:pointer;
-    background:var(--hx-surface); color:var(--hx-ink); font-size:12px; font-weight:800; border:1.5px solid var(--hx-surface-3);
+  .mm-login-form .btn-login:hover { transform:translateY(-1px); box-shadow:var(--hx-e2); }
+  .mm-login-form .btn-demo { padding:12px; border-radius:var(--hx-r); cursor:pointer;
+    background:var(--hx-surface); color:var(--hx-ink); font-size:12px; font-weight:600; border:1px solid var(--hx-line-2);
     font-family:inherit; transition:all .15s; }
   .mm-login-form .btn-demo:hover { border-color:var(--hx-ink); background:var(--hx-surface-2); }
-  .mm-login-error { font-size:11px; color:var(--hx-crit); font-weight:700; min-height:14px; padding:4px 0; }
-  .mm-login-footer { margin-top:18px; padding-top:18px; border-top:1px solid var(--hx-surface-2);
+  .mm-login-error { font-size:11.5px; color:var(--hx-crit); font-weight:600; min-height:14px; padding:4px 0; }
+  .mm-login-footer { margin-top:24px; padding-top:20px; border-top:1px solid var(--hx-line);
     text-align:center; font-size:11px; color:var(--hx-ink-4); font-weight:600; line-height:1.6; }
-  .mm-login-footer b { color:var(--hx-ink-2); font-weight:800; }
-  .mm-login-footer code { font-size:10px; background:var(--hx-surface-2); padding:2px 6px; border-radius:4px;
-    color:var(--hx-ink-2); font-family:'SF Mono', monospace; }
+  .mm-login-footer b { color:var(--hx-ink-2); font-weight:600; }
+  .mm-login-footer code { font-size:10.5px; background:var(--hx-surface-2); padding:2px 6px; border-radius:4px;
+    color:var(--hx-ink-2); font-family:var(--hx-mono); letter-spacing:-.01em; }
   /* 로그아웃 버튼 (사이드바 logout이 클릭됐을 때 핸들러용) */
-  .mm-login-msg { padding:10px 12px; border-radius:8px; font-size:11px; font-weight:700;
+  .mm-login-msg { padding:10px 12px; border-radius:var(--hx-r-s); font-size:11.5px; font-weight:600;
     text-align:center; margin-bottom:4px; }
   .mm-login-msg.info { background:var(--hx-accent-wash); color:var(--hx-accent-ink); }
-  .mm-login-msg.ok { background:var(--hx-good-wash); color:var(--hx-good); }
+  .mm-login-msg.ok { background:var(--hx-good-wash); color:var(--hx-good-d); }
   /* 로그인 ↔ 회원가입 전환 */
   .mm-login-switch { text-align:center; font-size:12px; color:var(--hx-ink-3); font-weight:600; margin-top:4px; }
-  .mm-login-switch a { color:var(--hx-accent-deep); font-weight:800; cursor:pointer; text-decoration:underline; margin-left:4px; }
+  .mm-login-switch a { color:var(--hx-accent-ink); font-weight:600; cursor:pointer; text-decoration:underline; margin-left:4px; }
 </style>
 
 <div class="mm-login-overlay" id="mm-login-overlay">
@@ -3952,7 +3949,7 @@ table.data-table {
       </div>
     </form>
     <div class="mm-login-footer" id="mm-login-footer">
-      <span id="mm-login-mode" style="display:block;font-weight:800;margin-bottom:6px">💻 로컬 데모 모드</span>
+      <span id="mm-login-mode" style="display:block;font-weight:700;margin-bottom:6px">💻 로컬 데모 모드</span>
       세션 키: <code>localStorage / mm-auth</code>
     </div>
     <script>
@@ -4179,52 +4176,52 @@ table.data-table {
 
       <!-- ═════ 기간 필터 ═════ -->
       <style id="ov-period-style">
-        .ov-period-bar { display:flex; justify-content:space-between; align-items:center; gap:14px;
-          margin:18px 0 14px; padding:14px 18px; background:var(--hx-surface); border-radius:14px;
-          border:1px solid var(--hx-surface-3); box-shadow:0 4px 18px -6px rgba(10, 10, 10,.06); flex-wrap:wrap; }
-        .ov-period-left { display:flex; flex-direction:column; gap:3px; }
-        .ov-period-title { font-size:13px; font-weight:900; color:var(--hx-ink); letter-spacing:-.01em; display:flex; align-items:center; gap:6px; }
+        .ov-period-bar { display:flex; justify-content:space-between; align-items:center; gap:18px;
+          margin:18px 0 14px; padding:16px 20px; background:var(--hx-surface); border-radius:var(--hx-r-l);
+          border:1px solid var(--hx-line); box-shadow:var(--hx-e1); flex-wrap:wrap; }
+        .ov-period-left { display:flex; flex-direction:column; gap:5px; }
+        .ov-period-title { font-size:13.5px; font-weight:600; color:var(--hx-ink); letter-spacing:-.015em; display:flex; align-items:center; gap:6px; }
         .ov-period-title .ico { font-size:14px; }
-        .ov-period-meta { font-size:15px; font-weight:700; color:var(--hx-ink-2); padding-left:20px; font-variant-numeric:tabular-nums; display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }
-        .ov-period-meta b { color:var(--hx-accent-ink); font-weight:900; font-size:22px; line-height:1.1; }
-        .ov-period-meta #ov-period-range { font-size:14px; color:var(--hx-ink-3); }
-        .ov-period-segs { display:inline-flex; gap:4px; padding:4px; background:var(--hx-surface-2); border-radius:10px; }
-        .ov-period-segs button { padding:7px 14px; border-radius:7px; border:0; background:transparent;
-          font-size:12px; font-weight:800; color:var(--hx-ink-3); cursor:pointer; transition:all .12s; letter-spacing:-.005em; }
+        .ov-period-meta { font-size:12.5px; font-weight:500; color:var(--hx-ink-2); padding-left:20px; font-variant-numeric:tabular-nums; display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }
+        .ov-period-meta b { color:var(--hx-accent-ink); font-weight:700; font-size:15px; line-height:1.1; }
+        .ov-period-meta #ov-period-range { font-family:var(--hx-mono); font-size:11px; color:var(--hx-ink-2); letter-spacing:-.01em; }
+        .ov-period-segs { display:inline-flex; gap:4px; padding:4px; background:var(--hx-surface-2); border-radius:var(--hx-r); }
+        .ov-period-segs button { padding:7px 14px; border-radius:var(--hx-r-s); border:0; background:transparent;
+          font-size:12px; font-weight:600; color:var(--hx-ink-2); cursor:pointer; transition:all .12s; letter-spacing:-.01em; }
         .ov-period-segs button:hover { color:var(--hx-ink); }
-        .ov-period-segs button.active { background:var(--hx-ink); color:var(--hx-surface); box-shadow:0 2px 6px -1px rgba(10, 10, 10,.25); }
+        .ov-period-segs button.active { background:var(--hx-ink); color:var(--hx-surface); box-shadow:var(--hx-e1); }
 
         /* 사용자 지정 영역 */
-        .ov-period-custom { display:none; padding:14px 18px; background:var(--hx-paper-2);
-          border-radius:12px; border:1px solid var(--hx-surface-3); margin-bottom:14px;
-          align-items:center; gap:14px; flex-wrap:wrap; }
+        .ov-period-custom { display:none; padding:16px 20px; background:var(--hx-paper-2);
+          border-radius:var(--hx-r-l); border:1px solid var(--hx-line); margin-bottom:14px;
+          align-items:center; gap:18px; flex-wrap:wrap; }
         .ov-period-custom.open { display:flex; }
-        .ov-period-custom .lbl { font-size:12px; font-weight:800; color:var(--hx-ink-2); letter-spacing:-.005em; display:flex; align-items:center; gap:6px; }
+        .ov-period-custom .lbl { font-size:12px; font-weight:600; color:var(--hx-ink-2); letter-spacing:-.015em; display:flex; align-items:center; gap:6px; }
         .ov-period-custom .lbl .ico { font-size:14px; }
         .ov-period-custom .dgrp { display:flex; align-items:center; gap:8px; }
         .ov-period-custom input[type="date"] {
-          padding:8px 12px; border:1px solid var(--hx-ink-5); border-radius:8px;
-          font-size:13px; font-weight:700; color:var(--hx-ink); background:var(--hx-surface);
+          padding:8px 12px; border:1px solid var(--hx-line-2); border-radius:var(--hx-r-s);
+          font-size:12.5px; font-weight:500; color:var(--hx-ink); background:var(--hx-surface);
           font-family:inherit; font-variant-numeric:tabular-nums;
           cursor:pointer; transition:all .15s;
         }
         .ov-period-custom input[type="date"]:hover { border-color:var(--hx-ink-4); }
         .ov-period-custom input[type="date"]:focus { outline:none; border-color:var(--hx-accent-deep); box-shadow:0 0 0 3px rgba(0, 134, 179,.12); }
-        .ov-period-custom .sep { color:var(--hx-ink-4); font-weight:700; font-size:13px; }
+        .ov-period-custom .sep { font-family:var(--hx-mono); color:var(--hx-ink-2); font-weight:500; font-size:12.5px; }
         .ov-period-custom .quick-btns { display:flex; gap:4px; margin-left:auto; }
         .ov-period-custom .quick-btns button {
-          padding:6px 10px; border-radius:6px; border:1px solid var(--hx-surface-3); background:var(--hx-surface);
-          font-size:11px; font-weight:800; color:var(--hx-ink-3); cursor:pointer; transition:all .12s;
+          padding:6px 11px; border-radius:var(--hx-r-s); border:1px solid var(--hx-line); background:var(--hx-surface);
+          font-size:11px; font-weight:600; color:var(--hx-ink-2); cursor:pointer; transition:all .12s;
         }
-        .ov-period-custom .quick-btns button:hover { background:var(--hx-ink); color:var(--hx-surface); border-color:var(--hx-ink); }
+        .ov-period-custom .quick-btns button:hover { background:var(--hx-surface-2); color:var(--hx-ink); border-color:var(--hx-line-2); }
         .ov-period-custom .apply-btn {
-          padding:9px 18px; border-radius:8px; border:0; background:linear-gradient(135deg,var(--hx-accent-deep),var(--hx-accent-ink));
-          color:var(--hx-surface); font-size:13px; font-weight:900; cursor:pointer; letter-spacing:-.005em;
-          box-shadow:0 4px 12px -2px rgba(0, 134, 179,.4); transition:all .15s;
+          padding:9px 18px; border-radius:var(--hx-r-s); border:0; background:var(--hx-accent-ink);
+          color:var(--hx-surface); font-size:13px; font-weight:600; cursor:pointer; letter-spacing:-.015em;
+          box-shadow:var(--hx-e2); transition:all .15s;
         }
-        .ov-period-custom .apply-btn:hover { transform:translateY(-1px); box-shadow:0 6px 16px -2px rgba(0, 134, 179,.5); }
-        .ov-period-custom .apply-btn:active { transform:translateY(0); }
-        .ov-period-custom .info { font-size:11px; color:var(--hx-ink-3); font-weight:700; padding:6px 12px; background:var(--hx-surface); border-radius:6px; border:1px solid var(--hx-surface-3); font-variant-numeric:tabular-nums; }
+        .ov-period-custom .apply-btn:hover { filter:brightness(1.15); box-shadow:var(--hx-e2); }
+        .ov-period-custom .apply-btn:active { box-shadow:none; }
+        .ov-period-custom .info { font-size:11px; color:var(--hx-ink-2); font-weight:500; padding:7px 12px; background:var(--hx-surface); border-radius:var(--hx-r-s); border:1px solid var(--hx-line); font-variant-numeric:tabular-nums; }
 
         @media (max-width:760px) {
           .ov-period-bar { flex-direction:column; align-items:stretch; }
@@ -5126,7 +5123,7 @@ table.data-table {
           <tbody id="ov-project-tbody">
             <tr><td colspan="8" style="text-align:center;padding:40px;color:var(--hx-ink-4);font-weight:600">
               <div style="font-size:28px;margin-bottom:6px">📁</div>
-              <div style="font-size:13px;font-weight:800;color:var(--hx-ink-2)">등록된 프로젝트가 없습니다</div>
+              <div style="font-size:13px;font-weight:700;color:var(--hx-ink-2)">등록된 프로젝트가 없습니다</div>
               <div style="font-size:11px;margin-top:3px">우측 상단 + 신규 등록 으로 시작하세요</div>
             </td></tr>
           </tbody>
@@ -6739,7 +6736,7 @@ table.data-table {
       hero.insertAdjacentHTML('afterend',
         '<div id="mm-closing-card" class="card-base" style="margin:18px 0;padding:18px 22px">'
         + '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">'
-        +   '<div><div style="font-size:16px;font-weight:800">📕 월 마감 <span style="font-size:11px;color:#B4B4B8;font-weight:600">(CEO 전용)</span></div>'
+        +   '<div><div style="font-size:16px;font-weight:700">📕 월 마감 <span style="font-size:11px;color:#B4B4B8;font-weight:600">(CEO 전용)</span></div>'
         +   '<div id="mm-closing-status" style="font-size:12.5px;color:#8E8E93;margin-top:4px">—</div></div>'
         +   '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'
         +     '<input type="month" id="mm-closing-month" style="padding:8px 10px;border:1px solid #CFCFD4;border-radius:8px;font-size:13px">'
@@ -7315,8 +7312,9 @@ table.data-table {
       <style id="purchase-table-style">
         /* 매입 세부내역 표 — 기성 수금 표(pjbill-table)와 폰트·패딩 일치 [#138] */
         #purchase-table-card .data-table { font-size:13px; }
-        #purchase-table-card .data-table thead th { padding:12px 16px; font-size:11px; letter-spacing:0; text-transform:none; }
-        #purchase-table-card .data-table tbody td { padding:16px 16px; font-size:14px; font-variant-numeric:tabular-nums; }
+        /* 세로 컬럼 구분선 제거 — 좌우 16px 패딩(=32px 거터)이 분리를 대신한다. 행 구분선(border-bottom)은 정보이므로 유지 */
+        #purchase-table-card .data-table thead th { padding:12px 16px; font-size:11px; letter-spacing:0; text-transform:none; border-right:none; border-bottom:1px solid var(--border-default); }
+        #purchase-table-card .data-table tbody td { padding:16px 16px; font-size:14px; font-variant-numeric:tabular-nums; border-right:none; }
         /* 스크롤 제거 — 전체 행 모두 표시 (드래그 없이 한눈에) [#146] */
         #purchase-table-card .table-scroll,
         #purchase-table-card .table-scroll-md,
@@ -7403,7 +7401,7 @@ table.data-table {
   <div class="modal-container modal-xl" id="mm-purchase-container">
     <div class="modal-header">
       <div style="display:flex;align-items:center;gap:12px">
-        <h2 style="font-size:22px;font-weight:800;margin:0">📦 매입 세부 내역 — <span id="mm-purchase-pid">—</span></h2>
+        <h2 style="font-size:22px;font-weight:700;margin:0">📦 매입 세부 내역 — <span id="mm-purchase-pid">—</span></h2>
         <button class="btn btn-ghost btn-sm" onclick="openModal('global-vendor-add')">🏢 업체관리</button>
       </div>
       <button class="modal-close" onclick="closeModal('modal-purchase')">✕</button>
@@ -7436,7 +7434,7 @@ table.data-table {
 <div class="modal-overlay" id="modal-billing">
   <div class="modal-container modal-xl">
     <div class="modal-header">
-      <h2 style="font-size:22px;font-weight:800;margin:0">💰 기성 회차별 내역 — <span id="mm-billing-pid">—</span></h2>
+      <h2 style="font-size:22px;font-weight:700;margin:0">💰 기성 회차별 내역 — <span id="mm-billing-pid">—</span></h2>
       <button class="modal-close" onclick="closeModal('modal-billing')">✕</button>
     </div>
     <div class="modal-body" style="padding:0 28px 8px">
@@ -7450,7 +7448,7 @@ table.data-table {
 <!-- 3. 기타수익 -->
 <div class="modal-overlay" id="modal-other-income">
   <div class="modal-container modal-xl">
-    <div class="modal-header"><h2 style="font-size:22px;font-weight:800;margin:0">💵 기타수익 — <span id="mm-oi-pid">—</span></h2><button class="modal-close" onclick="closeModal('modal-other-income')">✕</button></div>
+    <div class="modal-header"><h2 style="font-size:22px;font-weight:700;margin:0">💵 기타수익 — <span id="mm-oi-pid">—</span></h2><button class="modal-close" onclick="closeModal('modal-other-income')">✕</button></div>
     <div class="modal-body" style="padding:0 28px 8px">
       <div style="padding:12px 16px;border-radius:10px;background:#FFF7ED;border:1px solid #FDBA74;margin-bottom:14px;font-size:13px;color:#9A3412">ℹ️ 세금계산서 기준 <strong>매출</strong>. 예: 장비 공동사용 비용분담, 잡수익, 스크랩 매출 등</div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><div id="mm-oi-summary" style="font-size:17px;font-weight:700;color:var(--hx-warn)"></div><button class="btn btn-primary btn-sm" onclick="mmOtherIncome.addRow()">➕ 항목 추가</button></div>
@@ -7462,7 +7460,7 @@ table.data-table {
 <!-- 4. 계약 분산 (카드형 칸반) -->
 <div class="modal-overlay" id="modal-contract-dist">
   <div class="modal-container modal-xl" style="max-width:1500px">
-    <div class="modal-header"><h2 style="font-size:22px;font-weight:800;margin:0">📋 계약 분산 — <span id="mm-cd-pid">—</span></h2><button class="modal-close" onclick="closeModal('modal-contract-dist')">✕</button></div>
+    <div class="modal-header"><h2 style="font-size:22px;font-weight:700;margin:0">📋 계약 분산 — <span id="mm-cd-pid">—</span></h2><button class="modal-close" onclick="closeModal('modal-contract-dist')">✕</button></div>
     <div class="modal-body" style="padding:8px 28px;display:flex;flex-direction:column;gap:12px">
       <div style="display:flex;align-items:center;gap:8px;padding:12px 16px;background:#F8FAFF;border:1px solid var(--hx-accent-wash);border-radius:10px"><span style="font-size:13px;color:var(--hx-ink-3);margin-right:8px">항목 추가</span><select id="mm-cd-newtype" style="padding:8px 12px;border-radius:8px;border:1px solid var(--hx-ink-5);font-size:13px;background:var(--hx-surface);min-width:120px"></select><input id="mm-cd-newname" type="text" placeholder="항목명" style="padding:8px 12px;border-radius:8px;border:1px solid var(--hx-ink-5);font-size:13px;background:var(--hx-surface);flex:1;min-width:160px"><input id="mm-cd-newamt" type="text" placeholder="0" style="padding:8px 12px;border-radius:8px;border:1px solid var(--hx-ink-5);font-size:13px;background:var(--hx-surface);width:120px;text-align:right"><button class="btn btn-primary btn-sm" onclick="mmContractDist.addItem()">➕</button></div>
       <div id="mm-cd-bulkbar" style="display:none;align-items:center;gap:8px;padding:10px 16px;background:var(--hx-warn-wash);border:1px solid #FDE68A;border-radius:10px"><span id="mm-cd-bulkcount" style="font-size:13px;font-weight:700;color:var(--hx-warn-d)"></span><select id="mm-cd-bulkmove" style="padding:6px 10px;border-radius:6px;border:1px solid var(--hx-ink-5);font-size:12px"></select><button class="btn btn-sm" style="padding:6px 12px;border:1px solid var(--hx-accent-deep);background:var(--hx-surface);color:var(--hx-accent-deep);border-radius:6px;cursor:pointer" onclick="mmContractDist.moveSelected()">→ 분류 이동</button><button class="btn btn-sm" style="padding:6px 12px;border:1px solid var(--hx-crit);background:var(--hx-surface);color:var(--hx-crit);border-radius:6px;cursor:pointer" onclick="mmContractDist.removeSelected()">🗑 선택 삭제</button><button class="btn btn-sm" style="padding:6px 12px;border:1px solid var(--hx-ink-4);background:var(--hx-surface);color:var(--hx-ink-3);border-radius:6px;cursor:pointer;margin-left:auto" onclick="mmContractDist.clearSelection()">선택 해제</button></div>
@@ -7474,7 +7472,7 @@ table.data-table {
 <!-- 5. 원가 분산 (카드형 칸반) -->
 <div class="modal-overlay" id="modal-cost-dist">
   <div class="modal-container modal-xl" style="max-width:1500px">
-    <div class="modal-header"><h2 style="font-size:22px;font-weight:800;margin:0">🔀 원가 분산 (예산) — <span id="mm-od-pid">—</span></h2><button class="modal-close" onclick="closeModal('modal-cost-dist')">✕</button></div>
+    <div class="modal-header"><h2 style="font-size:22px;font-weight:700;margin:0">🔀 원가 분산 (예산) — <span id="mm-od-pid">—</span></h2><button class="modal-close" onclick="closeModal('modal-cost-dist')">✕</button></div>
     <div class="modal-body" style="padding:8px 28px;display:flex;flex-direction:column;gap:12px">
       <div style="display:flex;align-items:center;gap:8px;padding:12px 16px;background:var(--hx-warn-wash);border:1px solid #FDE68A;border-radius:10px"><span style="font-size:13px;color:var(--hx-warn-d);margin-right:8px">원가 예산 항목 추가</span><select id="mm-od-newtype" style="padding:8px 12px;border-radius:8px;border:1px solid var(--hx-ink-5);font-size:13px;background:var(--hx-surface);min-width:120px"></select><input id="mm-od-newname" type="text" placeholder="항목명" style="padding:8px 12px;border-radius:8px;border:1px solid var(--hx-ink-5);font-size:13px;background:var(--hx-surface);flex:1;min-width:160px"><input id="mm-od-newamt" type="text" placeholder="0" style="padding:8px 12px;border-radius:8px;border:1px solid var(--hx-ink-5);font-size:13px;background:var(--hx-surface);width:120px;text-align:right"><button class="btn btn-primary btn-sm" onclick="mmCostDist.addItem()">➕</button></div>
       <div id="mm-od-bulkbar" style="display:none;align-items:center;gap:8px;padding:10px 16px;background:var(--hx-warn-wash);border:1px solid #FDE68A;border-radius:10px"><span id="mm-od-bulkcount" style="font-size:13px;font-weight:700;color:var(--hx-warn-d)"></span><select id="mm-od-bulkmove" style="padding:6px 10px;border-radius:6px;border:1px solid var(--hx-ink-5);font-size:12px"></select><button class="btn btn-sm" style="padding:6px 12px;border:1px solid var(--hx-accent-deep);background:var(--hx-surface);color:var(--hx-accent-deep);border-radius:6px;cursor:pointer" onclick="mmCostDist.moveSelected()">→ 분류 이동</button><button class="btn btn-sm" style="padding:6px 12px;border:1px solid var(--hx-crit);background:var(--hx-surface);color:var(--hx-crit);border-radius:6px;cursor:pointer" onclick="mmCostDist.removeSelected()">🗑 선택 삭제</button><button class="btn btn-sm" style="padding:6px 12px;border:1px solid var(--hx-ink-4);background:var(--hx-surface);color:var(--hx-ink-3);border-radius:6px;cursor:pointer;margin-left:auto" onclick="mmCostDist.clearSelection()">선택 해제</button></div>
@@ -7486,7 +7484,7 @@ table.data-table {
 <!-- 6. 편집 -->
 <div class="modal-overlay" id="modal-edit">
   <div class="modal-container modal-lg">
-    <div class="modal-header"><h2 style="font-size:22px;font-weight:800;margin:0">✏️ 프로젝트 편집 — <span id="mm-edit-pid">—</span></h2><button class="modal-close" onclick="closeModal('modal-edit')">✕</button></div>
+    <div class="modal-header"><h2 style="font-size:22px;font-weight:700;margin:0">✏️ 프로젝트 편집 — <span id="mm-edit-pid">—</span></h2><button class="modal-close" onclick="closeModal('modal-edit')">✕</button></div>
     <div class="modal-body" style="padding:0 28px 8px"><div id="mm-edit-form" style="display:grid;grid-template-columns:140px 1fr;gap:12px;align-items:center;font-size:14px"></div></div>
     <div class="modal-footer" style="display:flex;justify-content:flex-end;gap:8px;padding:16px 28px"><button class="btn btn-ghost" onclick="closeModal('modal-edit')">취소</button><button class="btn btn-primary" onclick="mmEdit.save()">💾 저장</button></div>
   </div>
@@ -7494,7 +7492,7 @@ table.data-table {
 <!-- 7. 복사 -->
 <div class="modal-overlay" id="modal-copy">
   <div class="modal-container modal-lg">
-    <div class="modal-header"><h2 style="font-size:22px;font-weight:800;margin:0">📑 프로젝트 복사 — <span id="mm-copy-pid">—</span></h2><button class="modal-close" onclick="closeModal('modal-copy')">✕</button></div>
+    <div class="modal-header"><h2 style="font-size:22px;font-weight:700;margin:0">📑 프로젝트 복사 — <span id="mm-copy-pid">—</span></h2><button class="modal-close" onclick="closeModal('modal-copy')">✕</button></div>
     <div class="modal-body" style="padding:0 28px 8px">
       <div style="display:grid;grid-template-columns:140px 1fr;gap:12px;align-items:center;font-size:14px;margin-bottom:16px"><label>새 프로젝트 ID *</label><input id="mm-copy-newid" type="text" style="padding:10px 14px;border-radius:8px;border:1px solid var(--hx-ink-5);font-size:14px;background:var(--hx-surface-2)" placeholder="예: 명문-1100"><label>새 프로젝트명</label><input id="mm-copy-newname" type="text" style="padding:10px 14px;border-radius:8px;border:1px solid var(--hx-ink-5);font-size:14px;background:var(--hx-surface-2)" placeholder="기본: 원본명 + (복사)"></div>
       <div style="margin-bottom:8px;font-weight:700">복사 범위:</div>
@@ -7506,7 +7504,7 @@ table.data-table {
 <!-- 8. 보고서 -->
 <div class="modal-overlay" id="modal-report">
   <div class="modal-container modal-lg">
-    <div class="modal-header"><h2 style="font-size:22px;font-weight:800;margin:0">📊 보고서 — <span id="mm-report-pid">—</span></h2><button class="modal-close" onclick="closeModal('modal-report')">✕</button></div>
+    <div class="modal-header"><h2 style="font-size:22px;font-weight:700;margin:0">📊 보고서 — <span id="mm-report-pid">—</span></h2><button class="modal-close" onclick="closeModal('modal-report')">✕</button></div>
     <div class="modal-body" style="padding:0 28px 8px">
       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:20px"><button class="btn btn-primary" style="padding:24px;font-size:16px" onclick="mmReport.exportAll()">📤 전체 엑셀 (모든 시트)</button><button class="btn btn-secondary" style="padding:24px;font-size:16px" onclick="mmReport.exportSummary()">📋 요약 보고서 (PDF용 HTML)</button></div>
       <div style="padding:16px;border-radius:10px;background:#F3F4F6"><div style="font-size:14px;font-weight:700;margin-bottom:8px">📊 핵심 지표</div><div id="mm-report-kpi" style="font-size:13px;line-height:1.8"></div></div>
@@ -7517,7 +7515,7 @@ table.data-table {
 <!-- 9. 삭제 -->
 <div class="modal-overlay" id="modal-delete">
   <div class="modal-container modal-sm">
-    <div class="modal-header" style="background:var(--hx-crit-wash)"><h2 style="font-size:20px;font-weight:800;margin:0;color:var(--hx-crit-d)">🗑️ 프로젝트 영구 삭제</h2><button class="modal-close" onclick="closeModal('modal-delete')">✕</button></div>
+    <div class="modal-header" style="background:var(--hx-crit-wash)"><h2 style="font-size:20px;font-weight:700;margin:0;color:var(--hx-crit-d)">🗑️ 프로젝트 영구 삭제</h2><button class="modal-close" onclick="closeModal('modal-delete')">✕</button></div>
     <div class="modal-body" style="padding:20px 28px">
       <div style="padding:16px;border-radius:10px;background:var(--hx-crit-wash);border:1px solid var(--hx-crit);margin-bottom:16px;font-size:14px;color:var(--hx-crit-d)">⚠️ <strong id="mm-del-pid">—</strong>을(를) 영구 삭제합니다. 이 작업은 되돌릴 수 없습니다.<br>매입·기성·기타수익 모든 데이터가 함께 삭제됩니다.</div>
       <label style="display:block;font-size:13px;margin-bottom:6px">확인: 프로젝트 ID를 정확히 입력하세요</label>
@@ -7739,11 +7737,11 @@ table.data-table {
           <div class="row" style="align-items:flex-start;gap:10px;margin-bottom:8px">
             <div style="width:36px;height:36px;border-radius:8px;background:var(--hx-crit-wash);display:flex;align-items:center;justify-content:center">🔥</div>
             <div style="flex:1">
-              <div style="font-size:11px;font-weight:800;color:var(--hx-crit);letter-spacing:0.5px;text-transform:uppercase">원가초과 위험</div>
+              <div style="font-size:11px;font-weight:700;color:var(--hx-crit);letter-spacing:0.5px;">원가초과 위험</div>
               <div style="font-size:11px;color:var(--text-muted)">원가율 90%+ PJ</div>
             </div>
           </div>
-          <div style="font-size:28px;font-weight:900;color:var(--hx-crit)" class="t-num" data-alert-cnt="cost">0건</div>
+          <div style="font-size:28px;font-weight:700;color:var(--hx-crit)" class="t-num" data-alert-cnt="cost">0건</div>
           <div class="t-xs" style="color:var(--text-secondary);margin-top:4px">원가율 90% 초과 프로젝트</div>
         </div>
 
@@ -7751,11 +7749,11 @@ table.data-table {
           <div class="row" style="align-items:flex-start;gap:10px;margin-bottom:8px">
             <div style="width:36px;height:36px;border-radius:8px;background:var(--hx-violet-wash);display:flex;align-items:center;justify-content:center">💰</div>
             <div style="flex:1">
-              <div style="font-size:11px;font-weight:800;color:var(--hx-violet);letter-spacing:0.5px;text-transform:uppercase">미수금 위험</div>
+              <div style="font-size:11px;font-weight:700;color:var(--hx-violet);letter-spacing:0.5px;">미수금 위험</div>
               <div style="font-size:11px;color:var(--text-muted)">60일+ 미수</div>
             </div>
           </div>
-          <div style="font-size:28px;font-weight:900;color:var(--hx-violet)" class="t-num" data-alert-cnt="uncollect">0건</div>
+          <div style="font-size:28px;font-weight:700;color:var(--hx-violet)" class="t-num" data-alert-cnt="uncollect">0건</div>
           <div class="t-xs" style="color:var(--text-secondary);margin-top:4px">미수금 임계 초과</div>
         </div>
 
@@ -7763,11 +7761,11 @@ table.data-table {
           <div class="row" style="align-items:flex-start;gap:10px;margin-bottom:8px">
             <div style="width:36px;height:36px;border-radius:8px;background:var(--primary-50);display:flex;align-items:center;justify-content:center">📋</div>
             <div style="flex:1">
-              <div style="font-size:11px;font-weight:800;color:var(--primary-700);letter-spacing:0.5px;text-transform:uppercase">미지급 위험</div>
+              <div style="font-size:11px;font-weight:700;color:var(--primary-700);letter-spacing:0.5px;">미지급 위험</div>
               <div style="font-size:11px;color:var(--text-muted)">30일+ 미지급</div>
             </div>
           </div>
-          <div style="font-size:28px;font-weight:900;color:var(--primary-700)" class="t-num" data-alert-cnt="unpaid">0건</div>
+          <div style="font-size:28px;font-weight:700;color:var(--primary-700)" class="t-num" data-alert-cnt="unpaid">0건</div>
           <div class="t-xs" style="color:var(--text-secondary);margin-top:4px">매입 미지급 임계 초과</div>
         </div>
 
@@ -7775,11 +7773,11 @@ table.data-table {
           <div class="row" style="align-items:flex-start;gap:10px;margin-bottom:8px">
             <div style="width:36px;height:36px;border-radius:8px;background:var(--hx-crit-wash);display:flex;align-items:center;justify-content:center">🚨</div>
             <div style="flex:1">
-              <div style="font-size:11px;font-weight:800;color:var(--hx-crit-d);letter-spacing:0.5px;text-transform:uppercase">자금경색</div>
+              <div style="font-size:11px;font-weight:700;color:var(--hx-crit-d);letter-spacing:0.5px;">자금경색</div>
               <div style="font-size:11px;color:var(--text-muted)">자금 부족 임박</div>
             </div>
           </div>
-          <div style="font-size:28px;font-weight:900;color:var(--hx-crit-d)" class="t-num" data-alert-cnt="cash">0건</div>
+          <div style="font-size:28px;font-weight:700;color:var(--hx-crit-d)" class="t-num" data-alert-cnt="cash">0건</div>
           <div class="t-xs" style="color:var(--text-secondary);margin-top:4px">현금흐름 위험</div>
         </div>
 
@@ -7787,11 +7785,11 @@ table.data-table {
           <div class="row" style="align-items:flex-start;gap:10px;margin-bottom:8px">
             <div style="width:36px;height:36px;border-radius:8px;background:var(--hx-warn-wash);display:flex;align-items:center;justify-content:center">📉</div>
             <div style="flex:1">
-              <div style="font-size:11px;font-weight:800;color:var(--hx-warn);letter-spacing:0.5px;text-transform:uppercase">신청률 저조</div>
+              <div style="font-size:11px;font-weight:700;color:var(--hx-warn);letter-spacing:0.5px;">신청률 저조</div>
               <div style="font-size:11px;color:var(--text-muted)">기성 신청률 60% 미만</div>
             </div>
           </div>
-          <div style="font-size:28px;font-weight:900;color:var(--hx-warn)" class="t-num" data-alert-cnt="billing">0건</div>
+          <div style="font-size:28px;font-weight:700;color:var(--hx-warn)" class="t-num" data-alert-cnt="billing">0건</div>
           <div class="t-xs" style="color:var(--text-secondary);margin-top:4px">기성 신청 지연</div>
         </div>
       </div>
@@ -7840,7 +7838,7 @@ table.data-table {
               <tr>
                 <td colspan="10" style="text-align:center;padding:48px 20px;color:var(--hx-ink-4);font-weight:600">
                   <div style="font-size:32px;margin-bottom:8px">🔔</div>
-                  <div style="font-size:14px;font-weight:800;color:var(--hx-ink-2);margin-bottom:4px">현재 활성 경보가 없습니다</div>
+                  <div style="font-size:14px;font-weight:700;color:var(--hx-ink-2);margin-bottom:4px">현재 활성 경보가 없습니다</div>
                   <div style="font-size:12px">프로젝트 데이터 누적 시 자동 감지됩니다</div>
                 </td>
               </tr>
@@ -7863,8 +7861,8 @@ table.data-table {
           <div class="col gap-4">
             <div>
               <div class="row" style="justify-content:space-between;margin-bottom:6px">
-                <div style="font-size:13px;font-weight:800">🔥 원가율 위험 임계값</div>
-                <div id="th-cost-display" style="font-size:14px;font-weight:900;color:var(--hx-crit)" class="t-num">90%</div>
+                <div style="font-size:13px;font-weight:700">🔥 원가율 위험 임계값</div>
+                <div id="th-cost-display" style="font-size:14px;font-weight:700;color:var(--hx-crit)" class="t-num">90%</div>
               </div>
               <input type="range" min="80" max="100" value="90"
                 style="width:100%;accent-color:var(--hx-crit)"
@@ -7877,8 +7875,8 @@ table.data-table {
 
             <div>
               <div class="row" style="justify-content:space-between;margin-bottom:6px">
-                <div style="font-size:13px;font-weight:800">💰 미수금 위험 (일 수)</div>
-                <div id="th-unpaid-recv-display" style="font-size:14px;font-weight:900;color:var(--hx-violet)" class="t-num">60일</div>
+                <div style="font-size:13px;font-weight:700">💰 미수금 위험 (일 수)</div>
+                <div id="th-unpaid-recv-display" style="font-size:14px;font-weight:700;color:var(--hx-violet)" class="t-num">60일</div>
               </div>
               <input type="range" min="30" max="120" value="60"
                 style="width:100%;accent-color:var(--hx-violet)"
@@ -7891,8 +7889,8 @@ table.data-table {
 
             <div>
               <div class="row" style="justify-content:space-between;margin-bottom:6px">
-                <div style="font-size:13px;font-weight:800">📋 미지급 위험 (일 수)</div>
-                <div id="th-unpaid-pay-display" style="font-size:14px;font-weight:900;color:var(--primary-700)" class="t-num">30일</div>
+                <div style="font-size:13px;font-weight:700">📋 미지급 위험 (일 수)</div>
+                <div id="th-unpaid-pay-display" style="font-size:14px;font-weight:700;color:var(--primary-700)" class="t-num">30일</div>
               </div>
               <input type="range" min="15" max="60" value="30"
                 style="width:100%;accent-color:var(--primary-500)"
@@ -7905,8 +7903,8 @@ table.data-table {
 
             <div>
               <div class="row" style="justify-content:space-between;margin-bottom:6px">
-                <div style="font-size:13px;font-weight:800">📉 신청률 저조 임계값</div>
-                <div id="th-billing-rate-display" style="font-size:14px;font-weight:900;color:var(--hx-warn)" class="t-num">60%</div>
+                <div style="font-size:13px;font-weight:700">📉 신청률 저조 임계값</div>
+                <div id="th-billing-rate-display" style="font-size:14px;font-weight:700;color:var(--hx-warn)" class="t-num">60%</div>
               </div>
               <input type="range" min="40" max="80" value="60"
                 style="width:100%;accent-color:var(--hx-warn)"
@@ -7937,7 +7935,7 @@ table.data-table {
             <div style="padding:14px 16px;background:var(--bg-subtle);border-radius:8px;border-left:3px solid var(--hx-crit)">
               <div class="row" style="justify-content:space-between;align-items:center">
                 <div>
-                  <div style="font-size:14px;font-weight:800">최우선 경보</div>
+                  <div style="font-size:14px;font-weight:700">최우선 경보</div>
                   <div class="t-xs">원가초과 90%+, 자금경색</div>
                 </div>
                 <div class="row gap-2" style="font-size:18px">
@@ -7951,7 +7949,7 @@ table.data-table {
             <div style="padding:14px 16px;background:var(--bg-subtle);border-radius:8px;border-left:3px solid var(--hx-warn)">
               <div class="row" style="justify-content:space-between;align-items:center">
                 <div>
-                  <div style="font-size:14px;font-weight:800">높음 경보</div>
+                  <div style="font-size:14px;font-weight:700">높음 경보</div>
                   <div class="t-xs">미수금 60일+, 미지급 30일+</div>
                 </div>
                 <div class="row gap-2" style="font-size:18px">
@@ -7965,7 +7963,7 @@ table.data-table {
             <div style="padding:14px 16px;background:var(--bg-subtle);border-radius:8px;border-left:3px solid var(--primary-500)">
               <div class="row" style="justify-content:space-between;align-items:center">
                 <div>
-                  <div style="font-size:14px;font-weight:800">중간 경보</div>
+                  <div style="font-size:14px;font-weight:700">중간 경보</div>
                   <div class="t-xs">신청률 저조, 일반 미지급</div>
                 </div>
                 <div class="row gap-2" style="font-size:18px">
@@ -7977,7 +7975,7 @@ table.data-table {
             </div>
 
             <div style="padding:14px 16px;background:var(--hx-good-wash);border-radius:8px;border-left:3px solid var(--success-700)">
-              <div style="font-size:13px;font-weight:800;color:var(--success-700);margin-bottom:6px">📅 일일 요약 발송</div>
+              <div style="font-size:13px;font-weight:700;color:var(--success-700);margin-bottom:6px">📅 일일 요약 발송</div>
               <div class="t-xs" style="color:var(--text-secondary);line-height:1.7">
                 매일 오전 9시 활성 경보 통합 요약을 카카오톡 + 이메일로 발송. CEO 1명 + 회계 1명 + 관리자 2명 수신.
               </div>
@@ -7995,7 +7993,7 @@ table.data-table {
 
       <!-- 도메인 룰 안내 -->
       <div style="padding:14px 18px;background:var(--bg-subtle);border-radius:10px;border-left:4px solid var(--primary-500);margin-bottom:24px">
-        <div style="font-size:13px;font-weight:800;color:var(--text-primary);margin-bottom:6px">📌 경보 관리 도메인 룰</div>
+        <div style="font-size:13px;font-weight:700;color:var(--text-primary);margin-bottom:6px">📌 경보 관리 도메인 룰</div>
         <div class="t-xs" style="line-height:1.7;color:var(--text-secondary)">
           · 직불금 이중공제 방지 (도메인 룰 1): 미수금 = 기성VAT - 수금 (직불 차감 안 함)<br/>
           · 미수금 임계값은 발주처 평균 결제 일수의 1.5배 권장 (현재 60일 = 평균 40일의 150%)<br/>
@@ -8204,7 +8202,7 @@ table.data-table {
             <div id="activity-log-list">
               <div style="padding:40px 20px;text-align:center;color:var(--hx-ink-4);font-weight:600">
                 <div style="font-size:28px;margin-bottom:6px">📋</div>
-                <div style="font-size:13px;font-weight:800;color:var(--hx-ink-2)">기록된 활동이 없습니다</div>
+                <div style="font-size:13px;font-weight:700;color:var(--hx-ink-2)">기록된 활동이 없습니다</div>
                 <div style="font-size:11px;margin-top:3px">매입/기성 등록, 로그인 등 주요 동작이 자동 기록됩니다</div>
               </div>
             </div>
@@ -8225,62 +8223,62 @@ table.data-table {
             </div>
             <div class="col gap-2">
               <div class="row" style="align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:var(--bg-subtle)">
-                <span style="font-size:18px;font-weight:900;color:var(--hx-warn);width:24px;text-align:center">🥇</span>
+                <span style="font-size:18px;font-weight:700;color:var(--hx-warn);width:24px;text-align:center">🥇</span>
                 <div class="avatar a-2" style="width:28px;height:28px;font-size:12px">이</div>
                 <div style="flex:1">
-                  <div style="font-size:13px;font-weight:800">○○○</div>
+                  <div style="font-size:13px;font-weight:700">○○○</div>
                   <div class="t-xs">현장팀 · 출역 등록 위주</div>
                 </div>
                 <div style="text-align:right">
-                  <div style="font-size:14px;font-weight:800;color:var(--primary-700)" class="t-num">387건</div>
+                  <div style="font-size:14px;font-weight:700;color:var(--primary-700)" class="t-num">387건</div>
                   <div class="t-xs">21%</div>
                 </div>
               </div>
               <div class="row" style="align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:var(--bg-subtle)">
-                <span style="font-size:18px;font-weight:900;color:var(--hx-ink-4);width:24px;text-align:center">🥈</span>
+                <span style="font-size:18px;font-weight:700;color:var(--hx-ink-4);width:24px;text-align:center">🥈</span>
                 <div class="avatar a-4" style="width:28px;height:28px;font-size:12px">정</div>
                 <div style="flex:1">
-                  <div style="font-size:13px;font-weight:800">○○○</div>
+                  <div style="font-size:13px;font-weight:700">○○○</div>
                   <div class="t-xs">회계 · 매입·기성·수금</div>
                 </div>
                 <div style="text-align:right">
-                  <div style="font-size:14px;font-weight:800;color:var(--primary-700)" class="t-num">295건</div>
+                  <div style="font-size:14px;font-weight:700;color:var(--primary-700)" class="t-num">295건</div>
                   <div class="t-xs">16%</div>
                 </div>
               </div>
               <div class="row" style="align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:var(--bg-subtle)">
-                <span style="font-size:18px;font-weight:900;color:var(--hx-warn);width:24px;text-align:center">🥉</span>
+                <span style="font-size:18px;font-weight:700;color:var(--hx-warn);width:24px;text-align:center">🥉</span>
                 <div class="avatar a-1" style="width:28px;height:28px;font-size:12px">김</div>
                 <div style="flex:1">
-                  <div style="font-size:13px;font-weight:800">○○○</div>
+                  <div style="font-size:13px;font-weight:700">○○○</div>
                   <div class="t-xs">현장팀 · 매입·출역</div>
                 </div>
                 <div style="text-align:right">
-                  <div style="font-size:14px;font-weight:800;color:var(--primary-700)" class="t-num">218건</div>
+                  <div style="font-size:14px;font-weight:700;color:var(--primary-700)" class="t-num">218건</div>
                   <div class="t-xs">12%</div>
                 </div>
               </div>
               <div class="row" style="align-items:center;gap:10px;padding:10px 12px;border-radius:8px">
-                <span style="font-size:14px;font-weight:800;color:var(--text-tertiary);width:24px;text-align:center">4</span>
+                <span style="font-size:14px;font-weight:700;color:var(--text-tertiary);width:24px;text-align:center">4</span>
                 <div class="avatar a-3" style="width:28px;height:28px;font-size:12px">박</div>
                 <div style="flex:1">
                   <div style="font-size:13px;font-weight:700">○○○</div>
                   <div class="t-xs">관리자 · 거래처·설정</div>
                 </div>
                 <div style="text-align:right">
-                  <div style="font-size:14px;font-weight:800;color:var(--primary-700)" class="t-num">142건</div>
+                  <div style="font-size:14px;font-weight:700;color:var(--primary-700)" class="t-num">142건</div>
                   <div class="t-xs">8%</div>
                 </div>
               </div>
               <div class="row" style="align-items:center;gap:10px;padding:10px 12px;border-radius:8px">
-                <span style="font-size:14px;font-weight:800;color:var(--text-tertiary);width:24px;text-align:center">5</span>
+                <span style="font-size:14px;font-weight:700;color:var(--text-tertiary);width:24px;text-align:center">5</span>
                 <div class="avatar" style="width:28px;height:28px;font-size:12px;background:linear-gradient(135deg,var(--hx-accent-deep),var(--hx-accent-ink))">배</div>
                 <div style="flex:1">
                   <div style="font-size:13px;font-weight:700">배문기 대표</div>
                   <div class="t-xs">CEO · 프로젝트·설정</div>
                 </div>
                 <div style="text-align:right">
-                  <div style="font-size:14px;font-weight:800;color:var(--primary-700)" class="t-num">98건</div>
+                  <div style="font-size:14px;font-weight:700;color:var(--primary-700)" class="t-num">98건</div>
                   <div class="t-xs">5%</div>
                 </div>
               </div>
@@ -8313,39 +8311,39 @@ table.data-table {
                 <!-- 기타 16% -->
                 <circle cx="50" cy="50" r="38" fill="none" stroke="var(--hx-ink-4)" stroke-width="14"
                         stroke-dasharray="38.2 284.1" transform="rotate(212.4 50 50)"/>
-                <text x="50" y="48" text-anchor="middle" font-size="9" font-weight="900" fill="var(--text-primary)">총 활동</text>
-                <text x="50" y="60" text-anchor="middle" font-size="13" font-weight="900" fill="var(--text-primary)">0</text>
+                <text x="50" y="48" text-anchor="middle" font-size="9" font-weight="700" fill="var(--text-primary)">총 활동</text>
+                <text x="50" y="60" text-anchor="middle" font-size="13" font-weight="700" fill="var(--text-primary)">0</text>
               </svg>
               <div class="col gap-1" style="flex:1">
                 <div class="row" style="align-items:center;gap:6px;font-size:11px">
                   <span style="width:8px;height:8px;border-radius:2px;background:#EA580C"></span>
                   <span style="flex:1;font-weight:700">출역</span>
-                  <span class="t-num" style="font-weight:800">29%</span>
+                  <span class="t-num" style="font-weight:700">29%</span>
                 </div>
                 <div class="row" style="align-items:center;gap:6px;font-size:11px">
                   <span style="width:8px;height:8px;border-radius:2px;background:var(--hx-violet)"></span>
                   <span style="flex:1;font-weight:700">매입</span>
-                  <span class="t-num" style="font-weight:800">26%</span>
+                  <span class="t-num" style="font-weight:700">26%</span>
                 </div>
                 <div class="row" style="align-items:center;gap:6px;font-size:11px">
                   <span style="width:8px;height:8px;border-radius:2px;background:var(--hx-accent-deep)"></span>
                   <span style="flex:1;font-weight:700">프로젝트</span>
-                  <span class="t-num" style="font-weight:800">12%</span>
+                  <span class="t-num" style="font-weight:700">12%</span>
                 </div>
                 <div class="row" style="align-items:center;gap:6px;font-size:11px">
                   <span style="width:8px;height:8px;border-radius:2px;background:var(--hx-good)"></span>
                   <span style="flex:1;font-weight:700">기성·수금</span>
-                  <span class="t-num" style="font-weight:800">12%</span>
+                  <span class="t-num" style="font-weight:700">12%</span>
                 </div>
                 <div class="row" style="align-items:center;gap:6px;font-size:11px">
                   <span style="width:8px;height:8px;border-radius:2px;background:var(--hx-violet-d)"></span>
                   <span style="flex:1;font-weight:700">거래처</span>
-                  <span class="t-num" style="font-weight:800">5%</span>
+                  <span class="t-num" style="font-weight:700">5%</span>
                 </div>
                 <div class="row" style="align-items:center;gap:6px;font-size:11px">
                   <span style="width:8px;height:8px;border-radius:2px;background:var(--hx-ink-4)"></span>
                   <span style="flex:1;font-weight:700">기타</span>
-                  <span class="t-num" style="font-weight:800">16%</span>
+                  <span class="t-num" style="font-weight:700">16%</span>
                 </div>
               </div>
             </div>
@@ -8362,35 +8360,35 @@ table.data-table {
                 <div style="flex:1;height:14px;border-radius:4px;background:var(--hx-surface-2);overflow:hidden">
                   <div style="width:65%;height:100%;background:var(--hx-accent-deep)"></div>
                 </div>
-                <span class="t-num" style="font-weight:800;width:24px;text-align:right">14</span>
+                <span class="t-num" style="font-weight:700;width:24px;text-align:right">14</span>
               </div>
               <div class="row" style="align-items:center;gap:6px">
                 <span style="width:48px;color:var(--text-secondary);font-weight:700">09-11</span>
                 <div style="flex:1;height:14px;border-radius:4px;background:var(--hx-surface-2);overflow:hidden">
                   <div style="width:90%;height:100%;background:var(--hx-accent-ink)"></div>
                 </div>
-                <span class="t-num" style="font-weight:800;width:24px;text-align:right">19</span>
+                <span class="t-num" style="font-weight:700;width:24px;text-align:right">19</span>
               </div>
               <div class="row" style="align-items:center;gap:6px">
                 <span style="width:48px;color:var(--text-secondary);font-weight:700">11-13</span>
                 <div style="flex:1;height:14px;border-radius:4px;background:var(--hx-surface-2);overflow:hidden">
                   <div style="width:30%;height:100%;background:var(--hx-violet)"></div>
                 </div>
-                <span class="t-num" style="font-weight:800;width:24px;text-align:right">7</span>
+                <span class="t-num" style="font-weight:700;width:24px;text-align:right">7</span>
               </div>
               <div class="row" style="align-items:center;gap:6px">
                 <span style="width:48px;color:var(--text-secondary);font-weight:700">13-15</span>
                 <div style="flex:1;height:14px;border-radius:4px;background:var(--hx-surface-2);overflow:hidden">
                   <div style="width:8%;height:100%;background:var(--hx-ink-4)"></div>
                 </div>
-                <span class="t-num" style="font-weight:800;width:24px;text-align:right">2</span>
+                <span class="t-num" style="font-weight:700;width:24px;text-align:right">2</span>
               </div>
               <div class="row" style="align-items:center;gap:6px">
                 <span style="width:48px;color:var(--text-secondary);font-weight:700">15-17</span>
                 <div style="flex:1;height:14px;border-radius:4px;background:var(--hx-surface-2);overflow:hidden">
                   <div style="width:0%;height:100%;background:var(--hx-ink-4)"></div>
                 </div>
-                <span class="t-num" style="font-weight:800;width:24px;text-align:right;color:var(--text-tertiary)">0</span>
+                <span class="t-num" style="font-weight:700;width:24px;text-align:right;color:var(--text-tertiary)">0</span>
               </div>
             </div>
             <div style="margin-top:10px;padding:8px 12px;background:var(--bg-subtle);border-radius:6px;font-size:11px;color:var(--text-secondary)">
@@ -8402,7 +8400,7 @@ table.data-table {
 
       <!-- 도메인 룰 안내 -->
       <div style="padding:14px 18px;background:var(--bg-subtle);border-radius:10px;border-left:4px solid var(--primary-500);margin-bottom:24px">
-        <div style="font-size:13px;font-weight:800;color:var(--text-primary);margin-bottom:6px">📌 활동 로그 도메인 룰</div>
+        <div style="font-size:13px;font-weight:700;color:var(--text-primary);margin-bottom:6px">📌 활동 로그 도메인 룰</div>
         <div class="t-xs" style="line-height:1.7;color:var(--text-secondary)">
           · Supabase activity_log 테이블에 영구 보존 — 회계 감사 / 분쟁 대응 근거자료<br/>
           · X+Z 진입 패턴: 사이드바 메뉴 OR 전체현황의 활동 피드 "전체 보기" 버튼<br/>
@@ -8479,37 +8477,39 @@ table.data-table {
 
       <!-- ═════ 출역 빠른 등록 [#131] ═════ -->
       <style id="attend-style">
-        .attend-wrap { background:var(--hx-surface); border-radius:16px; padding:22px 24px;
-          border:1px solid var(--hx-surface-3); box-shadow:0 4px 18px -6px rgba(10, 10, 10,.06); margin-bottom:18px; }
-        .attend-hd { display:flex; align-items:center; gap:8px; font-size:17px; font-weight:900;
+        .attend-wrap { background:var(--hx-surface); border-radius:14px; padding:24px 26px;
+          border:1px solid var(--hx-line); box-shadow:var(--hx-e1); margin-bottom:18px; }
+        .attend-hd { display:flex; align-items:center; gap:8px; font-size:15px; font-weight:600;
           color:var(--hx-ink); letter-spacing:-.015em; margin-bottom:4px; }
-        .attend-sub { font-size:12px; color:var(--hx-ink-3); font-weight:600; padding-left:26px; margin-bottom:16px; }
-        .attend-form { display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;
-          padding:14px 16px; background:var(--hx-paper-2); border-radius:12px; border:1px solid var(--hx-surface-2); margin-bottom:16px; }
-        .attend-fld { display:flex; flex-direction:column; gap:4px; }
-        .attend-fld label { font-size:11px; font-weight:800; color:var(--hx-ink-2); letter-spacing:-.005em; }
-        .attend-fld input, .attend-fld select { padding:9px 12px; border:1px solid var(--hx-ink-5); border-radius:8px;
-          font-size:13px; font-weight:700; font-family:inherit; color:var(--hx-ink); background:var(--hx-surface); }
+        .attend-sub { font-size:12px; color:var(--hx-ink-3); font-weight:500; padding-left:26px; margin-bottom:18px; }
+        .attend-form { display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;
+          padding:16px 18px; background:var(--hx-paper-2); border-radius:10px; border:1px solid var(--hx-line); margin-bottom:18px; }
+        .attend-fld { display:flex; flex-direction:column; gap:6px; }
+        .attend-fld label { font-size:11px; font-weight:600; color:var(--hx-ink-2); letter-spacing:-.005em; }
+        .attend-fld input, .attend-fld select { padding:9px 12px; border:1px solid var(--hx-ink-5); border-radius:7px;
+          font-size:13px; font-weight:600; font-family:inherit; color:var(--hx-ink); background:var(--hx-surface); }
         .attend-fld input:focus, .attend-fld select:focus { outline:none; border-color:var(--hx-accent-deep);
           box-shadow:0 0 0 3px rgba(0, 134, 179,.12); }
-        .attend-add { padding:10px 20px; border-radius:9px; border:0; cursor:pointer;
-          background:linear-gradient(135deg,var(--hx-accent-deep),var(--hx-accent-ink)); color:var(--hx-surface); font-size:13px; font-weight:900;
-          font-family:inherit; box-shadow:0 4px 12px -2px rgba(0, 134, 179,.4); transition:all .15s; }
-        .attend-add:hover { transform:translateY(-1px); }
+        .attend-add { padding:10px 20px; border-radius:7px; border:0; cursor:pointer;
+          background:var(--hx-accent-deep); color:var(--hx-surface); font-size:13px; font-weight:700;
+          font-family:inherit; box-shadow:none; transition:background .15s; }
+        .attend-add:hover { background:var(--hx-accent-ink); }
         .attend-table { width:100%; border-collapse:separate; border-spacing:0; font-size:13px; }
         .attend-table th { padding:11px 14px; background:var(--hx-paper-2);
           border-bottom:1px solid var(--hx-surface-3); border-right:1px solid var(--hx-surface-3);
-          font-size:11px; font-weight:800; color:var(--hx-ink-3); letter-spacing:.04em; text-transform:uppercase; text-align:center; }
+          font-size:11px; font-weight:700; color:var(--hx-ink-3); letter-spacing:.04em; text-align:center; }
         .attend-table th:first-child { border-top-left-radius:10px; }
         .attend-table th:last-child { border-top-right-radius:10px; border-right:0; }
-        .attend-table td { padding:13px 14px; border-bottom:1px solid var(--hx-surface-2); border-right:1px solid var(--hx-surface-2);
+        .attend-table td { padding:14px 16px; border-bottom:1px solid var(--hx-line);
           font-size:13px; font-variant-numeric:tabular-nums; }
+        .attend-table td.tnum { font-family:var(--hx-mono); font-size:12px; letter-spacing:-.01em; color:var(--hx-ink-2); }
         .attend-table td:last-child { border-right:0; }
         .attend-table tbody tr:hover td { background:var(--hx-paper-2); }
-        .attend-empty { text-align:center; padding:36px 20px; color:var(--hx-ink-4); font-weight:600; }
-        .attend-stat { display:flex; gap:18px; margin-bottom:14px; flex-wrap:wrap; }
-        .attend-stat .item { font-size:12px; font-weight:700; color:var(--hx-ink-3); }
-        .attend-stat .item b { font-size:15px; font-weight:900; color:var(--hx-ink); font-variant-numeric:tabular-nums; }
+        .attend-empty { text-align:center; padding:44px 20px; color:var(--hx-ink-4); font-weight:500; }
+        .attend-stat { display:flex; gap:22px; margin-bottom:16px; flex-wrap:wrap; }
+        .attend-stat .item { font-size:12px; font-weight:500; color:var(--hx-ink-3); }
+        .attend-stat .item b { font-size:15px; font-weight:600; color:var(--hx-ink); font-variant-numeric:tabular-nums;
+          font-family:var(--hx-mono); letter-spacing:-.02em; }
       </style>
       <section class="attend-wrap">
         <div class="attend-hd"><span>📋</span><span>출역 빠른 등록</span></div>
@@ -8765,34 +8765,34 @@ table.data-table {
                 <circle cx="50" cy="50" r="38" fill="none" stroke="var(--hx-ink-4)" stroke-width="14"
                         stroke-dasharray="23.9 298.4" transform="rotate(234 50 50)"/>
                 <!-- 중앙 텍스트 -->
-                <text x="50" y="48" text-anchor="middle" font-size="11" font-weight="900" fill="var(--text-primary)">총 인건비</text>
-                <text x="50" y="60" text-anchor="middle" font-size="12" font-weight="900" fill="var(--text-primary)">5,400만</text>
+                <text x="50" y="48" text-anchor="middle" font-size="11" font-weight="700" fill="var(--text-primary)">총 인건비</text>
+                <text x="50" y="60" text-anchor="middle" font-size="12" font-weight="700" fill="var(--text-primary)">5,400만</text>
               </svg>
               <div class="col gap-2" style="flex:1">
                 <div class="row" style="align-items:center;gap:8px;font-size:13px">
                   <span style="width:10px;height:10px;border-radius:2px;background:var(--hx-accent-deep)"></span>
                   <span style="flex:1;font-weight:700">배관공</span>
-                  <span class="t-num" style="font-weight:800">35%</span>
+                  <span class="t-num" style="font-weight:700">35%</span>
                 </div>
                 <div class="row" style="align-items:center;gap:8px;font-size:13px">
                   <span style="width:10px;height:10px;border-radius:2px;background:var(--hx-violet)"></span>
                   <span style="flex:1;font-weight:700">덕트공</span>
-                  <span class="t-num" style="font-weight:800">25%</span>
+                  <span class="t-num" style="font-weight:700">25%</span>
                 </div>
                 <div class="row" style="align-items:center;gap:8px;font-size:13px">
                   <span style="width:10px;height:10px;border-radius:2px;background:var(--hx-good)"></span>
                   <span style="flex:1;font-weight:700">보온공</span>
-                  <span class="t-num" style="font-weight:800">18%</span>
+                  <span class="t-num" style="font-weight:700">18%</span>
                 </div>
                 <div class="row" style="align-items:center;gap:8px;font-size:13px">
                   <span style="width:10px;height:10px;border-radius:2px;background:var(--hx-warn)"></span>
                   <span style="flex:1;font-weight:700">용접공</span>
-                  <span class="t-num" style="font-weight:800">12%</span>
+                  <span class="t-num" style="font-weight:700">12%</span>
                 </div>
                 <div class="row" style="align-items:center;gap:8px;font-size:13px">
                   <span style="width:10px;height:10px;border-radius:2px;background:var(--hx-ink-4)"></span>
                   <span style="flex:1;font-weight:700">TAB·기타</span>
-                  <span class="t-num" style="font-weight:800">10%</span>
+                  <span class="t-num" style="font-weight:700">10%</span>
                 </div>
               </div>
             </div>
@@ -8805,57 +8805,57 @@ table.data-table {
             </div>
             <div class="col gap-2">
               <div class="row" style="align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:var(--bg-subtle)">
-                <span style="font-size:18px;font-weight:900;color:var(--hx-warn);width:24px;text-align:center">🥇</span>
+                <span style="font-size:18px;font-weight:700;color:var(--hx-warn);width:24px;text-align:center">🥇</span>
                 <div style="flex:1">
-                  <div style="font-size:13px;font-weight:800">○○○</div>
+                  <div style="font-size:13px;font-weight:700">○○○</div>
                   <div class="t-xs">배관공 · 현장</div>
                 </div>
                 <div style="text-align:right">
-                  <div style="font-size:14px;font-weight:800" class="t-num">19일</div>
+                  <div style="font-size:14px;font-weight:700" class="t-num">19일</div>
                   <div class="t-xs t-num">418만</div>
                 </div>
               </div>
               <div class="row" style="align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:var(--bg-subtle)">
-                <span style="font-size:18px;font-weight:900;color:var(--hx-ink-4);width:24px;text-align:center">🥈</span>
+                <span style="font-size:18px;font-weight:700;color:var(--hx-ink-4);width:24px;text-align:center">🥈</span>
                 <div style="flex:1">
-                  <div style="font-size:13px;font-weight:800">○○○</div>
+                  <div style="font-size:13px;font-weight:700">○○○</div>
                   <div class="t-xs">덕트공 · 현장</div>
                 </div>
                 <div style="text-align:right">
-                  <div style="font-size:14px;font-weight:800" class="t-num">17일</div>
+                  <div style="font-size:14px;font-weight:700" class="t-num">17일</div>
                   <div class="t-xs t-num">374만</div>
                 </div>
               </div>
               <div class="row" style="align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:var(--bg-subtle)">
-                <span style="font-size:18px;font-weight:900;color:var(--hx-warn);width:24px;text-align:center">🥉</span>
+                <span style="font-size:18px;font-weight:700;color:var(--hx-warn);width:24px;text-align:center">🥉</span>
                 <div style="flex:1">
-                  <div style="font-size:13px;font-weight:800">○○○</div>
+                  <div style="font-size:13px;font-weight:700">○○○</div>
                   <div class="t-xs">배관공 · 현장</div>
                 </div>
                 <div style="text-align:right">
-                  <div style="font-size:14px;font-weight:800" class="t-num">15일</div>
+                  <div style="font-size:14px;font-weight:700" class="t-num">15일</div>
                   <div class="t-xs t-num">330만</div>
                 </div>
               </div>
               <div class="row" style="align-items:center;gap:10px;padding:8px 10px;border-radius:8px">
-                <span style="font-size:14px;font-weight:800;color:var(--text-tertiary);width:24px;text-align:center">4</span>
+                <span style="font-size:14px;font-weight:700;color:var(--text-tertiary);width:24px;text-align:center">4</span>
                 <div style="flex:1">
                   <div style="font-size:13px;font-weight:700">○○○</div>
                   <div class="t-xs">보온공 · 현장</div>
                 </div>
                 <div style="text-align:right">
-                  <div style="font-size:14px;font-weight:800" class="t-num">14일</div>
+                  <div style="font-size:14px;font-weight:700" class="t-num">14일</div>
                   <div class="t-xs t-num">308만</div>
                 </div>
               </div>
               <div class="row" style="align-items:center;gap:10px;padding:8px 10px;border-radius:8px">
-                <span style="font-size:14px;font-weight:800;color:var(--text-tertiary);width:24px;text-align:center">5</span>
+                <span style="font-size:14px;font-weight:700;color:var(--text-tertiary);width:24px;text-align:center">5</span>
                 <div style="flex:1">
                   <div style="font-size:13px;font-weight:700">○○○</div>
                   <div class="t-xs">용접공 · 현장</div>
                 </div>
                 <div style="text-align:right">
-                  <div style="font-size:14px;font-weight:800" class="t-num">13일</div>
+                  <div style="font-size:14px;font-weight:700" class="t-num">13일</div>
                   <div class="t-xs t-num">312만</div>
                 </div>
               </div>
@@ -8903,7 +8903,7 @@ table.data-table {
 
       <!-- 전체 현장 합산 안내 -->
       <div style="padding:14px 18px;background:linear-gradient(135deg,var(--hx-accent-wash) 0%,var(--hx-surface) 100%);border-radius:10px;border-left:4px solid var(--primary-500);margin-bottom:24px">
-        <div style="font-size:13px;font-weight:800;color:var(--text-primary);margin-bottom:6px">📊 전체 현장 합산</div>
+        <div style="font-size:13px;font-weight:700;color:var(--text-primary);margin-bottom:6px">📊 전체 현장 합산</div>
         <div class="t-xs" id="at-summary-box" style="line-height:1.7;color:var(--text-secondary)">
           · 작업자: <strong>0명</strong><br/>
           · 누적 출역: <strong>0인-일</strong><br/>
@@ -8964,7 +8964,7 @@ table.data-table {
 
       <!-- 도메인 룰 안내 -->
       <div style="padding:14px 18px;background:var(--bg-subtle);border-radius:10px;border-left:4px solid var(--primary-500);margin-bottom:24px">
-        <div style="font-size:13px;font-weight:800;color:var(--text-primary);margin-bottom:6px">📌 출역 관리 도메인 룰</div>
+        <div style="font-size:13px;font-weight:700;color:var(--text-primary);margin-bottom:6px">📌 출역 관리 도메인 룰</div>
         <div class="t-xs" style="line-height:1.7;color:var(--text-secondary)">
           · 인건비/인건비직불금 매입에는 부가세 0원 자동 적용 (도메인 룰 5)<br/>
           · 일당 기본값은 작업자 프로필 마스터에서 자동 채움 — 일용직 메뉴에서 관리<br/>
@@ -9284,7 +9284,7 @@ table.data-table {
               <tr>
                 <td colspan="10" style="text-align:center;padding:48px 20px;color:var(--hx-ink-4);font-weight:600">
                   <div style="font-size:32px;margin-bottom:8px">📊</div>
-                  <div style="font-size:14px;font-weight:800;color:var(--hx-ink-2);margin-bottom:4px">거래처 매입·결제 현황 데이터 없음</div>
+                  <div style="font-size:14px;font-weight:700;color:var(--hx-ink-2);margin-bottom:4px">거래처 매입·결제 현황 데이터 없음</div>
                   <div style="font-size:12px">매입 등록이 누적되면 자동 집계됩니다</div>
                 </td>
               </tr>
@@ -9334,7 +9334,7 @@ table.data-table {
 
       <!-- 도메인 룰 안내 -->
       <div style="padding:14px 18px;background:var(--bg-subtle);border-radius:10px;border-left:4px solid var(--primary-500);margin-bottom:24px">
-        <div style="font-size:13px;font-weight:800;color:var(--text-primary);margin-bottom:6px">📌 거래처 매입·결제 현황 도메인 룰</div>
+        <div style="font-size:13px;font-weight:700;color:var(--text-primary);margin-bottom:6px">📌 거래처 매입·결제 현황 도메인 룰</div>
         <div class="t-xs" style="line-height:1.7;color:var(--text-secondary)">
           · 9분류 매입 자동 분류 (도메인 룰 4): 외주·자재·상품·간접·비증빙·인건·안전·직불·인건직불<br/>
           · 직불금 + 인건직불금은 캐시플로우에서 제외 (도메인 룰 1) — 발주처 직접지급<br/>
@@ -9541,7 +9541,7 @@ table.data-table {
               <tr>
                 <td colspan="10" style="text-align:center;padding:48px 20px;color:var(--hx-ink-4);font-weight:600">
                   <div style="font-size:32px;margin-bottom:8px">🏢</div>
-                  <div style="font-size:14px;font-weight:800;color:var(--hx-ink-2);margin-bottom:4px">등록된 거래처가 없습니다</div>
+                  <div style="font-size:14px;font-weight:700;color:var(--hx-ink-2);margin-bottom:4px">등록된 거래처가 없습니다</div>
                   <div style="font-size:12px">우측 ⚡ 신규 거래처 빠른 등록에서 시작하세요</div>
                 </td>
               </tr>
@@ -9608,15 +9608,15 @@ table.data-table {
 
             <div class="col gap-2" style="font-size:12px">
               <div style="padding:10px 12px;background:var(--hx-surface);border-radius:8px;border:1px solid var(--hx-violet-wash)">
-                <div style="font-weight:800;color:var(--hx-violet-d);margin-bottom:4px">1단계: 정규화 비교</div>
+                <div style="font-weight:700;color:var(--hx-violet-d);margin-bottom:4px">1단계: 정규화 비교</div>
                 <code style="font-size:11px;color:var(--hx-violet-d)">"(주) ○○ " ≡ "주식회○○○"</code>
               </div>
               <div style="padding:10px 12px;background:var(--hx-surface);border-radius:8px;border:1px solid var(--hx-violet-wash)">
-                <div style="font-weight:800;color:var(--hx-violet-d);margin-bottom:4px">2단계: 공백·괄호 제거</div>
+                <div style="font-weight:700;color:var(--hx-violet-d);margin-bottom:4px">2단계: 공백·괄호 제거</div>
                 <code style="font-size:11px;color:var(--hx-violet-d)">/\s+|[()（）]/g</code>
               </div>
               <div style="padding:10px 12px;background:var(--hx-surface);border-radius:8px;border:1px solid var(--hx-violet-wash)">
-                <div style="font-weight:800;color:var(--hx-violet-d);margin-bottom:4px">3단계: 선등록 검증</div>
+                <div style="font-weight:700;color:var(--hx-violet-d);margin-bottom:4px">3단계: 선등록 검증</div>
                 <div style="color:var(--hx-violet-d)">미등록·사업자번호 누락 시 저장 차단</div>
               </div>
             </div>
@@ -9637,57 +9637,57 @@ table.data-table {
           </div>
           <div class="col gap-2">
             <div class="row" style="align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:var(--bg-subtle)">
-              <span style="font-size:18px;font-weight:900;color:var(--hx-warn);width:24px;text-align:center">🥇</span>
+              <span style="font-size:18px;font-weight:700;color:var(--hx-warn);width:24px;text-align:center">🥇</span>
               <div style="flex:1">
-                <div style="font-size:13px;font-weight:800">(주)○○</div>
+                <div style="font-size:13px;font-weight:700">(주)○○</div>
                 <div class="t-xs">14개 PJ · 외주 (덕트 시공)</div>
               </div>
               <div style="text-align:right">
-                <div style="font-size:14px;font-weight:800;color:var(--primary-700)" class="t-num">8.2억</div>
+                <div style="font-size:14px;font-weight:700;color:var(--primary-700)" class="t-num">8.2억</div>
                 <div class="t-xs">전체 18%</div>
               </div>
             </div>
             <div class="row" style="align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:var(--bg-subtle)">
-              <span style="font-size:18px;font-weight:900;color:var(--hx-ink-4);width:24px;text-align:center">🥈</span>
+              <span style="font-size:18px;font-weight:700;color:var(--hx-ink-4);width:24px;text-align:center">🥈</span>
               <div style="flex:1">
-                <div style="font-size:13px;font-weight:800">○○</div>
+                <div style="font-size:13px;font-weight:700">○○</div>
                 <div class="t-xs">18개 PJ · 자재 (배관)</div>
               </div>
               <div style="text-align:right">
-                <div style="font-size:14px;font-weight:800;color:var(--primary-700)" class="t-num">6.2억</div>
+                <div style="font-size:14px;font-weight:700;color:var(--primary-700)" class="t-num">6.2억</div>
                 <div class="t-xs">전체 14%</div>
               </div>
             </div>
             <div class="row" style="align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:var(--bg-subtle)">
-              <span style="font-size:18px;font-weight:900;color:var(--hx-warn);width:24px;text-align:center">🥉</span>
+              <span style="font-size:18px;font-weight:700;color:var(--hx-warn);width:24px;text-align:center">🥉</span>
               <div style="flex:1">
-                <div style="font-size:13px;font-weight:800">(주)○○</div>
+                <div style="font-size:13px;font-weight:700">(주)○○</div>
                 <div class="t-xs">7개 PJ · 상품 (FCU·AHU)</div>
               </div>
               <div style="text-align:right">
-                <div style="font-size:14px;font-weight:800;color:var(--primary-700)" class="t-num">5.1억</div>
+                <div style="font-size:14px;font-weight:700;color:var(--primary-700)" class="t-num">5.1억</div>
                 <div class="t-xs">전체 11%</div>
               </div>
             </div>
             <div class="row" style="align-items:center;gap:10px;padding:10px 12px;border-radius:8px">
-              <span style="font-size:14px;font-weight:800;color:var(--text-tertiary);width:24px;text-align:center">4</span>
+              <span style="font-size:14px;font-weight:700;color:var(--text-tertiary);width:24px;text-align:center">4</span>
               <div style="flex:1">
                 <div style="font-size:13px;font-weight:700">○○</div>
                 <div class="t-xs">12개 PJ · 외주 (용접)</div>
               </div>
               <div style="text-align:right">
-                <div style="font-size:14px;font-weight:800;color:var(--primary-700)" class="t-num">4.85억</div>
+                <div style="font-size:14px;font-weight:700;color:var(--primary-700)" class="t-num">4.85억</div>
                 <div class="t-xs">전체 11%</div>
               </div>
             </div>
             <div class="row" style="align-items:center;gap:10px;padding:10px 12px;border-radius:8px">
-              <span style="font-size:14px;font-weight:800;color:var(--text-tertiary);width:24px;text-align:center">5</span>
+              <span style="font-size:14px;font-weight:700;color:var(--text-tertiary);width:24px;text-align:center">5</span>
               <div style="flex:1">
                 <div style="font-size:13px;font-weight:700">○○</div>
                 <div class="t-xs">9개 PJ · 자재 (밸브)</div>
               </div>
               <div style="text-align:right">
-                <div style="font-size:14px;font-weight:800;color:var(--primary-700)" class="t-num">3.4억</div>
+                <div style="font-size:14px;font-weight:700;color:var(--primary-700)" class="t-num">3.4억</div>
                 <div class="t-xs">전체 8%</div>
               </div>
             </div>
@@ -9711,11 +9711,11 @@ table.data-table {
             <div style="padding:12px 14px;background:var(--hx-surface);border-radius:8px;border:1px solid var(--hx-crit-s)">
               <div class="row" style="justify-content:space-between;align-items:flex-start">
                 <div>
-                  <div style="font-size:13px;font-weight:800">(주)○○</div>
+                  <div style="font-size:13px;font-weight:700">(주)○○</div>
                   <div class="t-xs">7개 PJ · 상품 (FCU·AHU)</div>
                 </div>
                 <div style="text-align:right">
-                  <div style="font-size:15px;font-weight:900;color:var(--hx-crit)" class="t-num">42,000,000</div>
+                  <div style="font-size:15px;font-weight:700;color:var(--hx-crit)" class="t-num">42,000,000</div>
                   <div class="t-xs">마지막 거래 4-15</div>
                 </div>
               </div>
@@ -9723,11 +9723,11 @@ table.data-table {
             <div style="padding:12px 14px;background:var(--hx-surface);border-radius:8px;border:1px solid var(--hx-crit-s)">
               <div class="row" style="justify-content:space-between;align-items:flex-start">
                 <div>
-                  <div style="font-size:13px;font-weight:800">○○</div>
+                  <div style="font-size:13px;font-weight:700">○○</div>
                   <div class="t-xs">4개 PJ · 상품 (제어반)</div>
                 </div>
                 <div style="text-align:right">
-                  <div style="font-size:15px;font-weight:900;color:var(--hx-crit)" class="t-num">22,000,000</div>
+                  <div style="font-size:15px;font-weight:700;color:var(--hx-crit)" class="t-num">22,000,000</div>
                   <div class="t-xs">마지막 거래 4-05</div>
                 </div>
               </div>
@@ -9735,11 +9735,11 @@ table.data-table {
             <div style="padding:12px 14px;background:var(--hx-surface);border-radius:8px;border:1px solid var(--hx-crit-s)">
               <div class="row" style="justify-content:space-between;align-items:flex-start">
                 <div>
-                  <div style="font-size:13px;font-weight:800">○○</div>
+                  <div style="font-size:13px;font-weight:700">○○</div>
                   <div class="t-xs">18개 PJ · 자재 (배관)</div>
                 </div>
                 <div style="text-align:right">
-                  <div style="font-size:15px;font-weight:900;color:var(--hx-crit)" class="t-num">18,200,000</div>
+                  <div style="font-size:15px;font-weight:700;color:var(--hx-crit)" class="t-num">18,200,000</div>
                   <div class="t-xs">마지막 거래 4-25</div>
                 </div>
               </div>
@@ -9747,11 +9747,11 @@ table.data-table {
             <div style="padding:12px 14px;background:var(--hx-surface);border-radius:8px;border:1px solid var(--hx-crit-s)">
               <div class="row" style="justify-content:space-between;align-items:flex-start">
                 <div>
-                  <div style="font-size:13px;font-weight:800">○○</div>
+                  <div style="font-size:13px;font-weight:700">○○</div>
                   <div class="t-xs">6개 PJ · 외주 (TAB)</div>
                 </div>
                 <div style="text-align:right">
-                  <div style="font-size:15px;font-weight:900;color:var(--hx-crit)" class="t-num">15,000,000</div>
+                  <div style="font-size:15px;font-weight:700;color:var(--hx-crit)" class="t-num">15,000,000</div>
                   <div class="t-xs">마지막 거래 4-18</div>
                 </div>
               </div>
@@ -9759,11 +9759,11 @@ table.data-table {
             <div style="padding:12px 14px;background:var(--hx-surface);border-radius:8px;border:1px solid var(--hx-crit-s)">
               <div class="row" style="justify-content:space-between;align-items:flex-start">
                 <div>
-                  <div style="font-size:13px;font-weight:800">안전제일</div>
+                  <div style="font-size:13px;font-weight:700">안전제일</div>
                   <div class="t-xs">15개 PJ · 안전 (산업안전)</div>
                 </div>
                 <div style="text-align:right">
-                  <div style="font-size:15px;font-weight:900;color:var(--hx-crit)" class="t-num">2,420,000</div>
+                  <div style="font-size:15px;font-weight:700;color:var(--hx-crit)" class="t-num">2,420,000</div>
                   <div class="t-xs">마지막 거래 4-22</div>
                 </div>
               </div>
@@ -9777,7 +9777,7 @@ table.data-table {
 
       <!-- 도메인 룰 안내 -->
       <div style="padding:14px 18px;background:var(--bg-subtle);border-radius:10px;border-left:4px solid var(--primary-500);margin-bottom:24px">
-        <div style="font-size:13px;font-weight:800;color:var(--text-primary);margin-bottom:6px">📌 거래처 관리 도메인 룰</div>
+        <div style="font-size:13px;font-weight:700;color:var(--text-primary);margin-bottom:6px">📌 거래처 관리 도메인 룰</div>
         <div class="t-xs" style="line-height:1.7;color:var(--text-secondary)">
           · 신규 거래처 자동 등록 정규화 (도메인 룰 6): 공백·괄호 제거 후 비교하여 중복 방지<br/>
           · [선등록 정책] 매입의 거래처는 마스터에 사업자등록번호까지 등록된 업체만 허용 — 미등록·번호 누락 시 저장 차단 (예외: 직불금·인건비직불금은 발주처 직접 지급이라 업체명 자유 입력, 인건비는 일용직 마스터 등록)<br/>
@@ -9902,27 +9902,29 @@ table.data-table {
 
       <!-- 다기능 일용직 디자인 토큰 [#114] -->
       <style id="multi-job-style">
-        .job-chips { display:flex; flex-wrap:wrap; gap:4px; align-items:center; }
-        .job-chip { padding:3px 8px; border-radius:6px; font-size:11px; font-weight:800;
+        .job-chips { display:flex; flex-wrap:wrap; gap:7px; align-items:center; }
+        .job-chip { padding:4px 9px; border-radius:var(--hx-r-s); font-size:11px; font-weight:700;
           white-space:nowrap; letter-spacing:-.01em; }
-        .job-chip.primary { box-shadow:0 0 0 1.5px currentColor inset; font-weight:900; }
+        .job-chip.primary { box-shadow:0 0 0 1.5px currentColor inset; font-weight:700; }
         .job-chip.alt { opacity:.75; font-size:10px; padding:2px 6px; }
         .wage-multi { font-variant-numeric:tabular-nums; line-height:1.3; }
-        .wage-multi b { color:var(--hx-ink); font-weight:900; }
-        .wage-multi .wage-alt { font-size:11px; color:var(--hx-ink-3); font-weight:700; display:block; margin-top:1px; }
+        .wage-multi b { color:var(--hx-ink); font-weight:700; font-family:var(--hx-mono); letter-spacing:-.02em; }
+        .wage-multi .wage-alt { font-size:11px; color:var(--hx-ink-2); font-weight:600; display:block; margin-top:4px; }
         .wage-multi .wage-alt .sep { color:var(--hx-ink-5); margin:0 3px; }
         /* 다기능자 강조 행 */
         tr.multi-job td:first-child::before { content:'⚡ '; font-size:10px; color:var(--hx-warn); }
         /* 신규 등록 폼 - 멀티 직종 */
-        .job-row { display:flex; gap:6px; align-items:center; margin-bottom:6px; }
+        .job-row { display:flex; gap:8px; align-items:center; margin-bottom:8px; }
         .job-row select, .job-row input { flex:1; min-width:0; padding:8px 10px; border:1px solid var(--hx-surface-3);
-          border-radius:8px; font-size:13px; font-weight:700; font-family:inherit; }
-        .job-row .x-btn { width:28px; height:28px; border-radius:6px; border:1px solid var(--hx-surface-3);
-          background:var(--hx-surface); color:var(--hx-ink-4); cursor:pointer; font-size:14px; font-weight:900; flex-shrink:0; }
+          border-radius:var(--hx-r); font-size:13px; font-weight:500; font-family:inherit; }
+        .job-row input { font-family:var(--hx-mono); letter-spacing:-.01em; }
+        .job-row input::placeholder { font-family:var(--hx-font); letter-spacing:0; }
+        .job-row .x-btn { width:28px; height:28px; border-radius:var(--hx-r-s); border:1px solid var(--hx-surface-3);
+          background:var(--hx-surface); color:var(--hx-ink-2); cursor:pointer; font-size:14px; font-weight:700; flex-shrink:0; }
         .job-row .x-btn:hover { background:var(--hx-crit-wash); color:var(--hx-crit); border-color:var(--hx-crit-s); }
-        .job-add-btn { width:100%; padding:8px; border-radius:8px; border:1.5px dashed var(--hx-ink-5);
-          background:var(--hx-surface); color:var(--hx-ink-2); font-size:12px; font-weight:800; cursor:pointer; margin-top:4px;
-          font-family:inherit; transition:all .15s; }
+        .job-add-btn { width:100%; padding:10px; border-radius:var(--hx-r); border:1px dashed var(--hx-ink-5);
+          background:var(--hx-surface); color:var(--hx-ink-2); font-size:12px; font-weight:600; cursor:pointer; margin-top:6px;
+          font-family:inherit; transition:border-color .15s, color .15s, background .15s; }
         .job-add-btn:hover { border-color:var(--hx-ink); color:var(--hx-ink); background:var(--hx-surface-2); }
       </style>
 
@@ -9931,7 +9933,7 @@ table.data-table {
         <div class="table-wrap">
           <div class="table-header">
             <div>
-              <div class="table-title">📋 일용직 인력 마스터 (<span id="workers-count">0</span>명) <span style="font-size:11px;color:var(--hx-warn);font-weight:800;margin-left:8px">⚡ 다기능 7명</span></div>
+              <div class="table-title">📋 일용직 인력 마스터 (<span id="workers-count">0</span>명) <span style="font-size:11px;color:var(--hx-warn);font-weight:700;margin-left:8px">⚡ 다기능 7명</span></div>
               <div class="t-xs">활동 0명 · 다기능자(⚡)는 여러 직종 가능 · 주민번호 7자리 마스킹</div>
             </div>
             <div class="row gap-2 flex-wrap">
@@ -9987,7 +9989,7 @@ table.data-table {
               <tr id="workers-empty-row">
                 <td colspan="10" style="text-align:center;padding:48px 20px;color:var(--hx-ink-4);font-weight:600">
                   <div style="font-size:32px;margin-bottom:8px">👷</div>
-                  <div style="font-size:14px;font-weight:800;color:var(--hx-ink-2);margin-bottom:4px">등록된 일용직이 없습니다</div>
+                  <div style="font-size:14px;font-weight:700;color:var(--hx-ink-2);margin-bottom:4px">등록된 일용직이 없습니다</div>
                   <div style="font-size:12px">우측 ⚡ 신규 인력 빠른 등록에서 시작하세요</div>
                 </td>
               </tr>
@@ -10066,34 +10068,34 @@ table.data-table {
                         stroke-dasharray="0 322.3" transform="rotate(165.5 50 50)"/>
                 <circle cx="50" cy="50" r="38" fill="none" stroke="var(--hx-ink-4)" stroke-width="14"
                         stroke-dasharray="0 322.3" transform="rotate(207.6 50 50)"/>
-                <text x="50" y="48" text-anchor="middle" font-size="9" font-weight="900" fill="var(--text-primary)">총 인력</text>
-                <text x="50" y="60" text-anchor="middle" font-size="14" font-weight="900" fill="var(--text-primary)">0명</text>
+                <text x="50" y="48" text-anchor="middle" font-size="9" font-weight="700" fill="var(--text-primary)">총 인력</text>
+                <text x="50" y="60" text-anchor="middle" font-size="14" font-weight="700" fill="var(--text-primary)">0명</text>
               </svg>
               <div class="col gap-2" style="flex:1">
                 <div class="row" style="align-items:center;gap:6px;font-size:12px">
                   <span style="width:8px;height:8px;border-radius:2px;background:var(--hx-accent-deep)"></span>
                   <span style="flex:1;font-weight:700">배관공</span>
-                  <span class="t-num" style="font-weight:800">0명</span>
+                  <span class="t-num" style="font-weight:700">0명</span>
                 </div>
                 <div class="row" style="align-items:center;gap:6px;font-size:12px">
                   <span style="width:8px;height:8px;border-radius:2px;background:var(--hx-violet)"></span>
                   <span style="flex:1;font-weight:700">덕트공</span>
-                  <span class="t-num" style="font-weight:800">0명</span>
+                  <span class="t-num" style="font-weight:700">0명</span>
                 </div>
                 <div class="row" style="align-items:center;gap:6px;font-size:12px">
                   <span style="width:8px;height:8px;border-radius:2px;background:var(--hx-good)"></span>
                   <span style="flex:1;font-weight:700">보온공</span>
-                  <span class="t-num" style="font-weight:800">0명</span>
+                  <span class="t-num" style="font-weight:700">0명</span>
                 </div>
                 <div class="row" style="align-items:center;gap:6px;font-size:12px">
                   <span style="width:8px;height:8px;border-radius:2px;background:var(--hx-warn)"></span>
                   <span style="flex:1;font-weight:700">용접공</span>
-                  <span class="t-num" style="font-weight:800">0명</span>
+                  <span class="t-num" style="font-weight:700">0명</span>
                 </div>
                 <div class="row" style="align-items:center;gap:6px;font-size:12px">
                   <span style="width:8px;height:8px;border-radius:2px;background:var(--hx-ink-4)"></span>
                   <span style="flex:1;font-weight:700">TAB·일반</span>
-                  <span class="t-num" style="font-weight:800">0명</span>
+                  <span class="t-num" style="font-weight:700">0명</span>
                 </div>
               </div>
             </div>
@@ -10110,57 +10112,57 @@ table.data-table {
           </div>
           <div class="col gap-2">
             <div class="row" style="align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:var(--bg-subtle)">
-              <span style="font-size:18px;font-weight:900;color:var(--hx-warn);width:24px;text-align:center">🥇</span>
+              <span style="font-size:18px;font-weight:700;color:var(--hx-warn);width:24px;text-align:center">🥇</span>
               <div style="flex:1">
-                <div style="font-size:13px;font-weight:800">○○○ <span class="badge" style="background:var(--hx-accent-wash);color:var(--hx-accent-ink);font-size:10px">배관공</span></div>
+                <div style="font-size:13px;font-weight:700">○○○ <span class="badge" style="background:var(--hx-accent-wash);color:var(--hx-accent-ink);font-size:10px">배관공</span></div>
                 <div class="t-xs">출역 89일 · 현장 외 4개 PJ</div>
               </div>
               <div style="text-align:right">
-                <div style="font-size:14px;font-weight:800;color:var(--primary-700)" class="t-num">19.58백만</div>
+                <div style="font-size:14px;font-weight:700;color:var(--primary-700)" class="t-num">19.58백만</div>
                 <div class="t-xs">평균 22만/일</div>
               </div>
             </div>
             <div class="row" style="align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:var(--bg-subtle)">
-              <span style="font-size:18px;font-weight:900;color:var(--hx-ink-4);width:24px;text-align:center">🥈</span>
+              <span style="font-size:18px;font-weight:700;color:var(--hx-ink-4);width:24px;text-align:center">🥈</span>
               <div style="flex:1">
-                <div style="font-size:13px;font-weight:800">○○○ <span class="badge" style="background:var(--hx-violet-wash);color:var(--hx-violet-d);font-size:10px">덕트공</span></div>
+                <div style="font-size:13px;font-weight:700">○○○ <span class="badge" style="background:var(--hx-violet-wash);color:var(--hx-violet-d);font-size:10px">덕트공</span></div>
                 <div class="t-xs">출역 76일 · 현장 외 3개 PJ</div>
               </div>
               <div style="text-align:right">
-                <div style="font-size:14px;font-weight:800;color:var(--primary-700)" class="t-num">16.72백만</div>
+                <div style="font-size:14px;font-weight:700;color:var(--primary-700)" class="t-num">16.72백만</div>
                 <div class="t-xs">평균 22만/일</div>
               </div>
             </div>
             <div class="row" style="align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:var(--bg-subtle)">
-              <span style="font-size:18px;font-weight:900;color:var(--hx-warn);width:24px;text-align:center">🥉</span>
+              <span style="font-size:18px;font-weight:700;color:var(--hx-warn);width:24px;text-align:center">🥉</span>
               <div style="flex:1">
-                <div style="font-size:13px;font-weight:800">○○○ <span class="badge" style="background:var(--hx-accent-wash);color:var(--hx-accent-ink);font-size:10px">배관공</span></div>
+                <div style="font-size:13px;font-weight:700">○○○ <span class="badge" style="background:var(--hx-accent-wash);color:var(--hx-accent-ink);font-size:10px">배관공</span></div>
                 <div class="t-xs">출역 72일 · 현장 외 2개 PJ</div>
               </div>
               <div style="text-align:right">
-                <div style="font-size:14px;font-weight:800;color:var(--primary-700)" class="t-num">15.84백만</div>
+                <div style="font-size:14px;font-weight:700;color:var(--primary-700)" class="t-num">15.84백만</div>
                 <div class="t-xs">평균 22만/일</div>
               </div>
             </div>
             <div class="row" style="align-items:center;gap:10px;padding:10px 12px;border-radius:8px">
-              <span style="font-size:14px;font-weight:800;color:var(--text-tertiary);width:24px;text-align:center">4</span>
+              <span style="font-size:14px;font-weight:700;color:var(--text-tertiary);width:24px;text-align:center">4</span>
               <div style="flex:1">
                 <div style="font-size:13px;font-weight:700">○○○ <span class="badge" style="background:var(--hx-good-wash);color:var(--hx-good-d);font-size:10px">보온공</span></div>
                 <div class="t-xs">출역 68일 · 현장 외 2개 PJ</div>
               </div>
               <div style="text-align:right">
-                <div style="font-size:14px;font-weight:800;color:var(--primary-700)" class="t-num">14.96백만</div>
+                <div style="font-size:14px;font-weight:700;color:var(--primary-700)" class="t-num">14.96백만</div>
                 <div class="t-xs">평균 22만/일</div>
               </div>
             </div>
             <div class="row" style="align-items:center;gap:10px;padding:10px 12px;border-radius:8px">
-              <span style="font-size:14px;font-weight:800;color:var(--text-tertiary);width:24px;text-align:center">5</span>
+              <span style="font-size:14px;font-weight:700;color:var(--text-tertiary);width:24px;text-align:center">5</span>
               <div style="flex:1">
                 <div style="font-size:13px;font-weight:700">○○○ <span class="badge" style="background:var(--hx-warn-wash);color:var(--hx-warn-d);font-size:10px">용접공</span></div>
                 <div class="t-xs">출역 61일 · 현장 외 1개 PJ</div>
               </div>
               <div style="text-align:right">
-                <div style="font-size:14px;font-weight:800;color:var(--primary-700)" class="t-num">14.64백만</div>
+                <div style="font-size:14px;font-weight:700;color:var(--primary-700)" class="t-num">14.64백만</div>
                 <div class="t-xs">평균 24만/일</div>
               </div>
             </div>
@@ -10171,7 +10173,7 @@ table.data-table {
 
       <!-- 도메인 룰 안내 -->
       <div style="padding:14px 18px;background:var(--bg-subtle);border-radius:10px;border-left:4px solid var(--primary-500);margin-bottom:24px">
-        <div style="font-size:13px;font-weight:800;color:var(--text-primary);margin-bottom:6px">📌 일용직 인력 관리 도메인 룰</div>
+        <div style="font-size:13px;font-weight:700;color:var(--text-primary);margin-bottom:6px">📌 일용직 인력 관리 도메인 룰</div>
         <div class="t-xs" style="line-height:1.7;color:var(--text-secondary)">
           · 인건비 매입 부가세 0원 자동 적용 (도메인 룰 5)<br/>
           · 인건비직불금 (발주처 직접지급) 시 명문이엔지 캐시플로우에서 제외 (도메인 룰 1)<br/>
@@ -10213,31 +10215,31 @@ table.data-table {
 
       <!-- 기능 상태 안내 배너 [#118] -->
       <style id="settings-status-style">
-        .settings-status-bar { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:10px;
-          margin-bottom:18px; padding:14px 16px; background:var(--hx-surface); border-radius:12px;
-          border:1px solid var(--hx-surface-3); box-shadow:0 4px 18px -6px rgba(10, 10, 10,.06); }
-        .ss-card { padding:10px 12px; border-radius:8px; background:var(--hx-paper-2); border:1px solid var(--hx-surface-2); }
-        .ss-card .ss-num { font-size:22px; font-weight:900; letter-spacing:-.02em; line-height:1; margin-bottom:4px; }
+        .settings-status-bar { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:14px;
+          margin-bottom:18px; padding:16px 18px; background:var(--hx-surface); border-radius:var(--hx-r);
+          border:1px solid var(--hx-line); box-shadow:var(--hx-e1); }
+        .ss-card { padding:14px 14px; border-radius:var(--hx-r-s); background:var(--hx-surface-2); }
+        .ss-card .ss-num { font-family:var(--hx-mono); font-size:22px; font-weight:600; letter-spacing:-.01em; line-height:1; margin-bottom:6px; }
         .ss-card.ok .ss-num { color:var(--hx-good); }
         .ss-card.wait .ss-num { color:var(--hx-warn); }
-        .ss-card.todo .ss-num { color:var(--hx-ink-4); }
-        .ss-card .ss-lbl { font-size:11px; color:var(--hx-ink-3); font-weight:800; letter-spacing:-.005em; }
+        .ss-card.todo .ss-num { color:var(--hx-ink-2); }
+        .ss-card .ss-lbl { font-size:11px; color:var(--hx-ink-2); font-weight:600; letter-spacing:-.01em; }
         /* 작동 가능 액션 영역 */
-        .settings-active-actions { padding:16px 18px; background:linear-gradient(135deg,#F0FDF4,#DCFCE7);
-          border:1px solid #86EFAC; border-radius:12px; margin-bottom:18px; }
-        .settings-active-actions .ttl { font-size:13px; font-weight:900; color:var(--hx-good); margin-bottom:10px;
+        .settings-active-actions { padding:18px 20px; background:var(--hx-good-wash);
+          border:1px solid var(--hx-good-s); border-radius:var(--hx-r); margin-bottom:18px; }
+        .settings-active-actions .ttl { font-size:13.5px; font-weight:600; letter-spacing:-.015em; color:var(--hx-good-d); margin-bottom:12px;
           display:flex; align-items:center; gap:6px; }
         .settings-active-actions .acts { display:flex; gap:8px; flex-wrap:wrap; }
-        .settings-active-actions button { padding:8px 14px; border-radius:8px; border:0; cursor:pointer;
-          font-size:12px; font-weight:800; background:var(--hx-surface); color:var(--hx-good); border:1px solid var(--hx-good-s);
+        .settings-active-actions button { padding:9px 14px; border-radius:var(--hx-r-s); border:0; cursor:pointer;
+          font-size:12px; font-weight:600; background:var(--hx-surface); color:var(--hx-good-d); border:1px solid var(--hx-good-s);
           font-family:inherit; transition:all .15s; }
         .settings-active-actions button:hover { background:var(--hx-good); color:var(--hx-surface); }
         /* setting-row 상태 뱃지 */
-        .ss-badge { display:inline-block; padding:2px 8px; border-radius:99px; font-size:10px;
-          font-weight:800; letter-spacing:-.005em; margin-left:8px; vertical-align:middle; }
-        .ss-badge.ok { background:var(--hx-good-wash); color:var(--hx-good); }
+        .ss-badge { display:inline-block; padding:3px 9px; border-radius:99px; font-size:10.5px;
+          font-weight:600; letter-spacing:-.01em; margin-left:8px; vertical-align:middle; }
+        .ss-badge.ok { background:var(--hx-good-wash); color:var(--hx-good-d); }
         .ss-badge.wait { background:var(--hx-warn-wash); color:var(--hx-warn-d); }
-        .ss-badge.todo { background:var(--hx-surface-2); color:var(--hx-ink-3); }
+        .ss-badge.todo { background:var(--hx-surface-2); color:var(--hx-ink-2); }
       </style>
 
       <div class="settings-status-bar">
@@ -10275,39 +10277,40 @@ table.data-table {
       <!-- ☁️ Supabase 연동 설정 카드 [#121] — CEO 전용 (JS가 cloud 페이지로 이동 [#152]) -->
       <div class="perm-ceo" id="sb-setup-wrap">
       <style id="sb-setup-style">
-        .sb-setup { padding:18px 20px; background:linear-gradient(135deg,var(--hx-accent-wash),var(--hx-accent-wash));
-          border:1px solid var(--hx-accent-s); border-radius:14px; margin-bottom:18px; }
+        .sb-setup { padding:22px 24px; background:var(--hx-surface);
+          border:1px solid var(--hx-line); border-radius:var(--hx-r-l); margin-bottom:18px; }
         .sb-setup .hd { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
-        .sb-setup .hd .ttl { font-size:14px; font-weight:900; color:var(--hx-accent-ink); display:flex; align-items:center; gap:8px; }
-        .sb-setup .hd .status { font-size:11px; font-weight:800; padding:4px 10px; border-radius:99px; }
+        .sb-setup .hd .ttl { font-size:14px; font-weight:600; letter-spacing:-.015em; color:var(--hx-ink); display:flex; align-items:center; gap:8px; }
+        .sb-setup .hd .status { font-size:11px; font-weight:700; padding:4px 10px; border-radius:99px; }
         .sb-setup .hd .status.ok { background:var(--hx-good-wash); color:var(--hx-good); }
         .sb-setup .hd .status.warn { background:var(--hx-warn-wash); color:var(--hx-warn-d); }
-        .sb-setup .hd .status.err { background:#FECACA; color:var(--hx-crit-d); }
-        .sb-setup .grid { display:grid; grid-template-columns:1fr; gap:10px; }
-        .sb-setup label { font-size:11px; font-weight:800; color:var(--hx-accent-ink); letter-spacing:-.005em; margin-bottom:-6px; }
-        .sb-setup input { padding:10px 12px; border:1.5px solid var(--hx-accent-s); border-radius:8px;
-          font-size:12px; font-weight:700; font-family:'SF Mono', monospace; color:var(--hx-ink);
+        .sb-setup .hd .status.err { background:var(--hx-crit-wash); color:var(--hx-crit-d); }
+        .sb-setup .grid { display:grid; grid-template-columns:1fr; gap:12px; }
+        .sb-setup label { font-size:11px; font-weight:600; color:var(--hx-ink-2); letter-spacing:-.005em; margin-bottom:-6px; }
+        .sb-setup label[for] { font-family:var(--hx-mono); font-size:10.5px; font-weight:500; letter-spacing:0; }
+        .sb-setup input { padding:10px 12px; border:1px solid var(--hx-line-2); border-radius:var(--hx-r-s);
+          font-size:12px; font-weight:500; font-family:var(--hx-mono); color:var(--hx-ink);
           background:var(--hx-surface); transition:all .15s; }
         .sb-setup input:focus { outline:none; border-color:var(--hx-accent-deep); box-shadow:0 0 0 3px rgba(0, 134, 179,.12); }
-        .sb-setup .acts { display:flex; gap:8px; margin-top:6px; flex-wrap:wrap; }
-        .sb-setup button { padding:9px 16px; border-radius:8px; border:0; font-size:12px;
-          font-weight:800; cursor:pointer; font-family:inherit; transition:all .15s; }
-        .sb-setup button.primary { background:linear-gradient(135deg,var(--hx-accent-deep),var(--hx-accent-ink)); color:var(--hx-surface);
-          box-shadow:0 4px 12px -2px rgba(0, 134, 179,.35); }
-        .sb-setup button.primary:hover { transform:translateY(-1px); box-shadow:0 6px 16px -2px rgba(0, 134, 179,.45); }
-        .sb-setup button.ghost { background:var(--hx-surface); color:var(--hx-accent-ink); border:1px solid var(--hx-accent-s); }
-        .sb-setup button.ghost:hover { background:var(--hx-accent-ink); color:var(--hx-surface); }
+        .sb-setup .acts { display:flex; gap:10px; margin-top:10px; flex-wrap:wrap; }
+        .sb-setup button { padding:9px 16px; border-radius:var(--hx-r-s); border:0; font-size:12px;
+          font-weight:600; cursor:pointer; font-family:inherit; transition:all .15s; }
+        .sb-setup button.primary { background:var(--hx-accent-ink); color:var(--hx-surface);
+          box-shadow:var(--hx-e1); }
+        .sb-setup button.primary:hover { background:var(--hx-ink); box-shadow:var(--hx-e1); }
+        .sb-setup button.ghost { background:var(--hx-surface); color:var(--hx-ink-2); border:1px solid var(--hx-line-2); }
+        .sb-setup button.ghost:hover { background:var(--hx-surface-2); color:var(--hx-ink); }
         .sb-setup button.danger { background:var(--hx-surface); color:var(--hx-crit); border:1px solid var(--hx-crit-s); }
         .sb-setup button.danger:hover { background:var(--hx-crit-wash); }
-        .sb-setup .info { margin-top:10px; padding:10px 12px; background:rgba(255,255,255,.6);
-          border-radius:8px; font-size:11px; color:var(--hx-ink-2); font-weight:600; line-height:1.6; }
-        .sb-setup .info code { font-family:'SF Mono', monospace; background:var(--hx-surface); padding:2px 5px;
-          border-radius:4px; font-size:10px; }
-        .sb-setup .result { margin-top:8px; padding:10px 12px; border-radius:8px; font-size:12px;
-          font-weight:700; display:none; }
+        .sb-setup .info { margin-top:16px; padding:14px 16px; background:var(--hx-surface-2);
+          border-radius:var(--hx-r-s); font-size:11px; color:var(--hx-ink-2); font-weight:500; line-height:1.7; }
+        .sb-setup .info code { font-family:var(--hx-mono); background:var(--hx-surface); padding:2px 5px;
+          border-radius:4px; font-size:10px; color:var(--hx-ink); }
+        .sb-setup .result { margin-top:10px; padding:10px 12px; border-radius:var(--hx-r-s); font-size:12px;
+          font-weight:600; display:none; }
         .sb-setup .result.show { display:block; }
         .sb-setup .result.ok { background:var(--hx-good-wash); color:var(--hx-good); }
-        .sb-setup .result.err { background:#FECACA; color:var(--hx-crit-d); }
+        .sb-setup .result.err { background:var(--hx-crit-wash); color:var(--hx-crit-d); }
       </style>
       <div class="sb-setup">
         <div class="hd">
@@ -10328,12 +10331,12 @@ table.data-table {
           <div class="result" id="sb-result"></div>
 
           <!-- 데이터 동기화 [#122] -->
-          <div style="margin-top:12px;padding-top:12px;border-top:1px dashed var(--hx-accent-s)">
-            <div style="font-size:11px;font-weight:800;color:var(--hx-accent-ink);margin-bottom:8px">🔄 데이터 동기화</div>
+          <div style="margin-top:18px;padding-top:18px;border-top:1px solid var(--hx-line)">
+            <div style="font-size:11px;font-weight:600;letter-spacing:-.015em;color:var(--hx-ink);margin-bottom:10px">🔄 데이터 동기화</div>
             <div class="acts">
               <button class="ghost" onclick="window.mmSbSync && window.mmSbSync.pull()">⬇️ 클라우드에서 받기 (Pull)</button>
               <button class="ghost" onclick="window.mmSbSync && window.mmSbSync.push()">⬆️ 클라우드로 보내기 (Push)</button>
-              <label style="display:flex;align-items:center;gap:6px;font-size:11px;font-weight:800;color:var(--hx-accent-ink);cursor:pointer">
+              <label style="display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--hx-ink-2);cursor:pointer">
                 <input type="checkbox" id="sb-autosync" onchange="window.mmSbSync && window.mmSbSync.toggleAuto(this.checked)" style="width:auto" />
                 자동 동기화 (저장 시 자동 업로드)
               </label>
@@ -10453,15 +10456,15 @@ table.data-table {
             </div>
             <!-- 사업자등록증 + 법인 도장 자산 [#143] -->
             <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--border-subtle)">
-              <div style="font-size:13px;font-weight:900;color:var(--text-primary);margin-bottom:8px">📎 회사 자산 (PDF·이미지)</div>
+              <div style="font-size:13px;font-weight:700;color:var(--text-primary);margin-bottom:8px">📎 회사 자산 (PDF·이미지)</div>
               <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px,1fr));gap:12px">
                 <div style="padding:12px;border:1px dashed var(--hx-ink-5);border-radius:10px;background:var(--hx-paper-2)">
-                  <div style="font-size:12px;font-weight:800;margin-bottom:6px">📋 사업자등록증</div>
+                  <div style="font-size:12px;font-weight:700;margin-bottom:6px">📋 사업자등록증</div>
                   <input type="file" id="cmp-cert-file" accept="image/*,.pdf" style="font-size:11px;width:100%" />
                   <div id="cmp-cert-preview" style="margin-top:8px;font-size:11px;color:var(--hx-ink-3)"></div>
                 </div>
                 <div style="padding:12px;border:1px dashed var(--hx-ink-5);border-radius:10px;background:var(--hx-paper-2)">
-                  <div style="font-size:12px;font-weight:800;margin-bottom:6px">🔴 법인 도장 (투명 PNG 권장)</div>
+                  <div style="font-size:12px;font-weight:700;margin-bottom:6px">🔴 법인 도장 (투명 PNG 권장)</div>
                   <input type="file" id="cmp-seal-file" accept="image/*" style="font-size:11px;width:100%" />
                   <div id="cmp-seal-preview" style="margin-top:8px;font-size:11px;color:var(--hx-ink-3)"></div>
                 </div>
@@ -10718,7 +10721,7 @@ table.data-table {
 
 
             <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border-subtle)">
-              <div style="font-size:13px;font-weight:800;margin-bottom:10px">📌 도메인 룰 활성화 (디버그용 — 실무에서는 모두 ON)</div>
+              <div style="font-size:13px;font-weight:700;margin-bottom:10px">📌 도메인 룰 활성화 (디버그용 — 실무에서는 모두 ON)</div>
               <div class="setting-row">
                 <div class="setting-row-info">
                   <div class="setting-row-title">룰 1: 직불금 이중공제 방지</div>
@@ -10851,7 +10854,7 @@ table.data-table {
 
             <!-- Supabase 마이그레이션 가이드 -->
             <details style="margin-top:18px;padding:14px 16px;background:var(--bg-subtle);border-radius:10px">
-              <summary style="font-size:12px;font-weight:800;cursor:pointer;color:var(--text-primary)">▶ Phase 3 Supabase 마이그레이션 가이드 (펼치기)</summary>
+              <summary style="font-size:12px;font-weight:700;cursor:pointer;color:var(--text-primary)">▶ Phase 3 Supabase 마이그레이션 가이드 (펼치기)</summary>
               <div style="margin-top:12px;font-size:12px;line-height:1.7;color:var(--text-secondary)">
                 <p><strong>현재 (Phase 1·2):</strong> localStorage 키 <code>mm-system-map-status-v1</code>가 Supabase mock 역할.</p>
                 <p><strong>Phase 3 진입 시 변경 사항 (코드 1:1 교체, 인터페이스 동일):</strong></p>
@@ -11117,19 +11120,19 @@ CREATE TABLE system_map_activity (
           statsEl.innerHTML =
             '<div style="background:#F6F6F7;border:1px solid #CFCFD4;border-radius:10px;padding:12px 14px">' +
               '<div style="font-size:11px;font-weight:700;color:#565659;margin-bottom:4px">⚪ 대기</div>' +
-              '<div style="font-size:22px;font-weight:900;color:#565659">' + s['⚪'] + '<span style="font-size:13px;font-weight:700"> / ' + s.total + '</span></div>' +
+              '<div style="font-size:22px;font-weight:700;color:#565659">' + s['⚪'] + '<span style="font-size:13px;font-weight:700"> / ' + s.total + '</span></div>' +
             '</div>' +
             '<div style="background:#FDF3E7;border:1px solid #E8B673;border-radius:10px;padding:12px 14px">' +
               '<div style="font-size:11px;font-weight:700;color:#7C3D06;margin-bottom:4px">🟡 진행 중</div>' +
-              '<div style="font-size:22px;font-weight:900;color:#7C3D06">' + s['🟡'] + '<span style="font-size:13px;font-weight:700"> / ' + s.total + '</span></div>' +
+              '<div style="font-size:22px;font-weight:700;color:#7C3D06">' + s['🟡'] + '<span style="font-size:13px;font-weight:700"> / ' + s.total + '</span></div>' +
             '</div>' +
             '<div style="background:#E6F5EF;border:1px solid #6FCFA9;border-radius:10px;padding:12px 14px">' +
               '<div style="font-size:11px;font-weight:700;color:#00593C;margin-bottom:4px">🟢 완료</div>' +
-              '<div style="font-size:22px;font-weight:900;color:#00593C">' + s['🟢'] + '<span style="font-size:13px;font-weight:700"> / ' + s.total + '</span></div>' +
+              '<div style="font-size:22px;font-weight:700;color:#00593C">' + s['🟢'] + '<span style="font-size:13px;font-weight:700"> / ' + s.total + '</span></div>' +
             '</div>' +
             '<div style="background:#EEF2FF;border:1px solid #BCA8FF;border-radius:10px;padding:12px 14px">' +
               '<div style="font-size:11px;font-weight:700;color:#4B2FCC;margin-bottom:4px">📊 완료율</div>' +
-              '<div style="font-size:22px;font-weight:900;color:#4B2FCC">' + Math.round(s['🟢']/s.total*100) + '<span style="font-size:13px;font-weight:700">%</span></div>' +
+              '<div style="font-size:22px;font-weight:700;color:#4B2FCC">' + Math.round(s['🟢']/s.total*100) + '<span style="font-size:13px;font-weight:700">%</span></div>' +
             '</div>';
         }
 
@@ -11156,7 +11159,7 @@ CREATE TABLE system_map_activity (
 
             return '<div style="padding:14px 0;border-bottom:1px solid var(--border-subtle);display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center">' +
               '<div style="min-width:0">' +
-                '<div style="font-size:13.5px;font-weight:800;color:var(--text-primary);margin-bottom:4px">' +
+                '<div style="font-size:13.5px;font-weight:700;color:var(--text-primary);margin-bottom:4px">' +
                   num + '. ' + item.key +
                 '</div>' +
                 '<div style="font-size:11.5px;color:var(--text-secondary)">' +
@@ -11314,7 +11317,7 @@ CREATE TABLE system_map_activity (
         </div>
         <div class="row" style="justify-content:space-between;margin-top:12px;padding:12px 14px;background:var(--hx-good-wash);border-radius:8px;border-left:3px solid var(--success-700)">
           <div style="font-size:12px;font-weight:700;color:var(--hx-good-d)">합계</div>
-          <div style="font-size:13px;font-weight:800;color:var(--hx-good-d)" id="day-detail-summary">—</div>
+          <div style="font-size:13px;font-weight:700;color:var(--hx-good-d)" id="day-detail-summary">—</div>
         </div>
       </div>
       <div class="modal-footer">
@@ -11762,7 +11765,7 @@ CREATE TABLE system_map_activity (
       var undoBtn = document.createElement('button');
       undoBtn.type = 'button';
       undoBtn.textContent = '↩ 실행취소';
-      undoBtn.style.cssText = 'margin-left:12px;background:#FFFFFF;color:#B45309;border:1px solid #B45309;border-radius:6px;padding:4px 12px;font-weight:800;cursor:pointer;font-size:13px;white-space:nowrap';
+      undoBtn.style.cssText = 'margin-left:12px;background:#FFFFFF;color:#B45309;border:1px solid #B45309;border-radius:6px;padding:4px 12px;font-weight:700;cursor:pointer;font-size:13px;white-space:nowrap';
       var closeBtn = document.createElement('button');
       closeBtn.type = 'button';
       closeBtn.className = 'toast-close';
@@ -12811,7 +12814,7 @@ CREATE TABLE system_map_activity (
                      (k === 'unverified' ? '#DC2626' : '#0086B3');
         return '<div style="background:' + color + ';border-left:4px solid ' + border + ';border-radius:8px;padding:12px 14px">' +
           '<div style="font-size:11px;font-weight:700;color:var(--text-tertiary);margin-bottom:4px">' + label + '</div>' +
-          '<div style="font-size:18px;font-weight:900;font-variant-numeric:tabular-nums">' + amount.toLocaleString() + '</div>' +
+          '<div style="font-size:18px;font-weight:700;font-variant-numeric:tabular-nums">' + amount.toLocaleString() + '</div>' +
           '<div style="font-size:11px;font-weight:700;color:var(--text-secondary);margin-top:2px">' + pct + '%</div>' +
           '</div>';
       }).join('');
@@ -14623,7 +14626,7 @@ CREATE TABLE system_map_activity (
       }).join('');
       var preview = state.paste.slice(0,5).map(function(row){ return '<tr>'+row.map(function(cell,ci){var skip=state.pasteMap[ci]==='skip';return '<td style="padding:4px 8px;border-bottom:1px solid #F6F6F7;font-size:11px;color:'+(skip?'#CFCFD4':'#565659')+';font-weight:'+(skip?400:600)+'">'+mmEsc(cell||'—')+'</td>'}).join('')+'</tr>' }).join('');
       var ph = state.pasteMap.map(function(mk){var cm=COLMAP.find(function(c){return c.key===mk});return '<th style="padding:5px 8px;border-bottom:2px solid #EFEFF1;font-size:11px;background:#FAFAFA;text-align:left">'+(cm?cm.label:'—')+'</th>'}).join('');
-      pp.innerHTML = '<div style="font-size:16px;font-weight:800;color:#005B7A;margin-bottom:10px">📋 붙여넣기 매핑 설정</div><div style="font-size:12px;color:#8E8E93;margin-bottom:12px">각 열의 필드를 지정하세요. 설정은 mm-paste-map에 저장됩니다.</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;padding:12px 14px;background:#FFFFFF;border-radius:8px;border:1px solid #EFEFF1">'+mapSel+'</div><div style="font-size:13px;font-weight:700;margin-bottom:6px">미리보기 ('+state.paste.length+'건)</div><div style="overflow-x:auto;max-height:200px;margin-bottom:12px"><table style="width:100%;border-collapse:separate;border-spacing:0;font-size:12px"><thead><tr>'+ph+'</tr></thead><tbody>'+preview+'</tbody></table></div>'+(state.paste.length>5?'<div style="font-size:11px;color:#B4B4B8;text-align:center;padding:6px">... 외 '+(state.paste.length-5)+'건</div>':'')+'<div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn btn-ghost btn-sm" onclick="mmPurchase.cancelPaste()">취소</button><button class="btn btn-primary btn-sm" onclick="mmPurchase.applyPaste()">✅ '+state.paste.length+'건 등록</button></div>';
+      pp.innerHTML = '<div style="font-size:16px;font-weight:700;color:#005B7A;margin-bottom:10px">📋 붙여넣기 매핑 설정</div><div style="font-size:12px;color:#8E8E93;margin-bottom:12px">각 열의 필드를 지정하세요. 설정은 mm-paste-map에 저장됩니다.</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;padding:12px 14px;background:#FFFFFF;border-radius:8px;border:1px solid #EFEFF1">'+mapSel+'</div><div style="font-size:13px;font-weight:700;margin-bottom:6px">미리보기 ('+state.paste.length+'건)</div><div style="overflow-x:auto;max-height:200px;margin-bottom:12px"><table style="width:100%;border-collapse:separate;border-spacing:0;font-size:12px"><thead><tr>'+ph+'</tr></thead><tbody>'+preview+'</tbody></table></div>'+(state.paste.length>5?'<div style="font-size:11px;color:#B4B4B8;text-align:center;padding:6px">... 외 '+(state.paste.length-5)+'건</div>':'')+'<div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn btn-ghost btn-sm" onclick="mmPurchase.cancelPaste()">취소</button><button class="btn btn-primary btn-sm" onclick="mmPurchase.applyPaste()">✅ '+state.paste.length+'건 등록</button></div>';
     } else { pp.style.display = 'none' }
     // 테이블
     var tbl = document.getElementById('mm-purchase-table');
@@ -15296,7 +15299,7 @@ CREATE TABLE system_map_activity (
           : colItems.map(function(b) { return renderCard(b) }).join('');
         return '<div data-col="'+c.key+'" ondragover="mm'+(mode==='contract'?'ContractDist':'CostDist')+'.onDragOver(event)" ondrop="mm'+(mode==='contract'?'ContractDist':'CostDist')+'.onDrop(event,\''+c.key+'\')" style="flex:1;min-width:200px;background:#FFFFFF;border-radius:10px;border:1px solid '+c.color+'30;display:flex;flex-direction:column">'
           + '<div style="padding:10px 12px;border-bottom:2px solid '+c.color+';background:'+c.color+'10;border-radius:10px 10px 0 0;display:flex;justify-content:space-between;align-items:center">'
-          +   '<label style="display:flex;align-items:center;gap:6px;font-weight:800;color:'+c.color+';font-size:13px;cursor:pointer">'
+          +   '<label style="display:flex;align-items:center;gap:6px;font-weight:700;color:'+c.color+';font-size:13px;cursor:pointer">'
           +     '<input type="checkbox" onchange="mm'+(mode==='contract'?'ContractDist':'CostDist')+'.toggleCol(\''+c.key+'\',this.checked)"> '+c.label
           +   '</label>'
           +   '<span style="font-size:11px;color:#8E8E93">'+colItems.length+'건</span>'
@@ -15304,7 +15307,7 @@ CREATE TABLE system_map_activity (
           + '<div style="flex:1;padding:8px;display:flex;flex-direction:column;gap:6px;min-height:80px;max-height:380px;overflow-y:auto">'+cards+'</div>'
           + '<div style="padding:10px 12px;border-top:1px solid #F6F6F7;background:#FAFAFA;border-radius:0 0 10px 10px;display:flex;justify-content:space-between;align-items:baseline">'
           +   '<span style="font-size:11px;color:#8E8E93">합계</span>'
-          +   '<div style="text-align:right"><div style="font-size:14px;font-weight:800;color:'+c.color+'">'+fmt(colSum)+'</div><div style="font-size:10px;color:#B4B4B8">'+pct+'%</div></div>'
+          +   '<div style="text-align:right"><div style="font-size:14px;font-weight:700;color:'+c.color+'">'+fmt(colSum)+'</div><div style="font-size:10px;color:#B4B4B8">'+pct+'%</div></div>'
           + '</div>'
           + '</div>';
       }).join('');
@@ -15610,7 +15613,7 @@ CREATE TABLE system_map_activity (
     if (!projects.length) {
       tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:#B4B4B8;font-weight:600">' +
         '<div style="font-size:28px;margin-bottom:6px">📁</div>' +
-        '<div style="font-size:13px;font-weight:800;color:#565659">등록된 프로젝트가 없습니다</div>' +
+        '<div style="font-size:13px;font-weight:700;color:#565659">등록된 프로젝트가 없습니다</div>' +
         '<div style="font-size:11px;margin-top:3px">우측 상단 <b>+ 신규 등록</b> 으로 첫 현장을 등록하세요</div>' +
         '</td></tr>';
       return;
@@ -16719,7 +16722,7 @@ CREATE TABLE system_map_activity (
     if (!arr.length){
       tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:48px 20px;color:#B4B4B8;font-weight:600">' +
         '<div style="font-size:32px;margin-bottom:8px">🏢</div>' +
-        '<div style="font-size:14px;font-weight:800;color:#565659;margin-bottom:4px">등록된 거래처가 없습니다</div>' +
+        '<div style="font-size:14px;font-weight:700;color:#565659;margin-bottom:4px">등록된 거래처가 없습니다</div>' +
         '<div style="font-size:12px">우측 ⚡ 신규 거래처 빠른 등록에서 시작하세요</div></td></tr>';
       return;
     }
@@ -16902,7 +16905,7 @@ CREATE TABLE system_map_activity (
     if (!attend.length){
       tbody.innerHTML = '<tr><td colspan="5" class="attend-empty">' +
         '<div style="font-size:28px;margin-bottom:6px">📭</div>' +
-        '<div style="font-size:13px;font-weight:800;color:#565659">등록된 출역 기록이 없습니다</div>' +
+        '<div style="font-size:13px;font-weight:700;color:#565659">등록된 출역 기록이 없습니다</div>' +
         '<div style="font-size:11px;margin-top:3px">위 폼에서 작업자를 선택해 출역을 등록하세요</div></td></tr>';
       return;
     }
@@ -16911,7 +16914,7 @@ CREATE TABLE system_map_activity (
         '<td class="tnum" style="text-align:center">' + (a.date||'—') + '</td>' +
         '<td><strong>' + mmEsc(a.workerName||'—') + '</strong></td>' +
         '<td style="text-align:center">' + mmEsc(a.jobType||'—') + '</td>' +
-        '<td style="text-align:right;font-weight:800">' + fmt(num(a.wage)) + '</td>' +
+        '<td style="text-align:right;font-weight:700">' + fmt(num(a.wage)) + '</td>' +
         '<td style="text-align:center"><button class="btn btn-secondary btn-sm" onclick="window.mmAttend.remove(\'' + a.id + '\')">삭제</button></td>' +
         '</tr>';
     }).join('');
@@ -17039,7 +17042,7 @@ CREATE TABLE system_map_activity (
     if (!arr.length){
       tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:48px 20px;color:#B4B4B8;font-weight:600">' +
         '<div style="font-size:32px;margin-bottom:8px">👷</div>' +
-        '<div style="font-size:14px;font-weight:800;color:#565659;margin-bottom:4px">등록된 일용직이 없습니다</div>' +
+        '<div style="font-size:14px;font-weight:700;color:#565659;margin-bottom:4px">등록된 일용직이 없습니다</div>' +
         '<div style="font-size:12px">우측 ⚡ 신규 인력 빠른 등록에서 시작하세요</div></td></tr>';
       return;
     }
@@ -17264,7 +17267,7 @@ CREATE TABLE system_map_activity (
     if (!alerts.length) {
       tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:48px 20px;color:#B4B4B8;font-weight:600">' +
         '<div style="font-size:32px;margin-bottom:8px">✅</div>' +
-        '<div style="font-size:14px;font-weight:800;color:#565659">활성 경보가 없습니다</div>' +
+        '<div style="font-size:14px;font-weight:700;color:#565659">활성 경보가 없습니다</div>' +
         '<div style="font-size:12px;margin-top:3px">모든 프로젝트가 정상 범위입니다</div></td></tr>';
       return;
     }
@@ -17314,7 +17317,7 @@ CREATE TABLE system_map_activity (
     if (!vendors.length) {
       tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:48px 20px;color:#B4B4B8;font-weight:600">' +
         '<div style="font-size:32px;margin-bottom:8px">📊</div>' +
-        '<div style="font-size:14px;font-weight:800;color:#565659">거래처 매입·결제 현황 데이터 없음</div>' +
+        '<div style="font-size:14px;font-weight:700;color:#565659">거래처 매입·결제 현황 데이터 없음</div>' +
         '<div style="font-size:12px;margin-top:3px">매입 등록(거래처 입력)이 누적되면 자동 집계됩니다</div></td></tr>';
       return;
     }
@@ -17453,7 +17456,7 @@ CREATE TABLE system_map_activity (
     if (!logs.length) {
       list.innerHTML = '<div style="padding:40px 20px;text-align:center;color:#B4B4B8;font-weight:600">' +
         '<div style="font-size:28px;margin-bottom:6px">📋</div>' +
-        '<div style="font-size:13px;font-weight:800;color:#565659">기록된 활동이 없습니다</div>' +
+        '<div style="font-size:13px;font-weight:700;color:#565659">기록된 활동이 없습니다</div>' +
         '<div style="font-size:11px;margin-top:3px">매입/기성 등록, 로그인 등 주요 동작이 자동 기록됩니다</div>' +
         '</div>';
       return;
@@ -18852,7 +18855,7 @@ CREATE TABLE system_map_activity (
     if (bodyEl) {
       var rows = Object.keys(data||{}).map(function(k){
         var v = data[k];
-        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #F6F6F7;gap:12px"><span style="font-size:12px;color:#8E8E93;font-weight:700;flex-shrink:0">' + mmEsc(k) + '</span><span style="font-size:13px;color:#0A0A0A;font-weight:800;text-align:right;font-variant-numeric:tabular-nums">' + mmEsc(v||'—') + '</span></div>';
+        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #F6F6F7;gap:12px"><span style="font-size:12px;color:#8E8E93;font-weight:700;flex-shrink:0">' + mmEsc(k) + '</span><span style="font-size:13px;color:#0A0A0A;font-weight:700;text-align:right;font-variant-numeric:tabular-nums">' + mmEsc(v||'—') + '</span></div>';
       }).join('');
       bodyEl.innerHTML = '<div style="padding:8px 0">' + rows + '</div>';
     }
@@ -19000,7 +19003,7 @@ CREATE TABLE system_map_activity (
               var v3 = hmGrid[c[0]+':'+m3] || 0; rowSum += v3;
               var al = hmMax > 0 ? v3/hmMax : 0;
               hh += '<div class="hm-cell'+(v3>0&&v3===hmMax?' hm-max':'')+'" title="'+c[1]+' '+m3+'월 — '+v3.toLocaleString()+'원" style="background:'+(v3>0?'rgba(0, 134, 179,'+(0.12+0.78*al).toFixed(2)+')':'#F6F6F7')+'">'
-                + (v3>0 ? '<span style="font-size:9px;font-weight:800;color:'+(al>0.45?'#FFFFFF':'#005B7A')+'">'+fmtMan(v3)+'</span>' : '')
+                + (v3>0 ? '<span style="font-size:9px;font-weight:700;color:'+(al>0.45?'#FFFFFF':'#005B7A')+'">'+fmtMan(v3)+'</span>' : '')
                 + '</div>';
             }
             hh += '<div class="hm-row-label" style="justify-content:center;padding-right:0;color:#005B7A">'+(rowSum>0?fmtMan(rowSum):'—')+'</div>';
@@ -19162,7 +19165,7 @@ CREATE TABLE system_map_activity (
   </div>\
   <div style="padding:16px;display:grid;grid-template-columns:repeat(auto-fit, minmax(280px,1fr));gap:14px">\
     <div style="padding:14px;border:1px solid #EFEFF1;border-radius:10px;background:#FAFAFA">\
-      <div style="font-size:14px;font-weight:900;margin-bottom:6px">💾 백업 / 복원</div>\
+      <div style="font-size:14px;font-weight:700;margin-bottom:6px">💾 백업 / 복원</div>\
       <div style="font-size:11px;color:#8E8E93;margin-bottom:10px">전체 localStorage 14개 키 → JSON 파일</div>\
       <div style="display:flex;gap:6px;flex-wrap:wrap">\
         <button class="btn btn-primary btn-sm" onclick="window.mmBackup&&window.mmBackup()">💾 백업 다운로드</button>\
@@ -19170,7 +19173,7 @@ CREATE TABLE system_map_activity (
       </div>\
     </div>\
     <div style="padding:14px;border:1px solid #EFEFF1;border-radius:10px;background:#FAFAFA">\
-      <div style="font-size:14px;font-weight:900;margin-bottom:8px">⚙️ 경보 임계값</div>\
+      <div style="font-size:14px;font-weight:700;margin-bottom:8px">⚙️ 경보 임계값</div>\
       <div style="display:flex;flex-direction:column;gap:6px;font-size:12px">\
         <label style="display:flex;justify-content:space-between;align-items:center">마진 최소(%)<input id="mm-th-profit" type="number" value="'+th.profitMin+'" style="width:70px;padding:5px;border:1px solid #CFCFD4;border-radius:5px;text-align:right"/></label>\
         <label style="display:flex;justify-content:space-between;align-items:center">원가율 최대(%)<input id="mm-th-cost" type="number" value="'+th.costMax+'" style="width:70px;padding:5px;border:1px solid #CFCFD4;border-radius:5px;text-align:right"/></label>\
@@ -19179,7 +19182,7 @@ CREATE TABLE system_map_activity (
       </div>\
     </div>\
     <div style="padding:14px;border:1px solid #EFEFF1;border-radius:10px;background:#FAFAFA">\
-      <div style="font-size:14px;font-weight:900;margin-bottom:8px">👥 알림 수신자</div>\
+      <div style="font-size:14px;font-weight:700;margin-bottom:8px">👥 알림 수신자</div>\
       <div style="display:flex;flex-direction:column;gap:5px;font-size:12px">\
         <input id="mm-rc-name" placeholder="이름" style="padding:6px;border:1px solid #CFCFD4;border-radius:5px"/>\
         <input id="mm-rc-email" placeholder="이메일" style="padding:6px;border:1px solid #CFCFD4;border-radius:5px"/>\
@@ -19189,13 +19192,13 @@ CREATE TABLE system_map_activity (
       </div>\
     </div>\
     <div style="padding:14px;border:1px solid #EFEFF1;border-radius:10px;background:#FAFAFA">\
-      <div style="font-size:14px;font-weight:900;margin-bottom:6px">👤 사용자 관리</div>\
+      <div style="font-size:14px;font-weight:700;margin-bottom:6px">👤 사용자 관리</div>\
       <div style="font-size:11px;color:#8E8E93;margin-bottom:8px">Supabase user_profiles 테이블</div>\
       <button class="btn btn-secondary btn-sm" onclick="window.mmUsers&&window.mmUsers.list().then(function(arr){document.getElementById(&quot;mm-user-list&quot;).innerHTML=arr.length?arr.map(function(u){return window.mmEsc(u.email||u.user_id||&quot;?&quot;)+&quot; · &quot;+window.mmEsc(u.role||&quot;user&quot;)+&quot; · &quot;+window.mmEsc(u.name||&quot;-&quot;)}).join(&quot;&lt;br&gt;&quot;):&quot;&lt;em style=color:#B4B4B8&gt;가입 사용자 없음 (또는 Supabase 미연동)&lt;/em&gt;&quot;})">👤 사용자 목록 조회</button>\
       <div id="mm-user-list" style="font-size:11px;color:#565659;margin-top:8px;max-height:90px;overflow:auto;padding:6px;background:#FFFFFF;border-radius:5px"><em style="color:#B4B4B8">조회 버튼을 누르세요</em></div>\
     </div>\
     <div style="padding:14px;border:1px solid #EFEFF1;border-radius:10px;background:#FAFAFA">\
-      <div style="font-size:14px;font-weight:900;margin-bottom:6px">📊 자동 경보 (현재)</div>\
+      <div style="font-size:14px;font-weight:700;margin-bottom:6px">📊 자동 경보 (현재)</div>\
       <div id="mm-alerts-summary" style="font-size:12px;color:#565659;margin-bottom:8px">집계 버튼을 누르세요</div>\
       <button class="btn btn-secondary btn-sm" onclick="(function(){var arr=window.mmAlertCheck?window.mmAlertCheck():[];var html=arr.length?arr.map(function(a){return &quot;⚠️ &quot;+(a.pid||&quot;?&quot;)+&quot; — &quot;+a.type+&quot; (&quot;+a.detail+&quot;)&quot;}).join(&quot;&lt;br&gt;&quot;):&quot;✅ 모든 프로젝트 정상&quot;;document.getElementById(&quot;mm-alerts-summary&quot;).innerHTML=html})()">🔄 재검사</button>\
     </div>\
@@ -19284,7 +19287,7 @@ CREATE TABLE system_map_activity (
       var lbl = ST_LABELS[s] || ST_LABELS.in_progress;
       var clr = ST_COLORS[s] || ST_COLORS.in_progress;
       var attrs = 'data-status="'+s+'"' + (type?' data-status-type="'+type+'"':'') + (id?' data-status-id="'+id+'"':'');
-      return '<span class="mm-status-badge" '+attrs+' style="display:inline-block;padding:3px 9px;border-radius:99px;background:'+clr+'22;color:'+clr+';font-size:11px;font-weight:800;cursor:pointer;user-select:none;white-space:nowrap" title="클릭으로 상태 변경">'+lbl+'</span>';
+      return '<span class="mm-status-badge" '+attrs+' style="display:inline-block;padding:3px 9px;border-radius:99px;background:'+clr+'22;color:'+clr+';font-size:11px;font-weight:700;cursor:pointer;user-select:none;white-space:nowrap" title="클릭으로 상태 변경">'+lbl+'</span>';
     },
     set: function(type, id, status) {
       try {
@@ -19571,7 +19574,7 @@ CREATE TABLE system_map_activity (
       var seal = localStorage.getItem(SEAL_KEY) || '';
       return '<div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #0A0A0A;padding-bottom:14px;margin-bottom:18px">' +
         '<div>' +
-        '<div style="font-size:22px;font-weight:900;color:#0A0A0A">' + (c.nameDisplay||c.name) + '</div>' +
+        '<div style="font-size:22px;font-weight:700;color:#0A0A0A">' + (c.nameDisplay||c.name) + '</div>' +
         '<div style="font-size:11px;color:#8E8E93;margin-top:4px">사업자등록번호 ' + c.bizNo + ' · 대표 ' + c.ceo + '</div>' +
         '<div style="font-size:11px;color:#8E8E93">' + c.addr + '</div>' +
         '<div style="font-size:11px;color:#8E8E93">📞 ' + c.phone + ' · 📧 ' + c.email + '</div>' +
@@ -19704,26 +19707,26 @@ CREATE TABLE system_map_activity (
   </div>\
   <div style="padding:16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px">\
     <div style="padding:14px;border:1px solid #EFEFF1;border-radius:10px;background:#FAFAFA">\
-      <div style="font-size:14px;font-weight:900;margin-bottom:8px">☁️ Supabase</div>\
+      <div style="font-size:14px;font-weight:700;margin-bottom:8px">☁️ Supabase</div>\
       <div style="font-size:12px;color:'+(ready()?'#00875A':'#DC2626')+';font-weight:700;margin-bottom:8px">'+(ready()?'✅ 연결됨':'❌ 미연결')+'</div>\
       <div style="font-size:11px;color:#8E8E93">10 기본 테이블 + 5 신규 테이블<br>SQL 파일: supabase-schema-phase1.sql</div>\
     </div>\
     <div style="padding:14px;border:1px solid #EFEFF1;border-radius:10px;background:#FAFAFA">\
-      <div style="font-size:14px;font-weight:900;margin-bottom:8px">📧 Resend (이메일)</div>\
+      <div style="font-size:14px;font-weight:700;margin-bottom:8px">📧 Resend (이메일)</div>\
       <div style="font-size:11px;color:#8E8E93;margin-bottom:6px;line-height:1.5">키는 <b>서버(Netlify 환경변수)</b>에서 관리합니다 — 브라우저에 저장하지 않습니다.<br>Netlify → Environment variables → <code>RESEND_API_KEY</code> (도메인 인증 후 <code>RESEND_FROM</code>)</div>\
       <input id="mm-test-email" placeholder="테스트 수신 이메일" style="width:100%;padding:6px;border:1px solid #CFCFD4;border-radius:5px;font-size:12px;margin-bottom:6px"/>\
       <button class="btn btn-primary btn-sm" style="width:100%" onclick="window.mmSendEmail((document.getElementById(&quot;mm-test-email&quot;).value||&quot;&quot;).trim(),&quot;[명문이엔지] 테스트 메일&quot;,&quot;Resend 연동 테스트 메일입니다. 도착하면 정상 작동입니다.&quot;)">📧 테스트 발송</button>\
     </div>\
     <div style="padding:14px;border:1px solid #EFEFF1;border-radius:10px;background:#FAFAFA">\
-      <div style="font-size:14px;font-weight:900;margin-bottom:8px">📱 SMS</div>\
+      <div style="font-size:14px;font-weight:700;margin-bottom:8px">📱 SMS</div>\
       <div style="font-size:11px;color:#8E8E93;margin-bottom:6px;line-height:1.5">키/발신번호는 <b>서버(Netlify 환경변수)</b>에서 관리합니다.<br>Netlify → Environment variables → <code>ALIGO_API_KEY</code> · <code>ALIGO_USER_ID</code> · <code>ALIGO_SENDER</code></div>\
       <input id="mm-test-phone" placeholder="테스트 수신 번호 (010-0000-0000)" style="width:100%;padding:6px;border:1px solid #CFCFD4;border-radius:5px;font-size:12px;margin-bottom:6px"/>\
       <button class="btn btn-primary btn-sm" style="width:100%" onclick="window.mmSendSms((document.getElementById(&quot;mm-test-phone&quot;).value||&quot;&quot;).trim(),&quot;[명문이엔지] 테스트 SMS입니다&quot;)">📱 테스트 발송</button>\
     </div>\
     <div style="padding:14px;border:1px solid #EFEFF1;border-radius:10px;background:#FAFAFA">\
-      <div style="font-size:14px;font-weight:900;margin-bottom:8px">💾 저장소 상태</div>\
+      <div style="font-size:14px;font-weight:700;margin-bottom:8px">💾 저장소 상태</div>\
       <div style="font-size:12px;color:#8E8E93;margin-bottom:8px">localStorage 사용량</div>\
-      <div style="font-size:18px;font-weight:900;color:'+(q.pct>90?'#DC2626':q.pct>70?'#B45309':'#00875A')+'">'+q.kb+' KB ('+q.pct+'%)</div>\
+      <div style="font-size:18px;font-weight:700;color:'+(q.pct>90?'#DC2626':q.pct>70?'#B45309':'#00875A')+'">'+q.kb+' KB ('+q.pct+'%)</div>\
       <div style="height:8px;background:#EFEFF1;border-radius:99px;overflow:hidden;margin-top:6px"><div style="height:100%;width:'+q.pct+'%;background:'+(q.pct>90?'#DC2626':q.pct>70?'#B45309':'#00875A')+';transition:width 0.3s"></div></div>\
       <div class="t-xs" style="margin-top:6px;color:#B4B4B8">한도 5MB · 90% 도달 시 자동 경고</div>\
     </div>\
@@ -20118,10 +20121,10 @@ CREATE TABLE system_map_activity (
         var medals=['🥇','🥈','🥉','4','5'];
         list.innerHTML = top.map(function(w,i){
           return '<div class="row" style="align-items:center;gap:10px;padding:10px 12px;border-radius:8px;'+(i<3?'background:var(--bg-subtle)':'')+'">'+
-            '<span style="font-size:'+(i<3?'18px':'14px')+';font-weight:900;color:'+(i===0?'#B45309':i<3?'#B4B4B8':'var(--text-tertiary)')+';width:24px;text-align:center">'+medals[i]+'</span>'+
-            '<div style="flex:1"><div style="font-size:13px;font-weight:800">'+mmEsc(w.name||'—')+' <span class="badge" style="background:#E8F9FF;color:#005B7A;font-size:10px">'+mmEsc(w.primaryJob||'일반')+'</span></div>'+
+            '<span style="font-size:'+(i<3?'18px':'14px')+';font-weight:700;color:'+(i===0?'#B45309':i<3?'#B4B4B8':'var(--text-tertiary)')+';width:24px;text-align:center">'+medals[i]+'</span>'+
+            '<div style="flex:1"><div style="font-size:13px;font-weight:700">'+mmEsc(w.name||'—')+' <span class="badge" style="background:#E8F9FF;color:#005B7A;font-size:10px">'+mmEsc(w.primaryJob||'일반')+'</span></div>'+
             '<div class="t-xs">출역 '+(w.daysWorked||0)+'일</div></div>'+
-            '<div style="text-align:right"><div style="font-size:14px;font-weight:800;color:var(--primary-700)" class="t-num">'+fmtMan(num(w.totalWage))+'</div></div></div>';
+            '<div style="text-align:right"><div style="font-size:14px;font-weight:700;color:var(--primary-700)" class="t-num">'+fmtMan(num(w.totalWage))+'</div></div></div>';
         }).join('');
       }
     }
@@ -20162,9 +20165,9 @@ CREATE TABLE system_map_activity (
         var medals=['🥇','🥈','🥉','4','5'];
         list.innerHTML = top.map(function(t,i){
           return '<div class="row" style="align-items:center;gap:10px;padding:10px 12px;border-radius:8px;'+(i<3?'background:var(--bg-subtle)':'')+'">'+
-            '<span style="font-size:'+(i<3?'18px':'14px')+';font-weight:900;width:24px;text-align:center">'+medals[i]+'</span>'+
-            '<div style="flex:1"><div style="font-size:13px;font-weight:800">'+mmEsc(t.name)+'</div><div class="t-xs">'+t.cnt+'건 거래</div></div>'+
-            '<div style="text-align:right"><div style="font-size:14px;font-weight:800;color:var(--primary-700)" class="t-num">'+fmtEok(t.amt)+'</div></div></div>';
+            '<span style="font-size:'+(i<3?'18px':'14px')+';font-weight:700;width:24px;text-align:center">'+medals[i]+'</span>'+
+            '<div style="flex:1"><div style="font-size:13px;font-weight:700">'+mmEsc(t.name)+'</div><div class="t-xs">'+t.cnt+'건 거래</div></div>'+
+            '<div style="text-align:right"><div style="font-size:14px;font-weight:700;color:var(--primary-700)" class="t-num">'+fmtEok(t.amt)+'</div></div></div>';
         }).join('');
       }
     }
@@ -20189,9 +20192,9 @@ CREATE TABLE system_map_activity (
         var medals=['🥇','🥈','🥉','4','5'];
         list.innerHTML = top.map(function(t,i){
           return '<div class="row" style="align-items:center;gap:10px;padding:10px 12px;border-radius:8px;'+(i<3?'background:var(--bg-subtle)':'')+'">'+
-            '<span style="font-size:'+(i<3?'18px':'14px')+';font-weight:900;width:24px;text-align:center">'+medals[i]+'</span>'+
-            '<div style="flex:1"><div style="font-size:13px;font-weight:800">'+mmEsc(t.name||'—')+' <span class="badge" style="background:#E8F9FF;color:#005B7A;font-size:10px">'+mmEsc(t.job||'일반')+'</span></div></div>'+
-            '<div style="text-align:right"><div style="font-size:14px;font-weight:800;color:var(--primary-700)" class="t-num">'+t.days+'일</div></div></div>';
+            '<span style="font-size:'+(i<3?'18px':'14px')+';font-weight:700;width:24px;text-align:center">'+medals[i]+'</span>'+
+            '<div style="flex:1"><div style="font-size:13px;font-weight:700">'+mmEsc(t.name||'—')+' <span class="badge" style="background:#E8F9FF;color:#005B7A;font-size:10px">'+mmEsc(t.job||'일반')+'</span></div></div>'+
+            '<div style="text-align:right"><div style="font-size:14px;font-weight:700;color:var(--primary-700)" class="t-num">'+t.days+'일</div></div></div>';
         }).join('');
       }
     }
@@ -20376,10 +20379,10 @@ CREATE TABLE system_map_activity (
         var medals=['🥇','🥈','🥉','4','5'];
         list.innerHTML = top.map(function(t,i){
           return '<div class="row" style="align-items:center;gap:10px;padding:10px 12px;border-radius:8px;'+(i<3?'background:var(--bg-subtle)':'')+'">'+
-            '<span style="font-size:'+(i<3?'18px':'14px')+';font-weight:900;width:24px;text-align:center">'+medals[i]+'</span>'+
+            '<span style="font-size:'+(i<3?'18px':'14px')+';font-weight:700;width:24px;text-align:center">'+medals[i]+'</span>'+
             '<div class="avatar a-1" style="width:28px;height:28px;font-size:12px">'+(t.name||'?').charAt(0)+'</div>'+
-            '<div style="flex:1"><div style="font-size:13px;font-weight:800">'+t.name+'</div></div>'+
-            '<div style="text-align:right"><div style="font-size:14px;font-weight:800;color:var(--primary-700)" class="t-num">'+t.cnt+'건</div></div></div>';
+            '<div style="flex:1"><div style="font-size:13px;font-weight:700">'+t.name+'</div></div>'+
+            '<div style="text-align:right"><div style="font-size:14px;font-weight:700;color:var(--primary-700)" class="t-num">'+t.cnt+'건</div></div></div>';
         }).join('');
       }
     }
