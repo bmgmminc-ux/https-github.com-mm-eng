@@ -16174,7 +16174,12 @@ CREATE TABLE system_map_activity (
   }
 
   // ── 자체 관리자 계정 (Supabase 불필요) [#148] ──
-  // 추가 계정은 ADMIN_ACCOUNTS 배열에 { id, pw, name, role } 추가
+  // ⚠️ [지혈1·2 보류] 이 경로는 두 가지 결함을 안고 있다 —
+  //    (a) 비밀번호가 공개 배포 파일에 평문으로 노출된다
+  //    (b) 이 경로 로그인은 supabase:false 를 반환해 자동 동기화·클라우드 내려받기가
+  //        아예 실행되지 않는다(그 브라우저에만 데이터가 쌓인다)
+  //    대표 Supabase 계정(bmgmminc@gmail.com) 생성 후 별칭+Supabase 인증으로 교체 예정.
+  //    지금 교체하면 계정이 없어 로그인이 막히므로 보류한다.
   var ADMIN_ACCOUNTS = [
     { id:'bmg', pw:'myungmoon2026', name:'배문기 대표', role:'ceo' }
   ];
@@ -16984,7 +16989,7 @@ CREATE TABLE system_map_activity (
     var worker = {
       id: 'W' + Date.now(),
       name: name.trim(),
-      rrn: (document.getElementById('wk-jumin')||{}).value || '', // [주민번호 통일 — 전수감사] jumin→rrn 표준화: push(jumin_masked:w.rrn)·CSV(w.rrn)가 이 경로 등록분만 null/공백으로 내보내던 결함
+      rrn: (document.getElementById('wk-jumin')||{}).value || '', // [주민번호 통일] jumin→rrn 표준화: CSV(w.rrn)가 이 경로. [지혈6] 클라우드 push 는 중단됨 등록분만 null/공백으로 내보내던 결함
       address: (document.getElementById('wk-addr')||{}).value || '',
       phone: (document.getElementById('wk-phone')||{}).value || '',
       primaryJob: pjob,
@@ -17532,12 +17537,24 @@ CREATE TABLE system_map_activity (
       // [전수조사] 셀프-에코 가드 — 이 기기가 방금 push한 변경의 realtime 반향이면 pull 생략 (스테일 덮어쓰기 레이스 + '다른 기기 변경' 토스트 스팸 방지)
       if (Date.now() - (window._mmSelfWriteAt || 0) < 6000) return;
       if (!window.mmData || !window.mmData.pull) return;
-      window.mmData.pull().then(function(r) {
-        if (r && r.ok) {
-          refreshAll();
-          if (window.globalToast) window.globalToast('🔄 다른 기기 변경 반영됨', 'info');
-        }
-      });
+      function _applyPull(){
+        window.mmData.pull().then(function(r) {
+          if (r && r.ok) {
+            refreshAll();
+            if (window.globalToast) window.globalToast('🔄 다른 기기 변경 반영됨', 'info');
+          }
+        });
+      }
+      // [지혈3] 아직 올리지 못한 내 변경이 있으면 먼저 올린다 — syncOnLogin 과 같은 정책.
+      // 이 가드가 없어 다른 기기의 저장이 내 미전송 입력을 덮고도 성공 토스트가 뜨던 결함.
+      if (window.mmData.hasUnsent && window.mmData.hasUnsent() && window.mmData.push) {
+        window.mmData.push().then(function(pr) {
+          if (pr && pr.ok) { _applyPull(); }
+          else if (window.globalToast) window.globalToast('⚠️ 내 변경을 올리지 못해 내려받기를 보류했습니다 — 연결 확인 후 재시도', 'error', 7000);
+        });
+        return;
+      }
+      _applyPull();
     }, 900);
   }
 
@@ -17603,7 +17620,8 @@ CREATE TABLE system_map_activity (
     try { var a = JSON.parse(localStorage.getItem(DASH_KEY)||'[]'); return Array.isArray(a)?a:[] }
     catch(e) { return [] }
   }
-  function saveLocal(arr) { try { localStorage.setItem(DASH_KEY, JSON.stringify(arr)); } catch(e) { if (window.globalToast) globalToast('⛔ 동기화 저장 실패 — 저장 공간 부족: ' + e.message, 'error', 8000); } }  // [전수조사] quota 가드
+  // [지혈3] _fromRemote=true 는 pull 이 내려받은 내용을 쓸 때 — 이때는 dirty 를 찍지 않는다(무한 왕복 방지)
+  function saveLocal(arr, _fromRemote) { try { localStorage.setItem(DASH_KEY, JSON.stringify(arr)); if (!_fromRemote) { try{ localStorage.setItem('mm-dash-dirty','1'); }catch(_d){} } } catch(e) { if (window.globalToast) globalToast('⛔ 동기화 저장 실패 — 저장 공간 부족: ' + e.message, 'error', 8000); } }  // [전수조사] quota 가드 + [지혈3] 저장 즉시 dirty
 
   // ── Supabase rows → localStorage Project 형식 ──
   function assembleProject(pr, costRows, ciRows, bRows, oiRows) {
@@ -17621,6 +17639,7 @@ CREATE TABLE system_map_activity (
     });
     (ciRows||[]).forEach(function(r) {
       p.costItems.push({
+        id: r.client_id||'',   // [지혈4] 첨부 링크 키 복원 — 이게 없어 재로그인 1회로 증빙 첨부가 끊겼다
         type: r.type, vendor: r.vendor||'', workerName: r.worker_name||'', desc: r.desc_text||'',
         supplyAmt: num(r.supply_amt), tax: num(r.tax), total: num(r.total),
         paidAmount: num(r.paid_amount), contractAmt: num(r.contract_amt), deduction: num(r.deduction),
@@ -17675,7 +17694,7 @@ CREATE TABLE system_map_activity (
                actual: bint(k.actual), seed_actual: bint(k._seedActual) };  // 미세팅은 0으로 푸시(컬럼 NOT NULL 가능성) — 부트스트랩이 0/undefined 동일하게 안전 처리(매트릭스 검증됨)
     });
     var costItems = (p.costItems||[]).filter(function(it){return it.type}).map(function(it) {
-      return { project_id: p.id, type: it.type, vendor: it.vendor||null, worker_name: it.workerName||null, desc_text: it.desc||null,
+      return { project_id: p.id, client_id: it.id||null, type: it.type, vendor: it.vendor||null, worker_name: it.workerName||null, desc_text: it.desc||null,
         supply_amt: bint(it.supplyAmt), tax: bint(it.tax), total: bint(it.total),
         paid_amount: bint(it.paidAmount), contract_amt: bint(it.contractAmt), deduction: bint(it.deduction),
         attrib_cat: it.attribCat||null,  // [귀속 공종 — B안] 직불 행의 귀속 공종 (컬럼 부재 시 push 폴백이 제거)
@@ -17741,7 +17760,8 @@ CREATE TABLE system_map_activity (
           (np.costItems||[]).forEach(function(it){ if (!it.attribCat) { var k=_ak(it); if (_apool[k] && _apool[k].length) it.attribCat = _apool[k].shift(); } });
         });
       } catch(_ae) {}
-      saveLocal(projects);
+      saveLocal(projects, true);   // [지혈3] 원격 유래 — dirty 미표시
+      try { lastHash = localStorage.getItem(DASH_KEY) || ''; } catch(_lh){}   // [지혈3] 방금 내려받은 내용을 '미전송 변경'으로 오인하지 않도록 기준선 갱신
       window.dispatchEvent(new StorageEvent('storage', { key: DASH_KEY }));
       return { ok:true, msg:'다운로드 완료 — 프로젝트 ' + projects.length + '건' };
     } catch(e) { return { ok:false, msg:'PULL 실패: ' + (e.message||e) } }
@@ -17773,6 +17793,11 @@ CREATE TABLE system_map_activity (
         await sb.from('cost_items').delete().eq('project_id', d.project.id);
         if (d.costItems.length) {
           var r3 = await sb.from('cost_items').insert(d.costItems);
+          if (r3.error && /client_id/i.test(r3.error.message||'')) {
+            // [지혈4] client_id 컬럼 미생성 환경 폴백 — SQL 실행 전에도 동기화는 정상 동작(첨부 링크만 미보존)
+            d.costItems.forEach(function(x){ delete x.client_id; });
+            r3 = await sb.from('cost_items').insert(d.costItems);
+          }
           if (r3.error && /attrib_cat/i.test(r3.error.message||'')) {
             // [귀속 공종 — B안] attrib_cat 컬럼 미생성 환경 폴백 — delete 후 insert 실패로 클라우드가 비는 사고 방지(로컬 attribCat은 유지)
             d.costItems.forEach(function(x){ delete x.attrib_cat; });
@@ -17934,7 +17959,7 @@ CREATE TABLE system_map_activity (
       var vP=_mVendors().map(function(v){ return { id:_mCloudId('v',v.name), owner_id:ownerId, name:v.name, business_no:v.bizNo, phone:v.phone, category:v.category, memo:v.memo, email:v.email, address:v.addr, ceo:v.ceo }; });
       if(vP.length){ var rv=await sb.from('vendors').upsert(vP,{ onConflict:'id' }); if(rv.error&&/ceo/i.test(rv.error.message||'')){ vP.forEach(function(x){ delete x.ceo; }); rv=await sb.from('vendors').upsert(vP,{ onConflict:'id' }); } if(rv.error) return { ok:false, msg:'거래처: '+rv.error.message }; }
       // [주민번호 통일 — 전수감사] rrn 표준 + jumin 레거시 폴백 — 구(舊) add() 등록분(jumin만 보유)이 항상 null로 push되어 주민번호가 클라우드에 미도달하던 결함 (push 화이트리스트 누락과 동급)
-      var wP=_mLoad('mm-workers').filter(function(w){ return w && w.name; }).map(function(w){ return { id:_mCloudId('w',w.name), owner_id:ownerId, name:w.name, jumin_masked:w.rrn||w.jumin||null, phone:w.phone||null, address:w.address||null, primary_job:w.primaryJob||null, primary_wage:Math.round(w.primaryWage||0), alt_jobs:Array.isArray(w.altJobs)?w.altJobs:[] }; });  // [수술⑤] address 동기화 편입 — 거래처는 포함인데 일용직만 누락이던 비대칭
+      var wP=_mLoad('mm-workers').filter(function(w){ return w && w.name; }).map(function(w){ return { id:_mCloudId('w',w.name), owner_id:ownerId, name:w.name, jumin_masked:null,  /* [지혈6] 주민번호 클라우드 전송 중단 — 컬럼명은 masked 인데 원문이 올라가고 있었다. 암호화 도입 전까지 로컬 보관만. */ phone:w.phone||null, address:w.address||null, primary_job:w.primaryJob||null, primary_wage:Math.round(w.primaryWage||0), alt_jobs:Array.isArray(w.altJobs)?w.altJobs:[] }; });  // [수술⑤] address 동기화 편입 — 거래처는 포함인데 일용직만 누락이던 비대칭
       if(wP.length){ var rw=await sb.from('workers').upsert(wP,{ onConflict:'id' }); if(rw.error) return { ok:false, msg:'일용직: '+rw.error.message }; }
       // [전수조사 H1] 툼스톤 잔존분 클라우드 삭제 재시도 — 삭제 당시 실패(오프라인 등)했어도 autoSync push마다 재시도
       // [재등록 보호 — 전수감사] 로컬에 다시 존재하는 이름은 툼스톤 해제: 삭제·개명 후 10분 내 재등록한 행을 push가 클라우드에서 반복 삭제하던 결함
@@ -17969,7 +17994,7 @@ CREATE TABLE system_map_activity (
       else { localStorage.setItem('mm-vendors-v23', JSON.stringify(_lvArr)); localStorage.removeItem('mm-vendors-v2'); localStorage.removeItem('mm-vendors'); }
       var lw={}; _mLoad('mm-workers').forEach(function(w){ if(w&&w.name&&!_mTombHas('w',w.name)) lw[_mNorm(w.name)]=w; });
       // [주민번호 통일 — 전수감사] rrn 폴백 체인에 ex.jumin 추가 — pull 1회로 레거시 jumin 행이 rrn 표준으로 이행
-      (rw.data||[]).forEach(function(r){ if(r.name&&!_mTombHas('w',r.name)){ var n=_mNorm(r.name); map['w:'+n]=r.id; var ex=lw[n]||{}; lw[n]=Object.assign({}, ex, { id:ex.id||('WK'+String(r.id).slice(0,8)), name:r.name, rrn:ex.rrn||ex.jumin||r.jumin_masked||'', phone:ex.phone||r.phone||'', address:ex.address||r.address||'', primaryJob:ex.primaryJob||r.primary_job||'일반', primaryWage:ex.primaryWage||r.primary_wage||0, altJobs:(Array.isArray(ex.altJobs)&&ex.altJobs.length)?ex.altJobs:(Array.isArray(r.alt_jobs)?r.alt_jobs:[]), daysWorked:ex.daysWorked||0, totalWage:ex.totalWage||0, createdAt:ex.createdAt||r.created_at }); } });
+      (rw.data||[]).forEach(function(r){ if(r.name&&!_mTombHas('w',r.name)){ var n=_mNorm(r.name); map['w:'+n]=r.id; var ex=lw[n]||{}; lw[n]=Object.assign({}, ex, { id:ex.id||('WK'+String(r.id).slice(0,8)), name:r.name, rrn:ex.rrn||ex.jumin||'',  /* [지혈6] 클라우드 값은 더 이상 읽지 않는다 */ phone:ex.phone||r.phone||'', address:ex.address||r.address||'', primaryJob:ex.primaryJob||r.primary_job||'일반', primaryWage:ex.primaryWage||r.primary_wage||0, altJobs:(Array.isArray(ex.altJobs)&&ex.altJobs.length)?ex.altJobs:(Array.isArray(r.alt_jobs)?r.alt_jobs:[]), daysWorked:ex.daysWorked||0, totalWage:ex.totalWage||0, createdAt:ex.createdAt||r.created_at }); } });
       localStorage.setItem('mm-workers', JSON.stringify(Object.keys(lw).map(function(k){ return lw[k]; })));
       _mIdMapSave(map);
       try{ window.dispatchEvent(new StorageEvent('storage',{ key:'mm-vendors-v23' })); }catch(e){}
@@ -18058,6 +18083,9 @@ CREATE TABLE system_map_activity (
     pushSettings: pushSettings, pullSettings: pullSettings,
     pushAttendance: pushAttendance, pullAttendance: pullAttendance,
     setAutoSync: setAutoSync, isAutoSync: function(){ return autoSync },
+    // [지혈3] 아직 클라우드로 올리지 못한 로컬 변경이 있는가.
+    // 워처가 도는 3초 사이는 dirty 플래그가 없으므로 내용 해시도 함께 본다.
+    hasUnsent: function(){ try { return (localStorage.getItem(DASH_KEY)||'') !== lastHash || localStorage.getItem('mm-dash-dirty') === '1'; } catch(e) { return false; } },
     mode: function(){ return sbReady() ? 'supabase' : 'local' }
   };
 })();
@@ -19985,6 +20013,11 @@ CREATE TABLE system_map_activity (
   // ═══════════════════════════════════════════════════════════════
   function camelToSnake(s){ return s.replace(/([A-Z])/g, function(m){return '_'+m.toLowerCase();}); }
   function toSnakeObj(o){ var out={}; Object.keys(o).forEach(function(k){ if (k==='id'||k==='createdAt') return; out[camelToSnake(k)] = o[k]; }); return out; }
+  // [지혈5] 중복 판정 키 — 서버 부여 컬럼(id·created_at)을 뺀 나머지 값으로 같은 행인지 본다
+  function _rowKey(row){
+    return Object.keys(row).filter(function(k){ return k!=='id' && k!=='created_at'; }).sort()
+      .map(function(k){ return k+'=' + (row[k]===null||row[k]===undefined ? '' : String(row[k])); }).join('');
+  }
 
   window.mmSyncPushPhase1 = async function() {
     var c = sb();
@@ -19994,11 +20027,19 @@ CREATE TABLE system_map_activity (
       try {
         var arr = JSON.parse(localStorage.getItem(localKey)||'[]');
         if (!Array.isArray(arr) || !arr.length) { pushed[table] = 0; return; }  // 빈 로컬 → 스킵(클라우드 보존, 오삭제 방지)
-        await c.from(table).delete().gte('id', 0);  // [감사 3단계] 멱등성 — 재삽입 전 전량삭제로 중복 폭증 방지 (id BIGSERIAL, RLS=authenticated 회사공유)
+        // [지혈5] 전량삭제 제거 — 예전에는 delete().gte('id',0) 로 회사 공유 테이블을 통째로 비운 뒤
+        // 이 기기 로컬로 채웠다. 오래된 목록을 가진 기기가 저장하면 다른 사람이 등록한 행이 사라졌다.
+        // 이제는 클라우드에 없는 행만 추가한다(삭제는 하지 않음).
         var payload = arr.map(toSnakeObj);
-        var r = await c.from(table).insert(payload);
+        var ex = await c.from(table).select('*');
+        if (ex.error) { console.warn(table+' read fail:', ex.error.message); pushed[table] = 'error'; return; }
+        var seen = {};
+        (ex.data||[]).forEach(function(row){ seen[_rowKey(row)] = 1; });
+        var fresh = payload.filter(function(o){ return !seen[_rowKey(o)]; });
+        if (!fresh.length) { pushed[table] = 0; return; }
+        var r = await c.from(table).insert(fresh);
         if (r.error) { console.warn(table+' push fail:', r.error.message); pushed[table] = 'error'; }
-        else pushed[table] = arr.length;
+        else pushed[table] = fresh.length;
       } catch(e) { pushed[table] = 'exception'; }
     };
     // 신규 항목만 (createdAt 기준 24시간 이내) — 간단 필터; 정확한 차이 sync는 추후 개선
