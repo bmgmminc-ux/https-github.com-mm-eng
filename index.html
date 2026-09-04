@@ -5116,6 +5116,22 @@ table.data-table {
 .main-area[data-screen="project-detail"] .pjatt-drop .ico .rn-i{width:22px;height:22px;margin:0;vertical-align:0;color:var(--hx-ink-3)}
 .main-area[data-screen="project-detail"] .modal-overlay .btn[aria-label] .rn-i{margin-right:0}
 /* ==== /rn:r2:project-detail ==== */
+/* ==== rn:cloud-banner ==== */
+.rn-cloud-banner{position:fixed;left:var(--hx-rail);right:0;top:0;z-index:60;display:flex;align-items:center;gap:12px;padding:8px 16px;background:var(--hx-warn-wash);color:var(--hx-warn-d);border-bottom:1px solid var(--hx-line);font-size:12.5px;font-weight:500;height:40px}
+.rn-cloud-banner span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rn-cloud-banner b{font-weight:600}
+.rn-cloud-banner .rn-btn{margin-left:auto;height:28px;padding:0 12px;border-radius:var(--hx-r-s);border:1px solid var(--hx-warn);background:var(--hx-surface);color:var(--hx-warn-d);font-weight:600;font-size:12px;cursor:pointer;white-space:nowrap;flex:none}
+body.rn-has-banner .main-area{padding-top:40px}
+body.rn-has-banner .main-area > .topbar{top:40px}
+@media (max-width:1024px){.rn-cloud-banner{left:var(--hx-rail-icon)}}
+@media (max-width:640px){
+  .rn-cloud-banner{left:0;top:auto;bottom:64px;height:auto;font-size:11.5px;padding:8px 12px;flex-wrap:wrap;border-bottom:0;border-top:1px solid var(--hx-line);box-shadow:var(--hx-e2)}
+  .rn-cloud-banner span{white-space:normal;overflow:visible}
+  .rn-cloud-banner .rn-btn{margin-left:0}
+  body.rn-has-banner .main-area{padding-top:0;padding-bottom:170px}
+  body.rn-has-banner .main-area > .topbar{top:0}
+}
+/* ==== /rn:cloud-banner ==== */
 </style>
 </head>
 <body data-page="overview">
@@ -8562,8 +8578,8 @@ table.data-table {
       <div style="padding:16px;border-radius:var(--hx-r);background:var(--hx-crit-wash);border:1px solid var(--hx-crit);margin-bottom:16px;font-size:14px;color:var(--hx-crit-d)"><strong id="mm-del-pid">—</strong>을(를) 영구 삭제합니다. 이 작업은 되돌릴 수 없습니다.<br>매입·기성·기타수익 모든 데이터가 함께 삭제됩니다.</div>
       <label style="display:block;font-size:13px;margin-bottom:6px">확인: 프로젝트 ID를 정확히 입력하세요</label>
       <input id="mm-del-confirm" type="text" placeholder="프로젝트 번호" style="padding:12px 16px;border-radius:var(--hx-r-s);border:1px solid var(--hx-crit);font-size:14px;width:100%;background:var(--hx-surface);margin-bottom:12px;box-sizing:border-box">
-      <label style="display:block;font-size:13px;margin-bottom:6px">관리자 비밀번호</label>
-      <input id="mm-del-pw" type="password" placeholder="비밀번호" style="padding:12px 16px;border-radius:var(--hx-r-s);border:1px solid var(--hx-crit);font-size:14px;width:100%;background:var(--hx-surface);box-sizing:border-box">
+      <label style="display:block;font-size:13px;margin-bottom:6px">삭제 확인 문구 <span style="color:var(--hx-ink-4);font-weight:400">(미설정 시 CEO 세션 확인으로 대체 — 입력 불필요)</span></label>
+      <input id="mm-del-pw" type="password" placeholder="설정 → 삭제 확인 문구를 정했다면 입력" style="padding:12px 16px;border-radius:var(--hx-r-s);border:1px solid var(--hx-crit);font-size:14px;width:100%;background:var(--hx-surface);box-sizing:border-box">
     </div>
     <div class="modal-footer" style="display:flex;justify-content:flex-end;gap:8px;padding:16px 28px"><button class="btn btn-ghost" onclick="closeModal('modal-delete')">취소</button><button class="btn btn-danger" style="background:var(--hx-crit);color:var(--hx-surface);padding:10px 20px;border-radius:var(--hx-r-s);border:none;cursor:pointer;font-weight:600" onclick="mmDelete.execute()"><svg class="icon icon-sm rn-i" aria-hidden="true"><use href="#i-trash"/></svg>영구 삭제</button></div>
   </div>
@@ -9560,7 +9576,7 @@ table.data-table {
             <th>이름</th><th>직종</th><th>현장</th>
             <th class="right">출역일</th><th class="right">평균 일당</th>
             <th class="right">누적 인건비</th>
-            <th class="center">4대보험</th>
+            <th class="center">4대보험<div class="t-xs" style="color:var(--text-muted);font-weight:400;white-space:nowrap">이번 달 8일 이상</div></th>
             <th class="center">액션</th>
           </tr></thead>
           <tbody><tr><td colspan="8" style="text-align:center;padding:40px;color:var(--hx-ink-4)">등록된 일용직이 없습니다 — 일용직 마스터에서 먼저 등록하세요</td></tr></tbody>
@@ -11226,7 +11242,7 @@ table.data-table {
           <div class="modal-title" id="day-detail-title">출역 인원</div>
           <div class="modal-subtitle" id="day-detail-subtitle">선택된 일자의 출역 작업자 명세</div>
         </div>
-        <button class="modal-close" onclick="closeModal('global-day-detail')"></button>
+        <button class="modal-close" onclick="closeModal('global-day-detail')" aria-label="닫기"><svg class="icon rn-i" aria-hidden="true"><use href="#i-x"/></svg></button>
       </div>
       <div class="modal-body">
         <div class="modal-info-banner" id="day-detail-banner">
@@ -11271,7 +11287,7 @@ table.data-table {
           <div class="modal-title">파일 업로드</div>
           <div class="modal-subtitle">엑셀(xlsx, xls), CSV, 이미지(jpg, png) 지원</div>
         </div>
-        <button class="modal-close" onclick="closeModal('global-upload')"></button>
+        <button class="modal-close" onclick="closeModal('global-upload')" aria-label="닫기"><svg class="icon rn-i" aria-hidden="true"><use href="#i-x"/></svg></button>
       </div>
       <div class="modal-body">
         <div style="border:2px dashed var(--border-default);border-radius:var(--hx-r);padding:40px 20px;text-align:center;background:var(--bg-subtle);cursor:pointer" onclick="window.mmGlobalUploadPick && mmGlobalUploadPick()">
@@ -11299,7 +11315,7 @@ table.data-table {
           <div class="modal-title">클립보드 붙여넣기 일괄 등록</div>
           <div class="modal-subtitle">엑셀·다우오피스 표 복사 → Tab 파싱 → 자동 컬럼 매핑 → 미리보기 → 일괄 저장</div>
         </div>
-        <button class="modal-close" onclick="closeModal('global-paste')"></button>
+        <button class="modal-close" onclick="closeModal('global-paste')" aria-label="닫기"><svg class="icon rn-i" aria-hidden="true"><use href="#i-x"/></svg></button>
       </div>
       <div class="modal-body">
         <div class="modal-info-banner">
@@ -11349,7 +11365,7 @@ table.data-table {
           <div class="modal-title">미수금 독촉 발송</div>
           <div class="modal-subtitle">발주처 회계 담당자에게 독촉 메일/문자 자동 발송</div>
         </div>
-        <button class="modal-close" onclick="closeModal('global-dunning')"></button>
+        <button class="modal-close" onclick="closeModal('global-dunning')" aria-label="닫기"><svg class="icon rn-i" aria-hidden="true"><use href="#i-x"/></svg></button>
       </div>
       <div class="modal-body">
         <div class="form-grid">
@@ -11405,7 +11421,7 @@ table.data-table {
           <div class="modal-title">경보 조치</div>
           <div class="modal-subtitle">원가초과 경보에 대한 조치 기록</div>
         </div>
-        <button class="modal-close" onclick="closeModal('global-alert-action')"></button>
+        <button class="modal-close" onclick="closeModal('global-alert-action')" aria-label="닫기"><svg class="icon rn-i" aria-hidden="true"><use href="#i-x"/></svg></button>
       </div>
       <div class="modal-body">
         <div class="modal-info-banner danger">
@@ -11451,7 +11467,7 @@ table.data-table {
           <div class="modal-title">임계값 설정</div>
           <div class="modal-subtitle">CEO 권한 — 경보 검출 임계값 조정</div>
         </div>
-        <button class="modal-close" onclick="closeModal('global-threshold')"></button>
+        <button class="modal-close" onclick="closeModal('global-threshold')" aria-label="닫기"><svg class="icon rn-i" aria-hidden="true"><use href="#i-x"/></svg></button>
       </div>
       <div class="modal-body">
         <div class="modal-info-banner warning">
@@ -11478,7 +11494,7 @@ table.data-table {
           <div class="modal-title">신규 거래처 등록</div>
           <div class="modal-subtitle">자동 정규화 적용 (도메인 룰 6) · 중복 자동 검출</div>
         </div>
-        <button class="modal-close" onclick="closeModal('global-vendor-add')"></button>
+        <button class="modal-close" onclick="closeModal('global-vendor-add')" aria-label="닫기"><svg class="icon rn-i" aria-hidden="true"><use href="#i-x"/></svg></button>
       </div>
       <div class="modal-body">
         <div class="form-grid">
@@ -11510,7 +11526,7 @@ table.data-table {
           <div class="modal-title">신규 프로젝트 등록</div>
           <div class="modal-subtitle">공사명만 입력해도 등록 가능 · 계약·원가는 상세에서 추가</div>
         </div>
-        <button class="modal-close" onclick="closeModal('global-project-add')"></button>
+        <button class="modal-close" onclick="closeModal('global-project-add')" aria-label="닫기"><svg class="icon rn-i" aria-hidden="true"><use href="#i-x"/></svg></button>
       </div>
       <div class="modal-body">
         <div class="form-grid">
@@ -11552,7 +11568,7 @@ table.data-table {
           <div class="modal-title">신규 일용직 등록</div>
           <div class="modal-subtitle">최소 이름 + 직종만 입력해도 등록 가능</div>
         </div>
-        <button class="modal-close" onclick="closeModal('global-worker-add')"></button>
+        <button class="modal-close" onclick="closeModal('global-worker-add')" aria-label="닫기"><svg class="icon rn-i" aria-hidden="true"><use href="#i-x"/></svg></button>
       </div>
       <div class="modal-body">
         <div class="form-grid">
@@ -11592,7 +11608,7 @@ table.data-table {
           <div class="modal-title">⏰ 출역 등록</div>
           <div class="modal-subtitle">기본값은 오늘 + 마지막 사용 작업자</div>
         </div>
-        <button class="modal-close" onclick="closeModal('global-attendance-add')"></button>
+        <button class="modal-close" onclick="closeModal('global-attendance-add')" aria-label="닫기"><svg class="icon rn-i" aria-hidden="true"><use href="#i-x"/></svg></button>
       </div>
       <div class="modal-body">
         <div class="form-grid">
@@ -11637,7 +11653,7 @@ table.data-table {
           <div class="modal-title" id="global-detail-title">상세 정보</div>
           <div class="modal-subtitle" id="global-detail-subtitle">선택된 항목의 상세 데이터</div>
         </div>
-        <button class="modal-close" onclick="closeModal('global-detail')"></button>
+        <button class="modal-close" onclick="closeModal('global-detail')" aria-label="닫기"><svg class="icon rn-i" aria-hidden="true"><use href="#i-x"/></svg></button>
       </div>
       <div class="modal-body" id="global-detail-body">
         <div class="t-xs" style="color:var(--text-secondary);line-height:1.7">
@@ -15083,13 +15099,14 @@ table.data-table {
     try {
       var stored = localStorage.getItem('mm-pw-hash');
       if (!stored) {
-        // 기본 비밀번호 (v1·v22 호환)
-        return input === 'mmeng2026';
+        // [rn3 C-3b] 기본값 폴백 제거 — 삭제 확인 문구 미설정 시 CEO 세션만 허용(프로젝트 ID 재입력 확인은 그대로)
+        var _a = window.mmAuth && window.mmAuth.get && window.mmAuth.get();
+        return !!(_a && _a.role === 'ceo');
       }
       var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(input));
       var hex = Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0')}).join('');
       return hex === stored;
-    } catch (e) { return input === 'mmeng2026' }
+    } catch (e) { return false }
   }
   window.mmDelete = {
     execute: async function() {
@@ -15097,7 +15114,7 @@ table.data-table {
       var pw = document.getElementById('mm-del-pw').value;
       if (confirmId !== del.project.id) { alert('프로젝트 ID가 일치하지 않습니다'); return }
       var pwOk = await verifyPassword(pw);
-      if (!pwOk) { alert('비밀번호가 틀렸습니다'); return }
+      if (!pwOk) { alert(localStorage.getItem('mm-pw-hash') ? '삭제 확인 문구가 틀렸습니다' : '영구 삭제는 CEO 계정으로 로그인한 상태에서만 가능합니다'); return }
       // [감사 D1·D3·D4] 클라우드 우선 삭제 — 성공해야 로컬 삭제(부활 방지). 클라우드 모드일 때만.
       if (window.mmData && window.mmData.deleteProject && window.mmData.mode && window.mmData.mode() === 'supabase') {
         if (window.globalToast) window.globalToast('☁️ 클라우드에서 삭제 중...', 'info', 2500);
@@ -16268,7 +16285,8 @@ table.data-table {
     // 인증 모드 표시 (운영 footer는 #147에서 숨김)
     var modeEl = document.getElementById('mm-login-mode');
     if (modeEl) {
-      modeEl.textContent = '관리자 로그인 (아이디 bmg)';
+      var _mig = false; try { _mig = localStorage.getItem('mm-cloud-migrated') === '1'; } catch(_e) {}
+      modeEl.textContent = _mig ? '클라우드 로그인 (이메일 ' + ((LOGIN_ALIAS && LOGIN_ALIAS.bmg) || '') + ')' : '관리자 로그인 (아이디 bmg)';   // [rn3 검토 반영] 전환 후 안내 문구 교체
       modeEl.style.color = '#0086B3';
     }
     setTimeout(function() {
@@ -16297,8 +16315,24 @@ table.data-table {
   // Supabase 인증 성공 후 CEO 권한을 부여할 이메일 (비밀번호 인증 통과해야만 적용 — 안전)
   // 우선순위: Supabase app_metadata.role > 이 목록 > 'user'
   var MM_ADMIN_EMAILS = ['bmgmminc@gmail.com'];
+  // [rn3 C-3] 로컬 아이디 → 클라우드 계정 별칭. 전환(mm-cloud-migrated) 후 로컬 경로는 닫힌다.
+  var LOGIN_ALIAS = { 'bmg': 'bmgmminc@gmail.com' };
+  function mmIsAdminEmail(email) { return MM_ADMIN_EMAILS.indexOf(String(email||'').toLowerCase().trim()) > -1; }
   function mmRoleFor(email) {
     return (MM_ADMIN_EMAILS.indexOf((email||'').toLowerCase().trim()) > -1) ? 'ceo' : 'user';
+  }
+
+  // [rn3 검토 반영] Supabase 인증 서버 응답 확인(3초) — 미응답이면 전환된 브라우저에서도 로컬 폴백 로그인을 허용해 잠금을 막는다
+  async function _sbReachable() {
+    try {
+      var cfg = getSupabaseConfig();
+      if (!cfg || !cfg.url || !cfg.anonKey) return false;
+      var ctl = (typeof AbortController === 'function') ? new AbortController() : null;
+      var timer = ctl ? setTimeout(function(){ ctl.abort(); }, 3000) : null;
+      var r = await fetch(String(cfg.url).replace(/\/+$/, '') + '/auth/v1/health', { headers: { apikey: cfg.anonKey }, signal: ctl ? ctl.signal : undefined });
+      if (timer) clearTimeout(timer);
+      return r.status < 500;
+    } catch(e) { return false; }
   }
 
   // 로그인 — 1) 자체 관리자 계정 우선 검증, 2) (이메일 형식이면) Supabase, 3) 폴백
@@ -16309,7 +16343,16 @@ table.data-table {
     // 1) 자체 관리자 계정 (아이디 = bmg 등) — Supabase 없이 즉시 로그인
     var acct = ADMIN_ACCOUNTS.find(function(a){ return a.id === loginId.toLowerCase(); });
     if (acct) {
+      // [rn3 C-3] 클라우드 전환이 끝난 브라우저에서는 로컬 경로를 닫고 이메일 로그인으로 유도(오프라인·Supabase 미응답 시에는 폴백 허용)
+      var _alias = LOGIN_ALIAS[acct.id];
+      var _migrated = _alias && localStorage.getItem('mm-cloud-migrated') === '1';
+      if (_migrated && getSupabaseClient() && await _sbReachable()) {
+        try { var _emEl = document.getElementById('mm-login-email'); if (_emEl) _emEl.value = _alias; } catch(_e) {}
+        throw new Error('이 아이디는 클라우드 계정(' + _alias + ')으로 전환되었습니다. 이메일과 클라우드 비밀번호로 로그인하세요');
+      }
       if (password !== acct.pw) throw new Error('비밀번호가 일치하지 않습니다');
+      try { localStorage.setItem('mm-local-admin-used', '1'); } catch(_e) {}   // 최초 클라우드 전환 시 이 브라우저의 로컬 데이터를 먼저 올리기 위한 표식
+      if (_migrated && window.globalToast) window.globalToast('⚠️ 클라우드 미응답 — 로컬 폴백 로그인 (이 세션의 변경은 클라우드에 저장되지 않습니다)', 'warning', 7000);
       return { email: acct.id, name: acct.name, role: acct.role, demoMode: false, supabase: false };
     }
 
@@ -16323,7 +16366,7 @@ table.data-table {
         return {
           email: u.email,
           name: (u.user_metadata && u.user_metadata.name) || u.email.split('@')[0],
-          role: (u.app_metadata && u.app_metadata.role) || mmRoleFor(u.email),
+          role: mmIsAdminEmail(u.email) ? 'ceo' : ((u.app_metadata && u.app_metadata.role) || 'user'),   // [rn3 검토 반영] 대표 이메일은 app_metadata 와 무관하게 항상 CEO
           id: u.id,
           demoMode: false,
           supabase: true
@@ -16354,6 +16397,10 @@ table.data-table {
     if (!name) throw new Error('이름을 입력하세요');
     if (!email || !password) throw new Error('이메일과 비밀번호를 입력하세요');
     if (password.length < 6) throw new Error('비밀번호는 6자 이상이어야 합니다');
+    // [rn3 C-11] 공개 가입 차단 — 관리자 이메일 또는 관리자가 허용한 목록(window.rnAllowedSignups)만. (서버측 차단은 Supabase 대시보드 'Enable email signups' 해제로 별도 확정)
+    var _emL = String(email).toLowerCase().trim();
+    var _allow = mmIsAdminEmail(_emL) || (Array.isArray(window.rnAllowedSignups) && window.rnAllowedSignups.map(function(x){ return String(x).toLowerCase().trim(); }).indexOf(_emL) > -1);
+    if (!_allow) throw new Error('가입은 관리자 승인 계정만 가능합니다. 관리자에게 계정을 요청하세요');
     var res = await sb.auth.signUp({
       email: email, password: password,
       options: { data: { name: name } }
@@ -16388,6 +16435,7 @@ table.data-table {
     }
     var toggleEl = document.getElementById('mm-login-toggle');
     if (toggleEl) toggleEl.addEventListener('click', function(){ setMode(!signUpMode); });
+    window.mmLoginSetMode = setMode;   // [rn3] 클라우드 계정 연결 버튼이 가입 모드로 연다
 
     form.addEventListener('submit', async function(e) {
       e.preventDefault();
@@ -16399,11 +16447,14 @@ table.data-table {
           // ── 회원가입 ──
           var name = document.getElementById('mm-login-name').value.trim();
           var data = await doSignUp(email, password, name);
+          // [rn3 검토 반영] Confirm-email ON 상태에서 이미 가입된 이메일이면 Supabase 가 오류 대신 identities 빈 사용자를 돌려준다 → 중복으로 처리
+          if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) throw new Error('User already registered');
           if (data.session && data.user) {
             // Confirm email OFF → 즉시 로그인
             var u = data.user;
             setAuth({ email:u.email, name:name, role:mmRoleFor(u.email), id:u.id, demoMode:false, supabase:true });
             applyRole(); hideLogin();
+            if (window.rnCloudBannerRemove) window.rnCloudBannerRemove();
             if (window.mmAudit) window.mmAudit.log('로그인', u.email + ' (신규 가입)');
             if (window.mmData) {
               if (window.mmData.setAutoSync) window.mmData.setAutoSync(true);
@@ -16419,6 +16470,8 @@ table.data-table {
             }
             setMode(false);
             document.getElementById('mm-login-pw').value = '';
+            // [rn3 검토 반영] 배너에서 온 전환(로컬 세션 유지 중)이면 오버레이를 닫아 잠금처럼 보이지 않게 — 이메일 확인 후 로그아웃→이메일 로그인
+            if (getAuth()) { hideLogin(); if (window.globalToast) window.globalToast('가입 완료 — 이메일(' + email + ') 확인 후 로그아웃하고 이메일로 로그인하세요', 'info', 10000); }
           }
         } else {
           // ── 로그인 ──
@@ -16426,6 +16479,7 @@ table.data-table {
           setAuth(user);
           applyRole();
           hideLogin();
+          if (user.supabase && window.rnCloudBannerRemove) window.rnCloudBannerRemove();
           if (window.mmAudit) window.mmAudit.log('로그인', user.email + ' (' + (user.role||'user') + ')');
           if (user.supabase && window.mmData) {
             if (window.mmData.setAutoSync) window.mmData.setAutoSync(true);  // 저장 시 자동 클라우드 백업
@@ -16434,6 +16488,12 @@ table.data-table {
         }
       } catch(err) {
         errEl.textContent = err.message;
+        // [rn3] 클라우드 계정 연결 중 '이미 가입된 이메일'이면 로그인 모드로 전환해 같은 이메일로 로그인하게 안내
+        if (signUpMode && /already|registered|exists|이미/i.test(err.message || '')) {
+          setMode(false);
+          var _info = document.getElementById('mm-login-info');
+          if (_info) { _info.className = 'mm-login-msg info'; _info.textContent = '이미 가입된 이메일입니다 — 클라우드 비밀번호로 로그인하세요'; _info.style.display = 'block'; }
+        }
       }
     });
 
@@ -16467,8 +16527,38 @@ table.data-table {
       if (a && a.supabase && isSupabaseReady() && window.mmData && window.mmData.syncOnLogin) {
         setTimeout(function(){ window.mmData.syncOnLogin(); }, 400);
       }
+      // [rn3 C-3] 로컬 관리자 세션(클라우드 미저장)이면 전환 배너 — 클라우드 계정을 만들거나 로그인하면 사라진다
+      if (a && a.supabase === false && isSupabaseReady() && LOGIN_ALIAS[a.email]) {
+        try { localStorage.setItem('mm-local-admin-used', '1'); } catch(_e) {}   // [rn3 검토 반영] 유지 세션(재로그인 없이 배너→전환)도 로컬 데이터 선올림 표식을 갖도록
+        setTimeout(function(){ window.rnCloudBannerShow && window.rnCloudBannerShow(a); }, 600);
+      }
     }
   }
+
+  // [rn3] 클라우드 전환 배너·계정 연결 (비밀번호는 대표가 직접 입력)
+  window.rnCloudBannerShow = function(a) {
+    if (document.getElementById('rn-cloud-banner')) return;
+    var alias = LOGIN_ALIAS[a && a.email] || MM_ADMIN_EMAILS[0];
+    var el = document.createElement('div');
+    el.id = 'rn-cloud-banner'; el.className = 'rn-cloud-banner';
+    el.innerHTML = '<span>이 세션은 <b>클라우드에 저장되지 않습니다</b> — 이 브라우저에만 데이터가 쌓입니다. 클라우드 계정(' + window.mmEsc(alias) + ')으로 전환하세요.</span>' +
+      '<button type="button" class="rn-btn" onclick="window.rnCloudConnect&&window.rnCloudConnect()">클라우드 계정 연결</button>';
+    document.body.appendChild(el);
+    document.body.classList.add('rn-has-banner');
+  };
+  window.rnCloudBannerRemove = function() {
+    var el = document.getElementById('rn-cloud-banner'); if (el) el.remove();
+    document.body.classList.remove('rn-has-banner');
+  };
+  window.rnCloudConnect = function() {
+    var a = getAuth();
+    var alias = LOGIN_ALIAS[a && a.email] || MM_ADMIN_EMAILS[0];
+    showLogin('클라우드 계정 만들기 — 비밀번호를 정해 가입하면 이 브라우저의 데이터가 클라우드로 올라갑니다. 이미 계정이 있으면 로그인 탭에서 이메일로 로그인하세요.');
+    if (window.mmLoginSetMode) window.mmLoginSetMode(true);
+    var em = document.getElementById('mm-login-email'); if (em) em.value = alias;
+    var nm = document.getElementById('mm-login-name'); if (nm && !nm.value) nm.value = (a && a.name) || '';
+    var pw = document.getElementById('mm-login-pw'); if (pw) { pw.value = ''; setTimeout(function(){ pw.focus(); }, 150); }
+  };
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
@@ -16915,13 +17005,23 @@ table.data-table {
     return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
   }
 
+  // [C-9] 4대보험 판정 월 키 — 'YYYY-MM' 인자면 그 달, 아니면 이번 달. attendance 화면의 연·월은 상태변수 없이 select DOM(renderAttendancePage 가 option 텍스트로 식별)에만 있어 호출자가 인자로 넘긴다
+  function monthKey(ym){
+    if (typeof ym === 'string' && /^\d{4}-\d{2}$/.test(ym)) return ym;
+    var d = new Date();
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+  }
   // 출역 기록 → workers 누적 전체 재계산 (정합성 보장)
-  function recalcWorkers(){
+  // [C-9] + 월별 출역일 daysWorkedMonth(daysWorkedYm 달 기준) — 일용직 국민연금·건강보험 '1개월 8일 이상' 판정 원천. daysWorked(전 기간 누적)는 '누적 일'·CSV·TOP5 표시용으로 그대로 유지
+  function recalcWorkers(ym){
+    var mk = monthKey(ym);
     var workers = loadWk();
     var attend = loadAt();
     workers.forEach(function(w){
       var recs = attend.filter(function(a){ return a.workerId === w.id });
       w.daysWorked = recs.length;
+      w.daysWorkedMonth = recs.filter(function(a){ return String(a.date||'').indexOf(mk) === 0 }).length;
+      w.daysWorkedYm = mk;
       w.totalWage = recs.reduce(function(s,a){ return s + num(a.wage) }, 0);
       var dates = recs.map(function(a){ return a.date }).filter(Boolean).sort();
       w.lastWork = dates.length ? dates[dates.length-1].slice(5) : '';
@@ -16974,6 +17074,7 @@ table.data-table {
     if (!wid){ alert('작업자를 선택하세요'); return; }
     var w = loadWk().find(function(x){ return x.id === wid });
     if (!w){ alert('작업자 정보를 찾을 수 없습니다'); return; }
+    var _pj = (window.rnAttendPj && window.rnAttendPj.id) ? window.rnAttendPj : null;  // [C-8] 상단 현장 필터(setAttendancePjFilter → window.rnAttendPj) 선택값 — '전체'면 null(종전과 동일 저장)
     // 중복 체크 (같은 날 같은 작업자)
     var attend = loadAt();
     if (attend.some(function(a){ return a.workerId===wid && a.date===date })){
@@ -16983,6 +17084,7 @@ table.data-table {
       id: 'AT'+Date.now(),
       date: date, workerId: wid, workerName: w.name,
       jobType: job || w.primaryJob, wage: wage,
+      projectId: _pj ? _pj.id : null, projectLabel: _pj ? String(_pj.id + ' ' + (_pj.name || '')).trim() : '',  // [C-8] 현장 필터 → 레코드 가산 저장("id 현장명" — 출역 등록 모달과 같은 라벨 형식, 화면 필터·클라우드 memo 호환)
       createdAt: new Date().toISOString()
     });
     saveAt(attend);
@@ -17039,6 +17141,8 @@ table.data-table {
   function init(){
     var dateEl = document.getElementById('at-date');
     if (dateEl && !dateEl.value) dateEl.value = todayStr();
+    // [C-9] 월 경계 통과·구버전 레코드(daysWorkedYm 없음)면 이번 달 기준 1회 재계산 — 부팅(DOMContentLoaded)·#attendance 진입·mmAttend.refresh 시점. 최신이면 쓰기 없음(마스터 해시 워처 무자극). 일용직 0명이면 아무 일도 하지 않는다
+    try { if (loadWk().some(function(w){ return w.daysWorkedYm !== monthKey(); })) recalcWorkers(); } catch(e){}
     fillWorkerSelect();
     onWorkerChange();
     render();
@@ -17472,7 +17576,22 @@ table.data-table {
 (function() {
   'use strict';
   var LOG_KEY = 'mm-activity-log';
-  var MAX_LOCAL = 200;
+  var MAX_LOCAL = 1000; // [H-8] 200 → 1000 (quota 가드는 saveLocal 에서 구 상한 재시도)
+  var MAX_LOCAL_FALLBACK = 200;
+  // [H-8] 서버 audit_log 기록 상태 집계 — 실패가 침묵하지 않도록 window.rnAuditStatus 에 남긴다.
+  //       skip(프리뷰 localhost 가드로 클라이언트 null · 미로그인 uid 없음)은 실패로 세지 않는다. 연속 실패 3회↑ 시 세션당 1회만 toast.
+  var srvStatus = window.rnAuditStatus = window.rnAuditStatus || { ok:0, fail:0, skip:0, streak:0, lastError:null, lastAt:null, toasted:false };
+  function srvOk() { srvStatus.ok++; srvStatus.streak = 0; srvStatus.lastAt = new Date().toISOString(); }
+  function srvFail(err) {
+    srvStatus.fail++; srvStatus.streak++;
+    var m = err && (err.message || err.msg || err.details || err.code);
+    srvStatus.lastError = String(m || (typeof err === 'string' ? err : 'unknown')).slice(0, 200);
+    srvStatus.lastAt = new Date().toISOString();
+    if (srvStatus.streak >= 3 && !srvStatus.toasted) {
+      srvStatus.toasted = true;
+      try { if (window.globalToast) window.globalToast('감사로그 서버 기록 실패 — 로컬에만 보관 중', 'warning', 8000); } catch(e){}
+    }
+  }
 
   var ACTION_STYLE = {
     '로그인':     { ico:'i-user', bg:'#E8F9FF', fg:'#005B7A' },
@@ -17503,7 +17622,10 @@ table.data-table {
     try { var a = JSON.parse(localStorage.getItem(LOG_KEY)||'[]'); return Array.isArray(a)?a:[] }
     catch(e) { return [] }
   }
-  function saveLocal(arr) { localStorage.setItem(LOG_KEY, JSON.stringify(arr.slice(0, MAX_LOCAL))); }
+  function saveLocal(arr) {
+    try { localStorage.setItem(LOG_KEY, JSON.stringify(arr.slice(0, MAX_LOCAL))); }
+    catch(e) { localStorage.setItem(LOG_KEY, JSON.stringify(arr.slice(0, MAX_LOCAL_FALLBACK))); } // [H-8] quota 가드: 구 상한(200)으로 재시도 · 그래도 실패하면 기존과 동일하게 예외 전파
+  }
 
   function log(action, detail) {
     var auth = (window.mmAuth && window.mmAuth.get && window.mmAuth.get()) || {};
@@ -17519,13 +17641,13 @@ table.data-table {
       if (sb) {
         sb.auth.getSession().then(function(s){
           var uid = s && s.data && s.data.session && s.data.session.user && s.data.session.user.id;
-          if (!uid) return;
+          if (!uid) { srvStatus.skip++; return; } // [H-8] 미로그인 → skip(실패 아님)
           sb.from('audit_log').insert({
             user_id: uid, action: entry.action, table_name: 'app', record_id: null,
             after_data: { detail: entry.detail, user: entry.user, ts: entry.ts }
-          }).then(function(){}, function(){});
-        }, function(){});
-      }
+          }).then(function(res){ if (res && res.error) srvFail(res.error); else srvOk(); }, function(err){ srvFail(err); }); // [H-8] PostgREST 는 reject 대신 {error} 로 응답
+        }, function(err){ srvFail(err); });
+      } else { srvStatus.skip++; } // [H-8] 클라이언트 null(localhost 가드·설정 없음) → skip(실패 아님)
     } catch(e){}
     return entry;
   }
@@ -17986,6 +18108,24 @@ table.data-table {
   // ── 로그인 후 자동 PULL + Realtime 시작 ──
   async function syncOnLogin() {
     if (!sbReady()) return;
+    // [rn3 C-3] 최초 클라우드 전환 가드 — 관리자 이메일 + 이 브라우저에서 로컬 관리자(bmg)로 일한 이력 + 로컬 프로젝트 존재 → 로컬이 진실이므로 dirty 로 표시해 선push. 그 외 브라우저는 종전대로 클라우드 우선.
+    var _rnMig = false, _rIsAdmin = false;
+    try {
+      var _ra = window.mmAuth && window.mmAuth.get && window.mmAuth.get();
+      _rIsAdmin = !!(_ra && _ra.email && ['bmgmminc@gmail.com'].indexOf(String(_ra.email).toLowerCase()) > -1);
+      var _rLocal = loadLocal();
+      if (_rIsAdmin && localStorage.getItem('mm-cloud-migrated') !== '1' && Array.isArray(_rLocal) && _rLocal.length) {
+        // [rn3 검토 반영] 클라우드 프로젝트 수를 먼저 확인 — 비어 있으면 로컬 선올림이 유일하게 안전, 이미 있으면 대표가 방향을 결정(기본은 표식 있을 때만 로컬 우선)
+        var _rUsed = localStorage.getItem('mm-local-admin-used') === '1';
+        var _rCloudN = -1;
+        try { var _rq = await sbClient().from('projects').select('id'); if (_rq && !_rq.error && Array.isArray(_rq.data)) _rCloudN = _rq.data.length; } catch(_rqe) {}
+        var _rGo;
+        if (_rCloudN === 0) _rGo = true;
+        else if (_rCloudN < 0) _rGo = _rUsed;
+        else _rGo = confirm('클라우드에 프로젝트 ' + _rCloudN + '건, 이 브라우저에 로컬 프로젝트 ' + _rLocal.length + '건이 있습니다.\n\n[확인] 로컬을 먼저 올려 합칩니다 (같은 번호는 이 브라우저 내용이 우선)\n[취소] 클라우드 내용으로 이 브라우저를 덮어씁니다');
+        if (_rGo) { localStorage.setItem('mm-dash-dirty', '1'); _rnMig = true; }
+      }
+    } catch(_re) {}
     // [H7] 미전송 프로젝트 변경 선push — 실패하면 pull 보류(클라우드 구본이 로컬 변경을 덮어쓰는 유실 차단, 출역과 동일 정책)
     var r;
     try {
@@ -18009,6 +18149,8 @@ table.data-table {
     if (window.globalToast) {
       window.globalToast(r.ok ? '☁️ ' + r.msg : '⚠️ ' + r.msg, r.ok?'success':'error');
     }
+    // [rn3 C-3] 관리자 클라우드 동기화 성공 → 이 브라우저는 전환 완료(로컬 관리자 경로 은퇴)
+    try { if (r && r.ok && _rIsAdmin) { localStorage.setItem('mm-cloud-migrated', '1'); if (window.rnCloudBannerRemove) window.rnCloudBannerRemove(); if (_rnMig && window.globalToast) window.globalToast('클라우드 전환 완료 — 이 브라우저의 데이터를 올렸습니다', 'success'); } } catch(_re2) {}
     // render 갱신
     ['pjDashboard','pjBudget','pjBilling','pjNav','ovProjectList'].forEach(function(k) {
       try { if (window[k] && window[k].render) window[k].render(); } catch(e){}
@@ -18056,6 +18198,15 @@ table.data-table {
   function _mIdMapSave(m){ try{ localStorage.setItem('mm-cloud-id-map', JSON.stringify(m)); }catch(e){} }
   function _mCloudId(kind,name){ var m=_mIdMap(); var k=kind+':'+_mNorm(name); if(!m[k]){ m[k]=_uuid(); _mIdMapSave(m); } return m[k]; }
   function _mLoad(key){ try{ var a=JSON.parse(localStorage.getItem(key)||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+  // [C-8] 출역 ↔ 현장 연결 — 클라우드 projects.id 는 클라이언트 id 문자열(disassembleProject id:p.id, cost_items.project_id 와 동일)이므로 attendance.project_id 에도 같은 값을 쓴다
+  function _attPidIdx(){ var m={}; _mLoad('mm-dash-v4').forEach(function(p){ if(!p||!p.id) return; var id=String(p.id).trim(); if(!id) return; m['i:'+_mNorm(id)]=id; if(p.name && !m['n:'+_mNorm(p.name)]) m['n:'+_mNorm(p.name)]=id; }); return m; }
+  // 우선순위: 레코드 projectId(로컬 mm-dash-v4 에 실존할 때만 — 미실존 pid 는 FK 위반으로 배치 전체를 실패시키므로 라벨 대조로 폴백) → projectLabel 전체가 id/현장명 → "id 현장명" 분리 매칭. 실패 시 null(memo 라벨은 그대로)
+  function _attPid(a, idx){ if(!a) return null; idx=idx||_attPidIdx(); var pid=String(a.projectId||'').trim(); if(pid && idx['i:'+_mNorm(pid)]) return idx['i:'+_mNorm(pid)]; var lb=String(a.projectLabel||'').trim(); if(!lb) return null; var k=idx['i:'+_mNorm(lb)]||idx['n:'+_mNorm(lb)]; if(k) return k; var sp=lb.indexOf(' '); if(sp>0){ k=idx['i:'+_mNorm(lb.slice(0,sp))]||idx['n:'+_mNorm(lb.slice(sp+1))]; if(k) return k; } return null; }
+  // [수술① — 출역 ID 안정화] pull이 재작성한 'AT'+uuid 행은 같은 uuid 로 재upsert — pushAttendance 지역 _aCid 를 모듈 스코프로 이동(규칙 동일)
+  function _attCid(a){ var m=String(a.id||'').match(/^AT([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i); return m?m[1].toLowerCase():_mCloudId('a', a.id||(a.workerName+'|'+a.date)); }
+  function _attRow(a, idx){ return { id:_attCid(a), worker_id:_mCloudId('w', a.workerName), project_id:_attPid(a, idx), work_date:a.date, job_type:a.jobType||null, wage:Math.round(a.wage||0), memo:a.projectLabel||null }; }
+  window.rnAttendProjectId=function(a){ return _attPid(a); };            // [C-8] 순수 함수 노출 — 로컬 출역 레코드 → attendance.project_id (입력 경로·검증 공용, 부작용 없음)
+  window.rnAttendPayload=function(a){ return _attRow(a, _attPidIdx()); };  // [C-8] 단일 레코드 payload 행 노출(검증용 — _mCloudId 호출로 mm-cloud-id-map 에 항목이 생기므로 테스트는 원복)
   // [번호증발 수정] first-wins 화이트리스트가 사업자번호를 클라우드에 한 번도 올리지 않던 결함 — 3키 필드 병합 + bizNo/ceo/email/addr 포함
   function _mVendors(){ var out={}; ['mm-vendors','mm-vendors-v2','mm-vendors-v23'].forEach(function(key){ _mLoad(key).forEach(function(v){ var nm=((typeof v==='string')?v:(v&&v.name))||''; nm=String(nm).trim(); if(!nm) return; var n=_mNorm(nm); var o=out[n]||(out[n]={ name:nm }); if(typeof v!=='object'||!v) return; ['phone','category','memo','ceo','email'].forEach(function(f){ if(!o[f]&&v[f]) o[f]=v[f]; }); if(!o.bizNo){ var b=String(v.bizNo||v.businessNo||v.bizno||v.biz_no||'').replace(/[^0-9]/g,''); if(b.length>=10) o.bizNo=b; } if(!o.addr&&(v.addr||v.address)) o.addr=v.addr||v.address; }); }); return Object.keys(out).map(function(k){ var o=out[k]; ['phone','category','memo','ceo','email','bizNo','addr'].forEach(function(f){ if(o[f]===undefined) o[f]=null; }); return o; }); }
 
@@ -18160,11 +18311,19 @@ table.data-table {
       if(!at.length){ try{ localStorage.removeItem('mm-attend-dirty'); }catch(e){} return { ok:true, msg:'출역 0' }; }
       await pushMasters();   // worker FK 보장(일용직 먼저 upsert)
       // [수술① — 출역 ID 안정화] pull이 재작성한 'AT'+uuid 행은 같은 uuid로 재upsert — pull→재push가 매 로그인 새 uuid로 클라우드 행을 증식시키던 결함 봉쇄
-      var _aCid=function(a){ var m=String(a.id||'').match(/^AT([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i); return m?m[1].toLowerCase():_mCloudId('a', a.id||(a.workerName+'|'+a.date)); };
+      // [C-8] _aCid → 모듈 스코프 _attCid 로 이동(위 [수술①] 규칙 동일) — _attRow / window.rnAttendPayload 와 공유
       // [적대검증 보강] 일용직 마스터에 없는 이름('(미상)' 등 고아)은 push 제외 — FK 위반 1건이 출역 배치 전체를 무음 실패시키던 결함
       var _wkSet={}; _mLoad('mm-workers').forEach(function(w){ if(w&&w.name) _wkSet[_mNorm(w.name)]=1; });
-      var payload=at.filter(function(a){ return _wkSet[_mNorm(a.workerName)]; }).map(function(a){ return { id:_aCid(a), worker_id:_mCloudId('w', a.workerName), project_id:null, work_date:a.date, job_type:a.jobType||null, wage:Math.round(a.wage||0), memo:a.projectLabel||null }; }).filter(function(p){ return !_mTombHas('a', p.id); });  // [수술⑥] 삭제 툼스톤 행은 재upsert 금지
+      var _pIdx=_attPidIdx(), _pWin={};  // [C-8] 현장 id 인덱스(배치당 1회) + UNIQUE(worker_id,work_date,project_id) 선제 회피용(키별 승자 = 클라우드 id 최소 행 — 배열 순서(pull 재정렬)와 무관하게 결정적이라 push 마다 승자가 뒤바뀌며 UNIQUE 충돌을 일으키지 않음)
+      var payload=at.filter(function(a){ return _wkSet[_mNorm(a.workerName)]; }).map(function(a){ return _attRow(a,_pIdx); }).filter(function(p){ return !_mTombHas('a', p.id); });  // [수술⑥] 삭제 툼스톤 행은 재upsert 금지 · [C-8] project_id 는 _attPid(레코드 projectId → projectLabel 대조, 실패 시 null·memo 유지)
+      payload.forEach(function(p){ if(!p.project_id) return; var _k=p.worker_id+'|'+p.work_date+'|'+p.project_id; if(!_pWin[_k]||p.id<_pWin[_k]) _pWin[_k]=p.id; });
+      payload.forEach(function(p){ if(p.project_id && _pWin[p.worker_id+'|'+p.work_date+'|'+p.project_id]!==p.id) p.project_id=null; });  // [C-8] 같은 (작업자·일자·현장) 2건째부터는 project_id null(memo 유지) — NULL 이 아니게 되면서 살아나는 UNIQUE 제약이 배치 전체를 실패시키지 않도록
       var r=await sb.from('attendance').upsert(payload,{ onConflict:'id' });
+      if(r.error && /project_id/i.test(r.error.message||'') && payload.some(function(p){ return !!p.project_id; })){  // [C-8 폴백] 현장 FK(프로젝트가 아직 클라우드에 없음)·UNIQUE 충돌 시 현장 연결만 떼고 1회 재시도 — 출역 자체는 종전처럼 올리고, dirty 는 해제하지 않아 다음 동기화(push 가 projects 를 먼저 올린 뒤)에 재연결
+        payload=payload.map(function(p){ p.project_id=null; return p; });
+        r=await sb.from('attendance').upsert(payload,{ onConflict:'id' });
+        if(!r.error) return { ok:true, msg:'출역 '+payload.length+' (현장 미연결 — 다음 동기화 재시도)' };
+      }
       if(r.error) return { ok:false, msg:r.error.message };
       try{ localStorage.removeItem('mm-attend-dirty'); }catch(e){}  // [수술④] push 성공 → dirty 해제
       return { ok:true, msg:'출역 '+payload.length };
@@ -18176,7 +18335,8 @@ table.data-table {
       var r=await fetchAllRows(sb, 'attendance'); if(r.error) throw r.error;   // [C1] 1000행 절단 방지 — 출역도 페이지네이션
       var workers=_mLoad('mm-workers');
       function wByCid(cid){ for(var i=0;i<workers.length;i++){ if(_mCloudId('w', workers[i].name)===cid) return workers[i]; } return null; }
-      var arr=(r.data||[]).filter(function(row){ return !_mTombHas('a', String(row.id)); }).map(function(row){ var w=wByCid(row.worker_id); return { id:'AT'+row.id, date:row.work_date, workerId:w?w.id:row.worker_id, workerName:w?w.name:'(미상)', jobType:row.job_type||'일반', wage:row.wage||0, projectLabel:row.memo||'', createdAt:row.created_at }; });
+      var _pjN={}; _mLoad('mm-dash-v4').forEach(function(p){ if(p&&p.id) _pjN[String(p.id)]=String(p.name||''); });  // [C-8] project_id → "id 현장명" 라벨 복원용(로컬 프로젝트명)
+      var arr=(r.data||[]).filter(function(row){ return !_mTombHas('a', String(row.id)); }).map(function(row){ var w=wByCid(row.worker_id); var _pid=row.project_id?String(row.project_id):null; return { id:'AT'+row.id, date:row.work_date, workerId:w?w.id:row.worker_id, workerName:w?w.name:'(미상)', jobType:row.job_type||'일반', wage:row.wage||0, projectId:_pid, projectLabel:row.memo||(_pid?(_pid+' '+(_pjN[_pid]||'')).trim():''), createdAt:row.created_at }; });  // [C-8] projectId 가산 복원 · memo 우선, 없으면 현장명 합성(화면 필터가 라벨의 id/현장명 포함으로 동작)
       localStorage.setItem('mm-attendance', JSON.stringify(arr));
       try{ if(window.mmAttend&&window.mmAttend.recalcWorkers) window.mmAttend.recalcWorkers(); }catch(e){}
       try{ if(window.mmAttend&&window.mmAttend.render) window.mmAttend.render(); }catch(e){}
@@ -18620,7 +18780,7 @@ table.data-table {
       if (arr.some(function(a){ return a.workerId===w.id && a.date===date; })) {
         if (!confirm(date + ' ' + workerName + ' 출역 이미 있음. 추가할까요?')) return;
       }
-      arr.unshift({ id:'AT'+Date.now(), date:date, workerId:w.id, workerName:w.name, jobType:w.primaryJob||'일반', wage:wage, projectLabel:pjLabel, createdAt:new Date().toISOString() });
+      arr.unshift({ id:'AT'+Date.now(), date:date, workerId:w.id, workerName:w.name, jobType:w.primaryJob||'일반', wage:wage, projectId:(window.rnAttendProjectId ? window.rnAttendProjectId({ projectLabel:pjLabel }) : null), projectLabel:pjLabel, createdAt:new Date().toISOString() });  // [C-8] 프로젝트 select 라벨("id 현장명") → projectId 가산(미매칭 null)
       localStorage.setItem('mm-attendance', JSON.stringify(arr));
       try { localStorage.setItem('mm-attend-dirty','1'); } catch(e){}  // [수술④ 보강] 쓰기 지점 dirty
       if (window.mmAttend) {
@@ -18937,9 +19097,9 @@ table.data-table {
     },
     setRole: async function(userId, role) {
       var sb = window.mmSupabase && window.mmSupabase.getClient && window.mmSupabase.getClient();
-      if (!sb) { alert('Supabase 연동 필요'); return false; }
-      try { var r = await sb.from('user_profiles').update({ role: role }).eq('user_id', userId); if (r.error) throw r.error; audit('시스템', '권한 변경 — ' + userId + ' → ' + role); return true; }
-      catch(e) { alert('권한 변경 실패 — ' + e.message); return false; }
+      if (!sb) { toast('Supabase 연동 필요 — 권한 변경 불가', 'warning'); return false; }
+      try { var r = await sb.from('user_profiles').update({ role: role }).eq('id', userId).select('id'); if (r.error) throw r.error; if (!r.data || !r.data.length) throw new Error('변경된 행 없음 — user_profiles 권한 정책(RLS) 확인'); audit('시스템', '권한 변경 — ' + userId + ' → ' + role); return true; }
+      catch(e) { toast('권한 변경 실패 — ' + (e && e.message ? e.message : e), 'danger'); return false; }
     }
   };
 
@@ -19595,13 +19755,13 @@ table.data-table {
       c.innerHTML = arr.map(function(u){
         var roles = ['ceo','admin','user','demo'];
         var optHtml = roles.map(function(r){ return '<option value="'+r+'"'+((u.role||'user')===r?' selected':'')+'>'+r+'</option>'; }).join('');
-        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;gap:8px;border-bottom:1px solid #F6F6F7"><span style="font-size:11px;flex:1;overflow:hidden;text-overflow:ellipsis">'+(u.email||u.user_id||'?')+'</span><select onchange="window.mmUsersUI.change(this,&quot;'+(u.user_id||'')+'&quot;)" style="padding:2px 6px;border:1px solid var(--hx-ink-5);border-radius:var(--hx-r-xs);font-size:11px">'+optHtml+'</select></div>';
+        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;gap:8px;border-bottom:1px solid #F6F6F7"><span style="font-size:11px;flex:1;overflow:hidden;text-overflow:ellipsis">'+(u.email||u.id||'?')+'</span><select onchange="window.mmUsersUI.change(this,&quot;'+(u.id||'')+'&quot;)" style="padding:2px 6px;border:1px solid var(--hx-ink-5);border-radius:var(--hx-r-xs);font-size:11px">'+optHtml+'</select></div>';
       }).join('');
     },
     change: async function(sel, userId) {
       if (!userId || !window.mmUsers || !window.mmUsers.setRole) return;
       var ok = await window.mmUsers.setRole(userId, sel.value);
-      if (ok) toast('👤 권한 변경 완료 — ' + sel.value, 'success');
+      if (!ok) { var host = sel.parentNode && sel.parentNode.parentNode; if (host && host.id && window.mmUsersUI.list) window.mmUsersUI.list(host.id); return; } toast('👤 권한 변경 완료 — ' + sel.value, 'success');
     }
   };
 
@@ -20026,7 +20186,7 @@ table.data-table {
             var w = workers.find(function(x){return (x.name||'').trim()===workerName;});
             if (!w) { _skip++; return; }  // [수술 — 선등록 정책] 미등록 작업자 자동 생성 차단 — 일용직 화면에서 먼저 등록
             if (arr.some(function(a){ return a.workerId === w.id && a.date === date; })) { _dup++; return; }  // [수술 — 재업로드 중복 차단] 같은 파일 재가져오기 시 출역 2배 누적되던 결함
-            arr.push({ id:'AT'+ts+'_'+i, date:date, workerId:w.id, workerName:w.name, jobType:(r[2]||w.primaryJob||'일반').trim(), wage:num(r[3])||num(w.primaryWage), projectLabel:(r[4]||'').trim(), createdAt:new Date().toISOString() });
+            arr.push({ id:'AT'+ts+'_'+i, date:date, workerId:w.id, workerName:w.name, jobType:(r[2]||w.primaryJob||'일반').trim(), wage:num(r[3])||num(w.primaryWage), projectId:(window.rnAttendProjectId ? window.rnAttendProjectId({ projectLabel:(r[4]||'').trim() }) : null), projectLabel:(r[4]||'').trim(), createdAt:new Date().toISOString() });  // [C-8] CSV 5열(프로젝트) 라벨 → projectId 가산(미매칭 null)
             count++;
           });
           if (_skip || _dup) toast('⚠️ 제외 — 미등록 작업자 ' + _skip + '건 · 중복 ' + _dup + '건', 'warning', 6000);
@@ -20072,13 +20232,24 @@ table.data-table {
   // ═══════════════════════════════════════════════════════════════
   // 2. 이메일 발송 (Resend) [#145.2]
   // ═══════════════════════════════════════════════════════════════
+  // [rn3 C-1] Netlify 함수 인증 — 현재 Supabase 세션의 access token (없으면 null). 함수는 이 토큰을 Supabase 에 검증한다.
+  window.rnCloudToken = async function() {
+    try {
+      var sb = window.mmSupabase && window.mmSupabase.getClient && window.mmSupabase.getClient();
+      if (!sb) return null;
+      var s = await sb.auth.getSession();
+      return (s && s.data && s.data.session && s.data.session.access_token) || null;
+    } catch(e) { return null; }
+  };
   window.mmSendEmail = async function(to, subject, html) {
     // 서버 프록시(Netlify Function) 경유 — 키는 서버 환경변수에만 존재, 브라우저 비노출
     // Resend 는 브라우저 직접 호출(CORS) 차단이므로 서버 함수가 대신 호출
     try {
+      var _tok = await window.rnCloudToken();
+      if (!_tok) { toast('메일 발송은 클라우드 계정으로 로그인한 뒤 사용할 수 있습니다', 'warn'); return false; }
       var r = await fetch('/.netlify/functions/send-email', {
         method:'POST',
-        headers:{ 'Content-Type':'application/json' },
+        headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + _tok },
         body: JSON.stringify({ to:to, subject:subject, html:html })
       });
       var data = {};
@@ -20095,9 +20266,11 @@ table.data-table {
     // 서버 프록시(Netlify Function) 경유 — 알리고 키/발신번호는 서버 환경변수에만 존재, 브라우저 비노출
     // 알리고는 브라우저 직접 호출(CORS) 차단이므로 서버 함수가 대신 호출
     try {
+      var _tok = await window.rnCloudToken();
+      if (!_tok) { toast('SMS 발송은 클라우드 계정으로 로그인한 뒤 사용할 수 있습니다', 'warn'); return false; }
       var r = await fetch('/.netlify/functions/send-sms', {
         method:'POST',
-        headers:{ 'Content-Type':'application/json' },
+        headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + _tok },
         body: JSON.stringify({ to:to, message:message })
       });
       var data = {};
@@ -20117,23 +20290,26 @@ table.data-table {
     if (!pending.length) { toast('대기 알림 없음', 'info'); return; }
     var recipients = (window.mmRecipients && window.mmRecipients.load) ? window.mmRecipients.load() : [];
     if (!recipients.length) { toast('수신자 미등록 — 설정 → 알림 수신자 추가', 'warn'); return; }
+    // [rn3 검토 반영] 클라우드 세션이 없으면 발송 자체가 불가 — 큐를 '발송 완료'로 거짓 처리하지 않고 보존
+    if (!(window.rnCloudToken && await window.rnCloudToken())) { toast('알림 발송은 클라우드 계정으로 로그인한 뒤 가능합니다 — 대기 큐는 보존됩니다', 'warn'); return; }
     var sent = 0, failed = 0;
     for (var i = 0; i < pending.length; i++) {
-      var item = pending[i];
+      var item = pending[i], _iSent = 0, _iFail = 0;
       var msg = '📌 미수금 안내: ' + (item.target||'발주처');
       for (var j = 0; j < recipients.length; j++) {
         var r = recipients[j];
         if (r.active === false) continue;
         if (r.email) {
           var ok = await window.mmSendEmail(r.email, '[명문이엔지] '+msg, '<p>'+msg+'</p><hr><p style="color:var(--hx-ink-4);font-size:13px">자동 발송 by ㈜명문이엔지 v3</p>');
-          if (ok) sent++; else failed++;
+          if (ok) { sent++; _iSent++; } else { failed++; _iFail++; }
         }
         if (r.phone) {
           var ok = await window.mmSendSms(r.phone, msg);
-          if (ok) sent++; else failed++;
+          if (ok) { sent++; _iSent++; } else { failed++; _iFail++; }
         }
       }
-      item.status = '발송 완료 ' + new Date().toISOString();
+      // 건별 상태: 하나라도 실패하면 대기 유지(다음 처리에서 재시도), 전부 성공해야 완료
+      item.status = (_iSent > 0 && _iFail === 0) ? '발송 완료 ' + new Date().toISOString() : '발송 대기 (실패 ' + _iFail + '건 — 재시도)';
     }
     try { localStorage.setItem('mm-dunning-queue', JSON.stringify(queue)); } catch(e) {}
     try { if (sb() && window.mmSyncPushPhase1) window.mmSyncPushPhase1(); } catch(e) {}  // [독촉 sync] '발송 완료' 상태 전파
@@ -20280,7 +20456,7 @@ table.data-table {
     if (!screen) return;
     var wk = workers(), at = attendance();
     var total = wk.length;
-    var active = wk.filter(function(w){ return num(w.daysWorked)>0; }).length;
+    var active = wk.filter(function(w){ return num(w.daysWorkedMonth)>0; }).length;   // [C-9 부수] kpis[1] 라벨 '이번 달 활동' — 이번 달 출역자 수(누적 daysWorked>0 이 아님)
     // [rn fix-workers 1] kpis[2] 는 '평균 일당 … 만' 카드 — ins8(월 8일 이상 인원) 기입은 라벨·단위 불일치. 등록 인력 기본 일당(primaryWage, 미입력 0 은 제외) 평균을 만 단위 소수 1자리로(대상 0명이면 0)
     var wageList = wk.map(function(w){ return num(w.primaryWage); }).filter(function(v){ return v>0; });
     var wageAvg = wageList.length ? wageList.reduce(function(s,v){ return s+v; }, 0)/wageList.length : 0;
@@ -20383,7 +20559,7 @@ table.data-table {
         unifiedTbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--hx-ink-4);font-size:14px">등록된 일용직이 없습니다 — 일용직 마스터에서 먼저 등록하세요</td></tr>';
       } else {
         unifiedTbody.innerHTML = wk.map(function(w){
-          var ins = num(w.daysWorked)>=8;
+          var ins = num(w.daysWorkedMonth)>=8;   // [C-9] 이번 달(daysWorkedMonth) 8일 이상 = 가입 대상 — 누적 daysWorked 판정 폐기
           return '<tr><td><strong>'+mmEsc(w.name||'—')+'</strong><div class="t-xs">'+mmEsc(w.phone||'')+'</div></td>'+
             '<td><span class="badge" style="background:var(--hx-accent-wash);color:var(--hx-accent-ink)">'+mmEsc(w.primaryJob||'일반')+'</span></td>'+
             '<td class="t-xs">—</td>'+
@@ -20622,7 +20798,7 @@ table.data-table {
     }
 
     // workers 히어로
-    var totalW = wk.length, activeW = wk.filter(function(w){return num(w.daysWorked)>0;}).length, ins8 = wk.filter(function(w){return num(w.daysWorked)>=8;}).length;
+    var totalW = wk.length, activeW = wk.filter(function(w){return num(w.daysWorkedMonth)>0;}).length, ins8 = wk.filter(function(w){return num(w.daysWorkedMonth)>=8;}).length;   // [C-9] hero '이번 달 활동'(activeW)·8일 판정(ins8) = daysWorkedMonth — 누적 daysWorked 아님
     setHeroStats('[data-screen="workers"]', [totalW, activeW+'명', fmtMan(wk.reduce(function(s,w){return s+num(w.totalWage);},0))]);
 
 

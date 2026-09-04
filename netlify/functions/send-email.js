@@ -1,6 +1,9 @@
 // ㈜명문이엔지 v3 — Resend 이메일 발송 서버 프록시 (Netlify Function)
 // 보안: RESEND_API_KEY 는 Netlify 환경변수에만 존재. 브라우저로 절대 전송되지 않음.
 // 브라우저(mmSendEmail) → 이 함수 → Resend 순으로 호출 (CORS 우회 + 키 비노출)
+// [rn3 C-1] 인증: Supabase 세션 토큰을 검증한 요청만 발송(401 / 인증 서버 미응답 503). 수신자 수·본문 크기 상한.
+const { requireUser, gate } = require('./lib/auth');
+
 exports.handler = async (event) => {
   const headers = { 'Content-Type': 'application/json' };
 
@@ -8,6 +11,10 @@ exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method not allowed' }) };
   }
+
+  const user = await requireUser(event);
+  const denied = gate(user, headers);
+  if (denied) return denied;
 
   const key = process.env.RESEND_API_KEY;
   if (!key) {
@@ -24,6 +31,10 @@ exports.handler = async (event) => {
   if (!to || !subject) {
     return { statusCode: 400, headers, body: JSON.stringify({ error: 'to/subject 필수' }) };
   }
+  const toList = Array.isArray(to) ? to : [to];
+  if (toList.length > 20 || String(subject).length > 300 || String(html).length > 200000) {
+    return { statusCode: 413, headers, body: JSON.stringify({ error: '요청 크기 초과 (수신자 20명 · 제목 300자 · 본문 200KB 이내)' }) };
+  }
 
   // 도메인 인증 전: onboarding@resend.dev (계정 소유 메일로만 발송 가능)
   // 도메인 인증 후: Netlify 환경변수 RESEND_FROM 에 'noreply@회사도메인' 설정
@@ -33,7 +44,7 @@ exports.handler = async (event) => {
     const r = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { 'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from, to: Array.isArray(to) ? to : [to], subject, html })
+      body: JSON.stringify({ from, to: toList, subject, html })
     });
     const data = await r.json().catch(() => ({}));
     return { statusCode: r.status, headers, body: JSON.stringify(data) };

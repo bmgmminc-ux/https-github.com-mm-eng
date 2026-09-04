@@ -1,6 +1,9 @@
 // ㈜명문이엔지 v3 — 알리고 SMS 발송 서버 프록시 (Netlify Function)
 // 보안: 알리고 키/계정/발신번호는 Netlify 환경변수에만 존재. 브라우저로 절대 전송되지 않음.
 // 브라우저(mmSendSms) → 이 함수 → 알리고 순으로 호출 (CORS 우회 + 키 비노출)
+// [rn3 C-1] 인증: Supabase 세션 토큰을 검증한 요청만 발송(401 / 인증 서버 미응답 503). 수신자 형식·본문 길이 상한.
+const { requireUser, gate } = require('./lib/auth');
+
 exports.handler = async (event) => {
   const headers = { 'Content-Type': 'application/json' };
 
@@ -8,6 +11,10 @@ exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method not allowed' }) };
   }
+
+  const user = await requireUser(event);
+  const denied = gate(user, headers);
+  if (denied) return denied;
 
   const key = process.env.ALIGO_API_KEY;
   const userId = process.env.ALIGO_USER_ID;
@@ -20,10 +27,13 @@ exports.handler = async (event) => {
   try { body = JSON.parse(event.body || '{}'); }
   catch (e) { return { statusCode: 400, headers, body: JSON.stringify({ error: 'Invalid JSON' }) }; }
 
-  const to = body.to;
-  const message = body.message || '';
+  const to = String(body.to || '').replace(/[^0-9,]/g, '');
+  const message = String(body.message || '');
   if (!to || !message) {
     return { statusCode: 400, headers, body: JSON.stringify({ error: 'to/message 필수' }) };
+  }
+  if (to.split(',').filter(Boolean).length > 20 || message.length > 2000) {
+    return { statusCode: 413, headers, body: JSON.stringify({ error: '요청 크기 초과 (수신 20명 · 본문 2000자 이내)' }) };
   }
 
   const form = new URLSearchParams();
