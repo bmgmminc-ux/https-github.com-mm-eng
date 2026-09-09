@@ -21067,6 +21067,10 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
   async function push() {
     var sb = sbClient();
     if (!sb) { _dashPushFailed('Supabase 미설정', true); return { ok:false, msg:'Supabase 미설정' }; }   // [H7] silent — 로컬 전용 모드(프리뷰 등)는 소음 없이 dirty만
+    // [중복 폭주 차단] 동시 실행 잠금 — push 호출 지점이 10곳(저장·로그인·realtime·디바운스·수동)이라 겹칠 수 있고,
+    //   cost_items 에는 UNIQUE 가 없어 delete/insert 가 인터리브되면 그대로 두 벌이 남는다.
+    if (window.__mmPushBusy) return { ok:false, msg:'이미 업로드 중 — 중복 실행 건너뜀' };
+    window.__mmPushBusy = true;
     try {
       var sess = await sb.auth.getSession();
       var ownerId = sess.data.session && sess.data.session.user && sess.data.session.user.id;
@@ -21086,7 +21090,8 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
         var r2 = await sb.from('project_costs').upsert(d.costs, { onConflict: 'project_id,category' });
         if (r2.error) throw r2.error;
         // costItems / billingItems: 기존 삭제 후 재삽입
-        await sb.from('cost_items').delete().eq('project_id', d.project.id);
+        var rd3 = await sb.from('cost_items').delete().eq('project_id', d.project.id);
+        if (rd3 && rd3.error) throw rd3.error;   // [중복 폭주 차단] 지우지 못했으면 넣지 않는다 — cost_items 에는 UNIQUE 가 없어 그대로 누적된다
         if (d.costItems.length) {
           var r3 = await sb.from('cost_items').insert(d.costItems);
           if (r3.error && /client_id/i.test(r3.error.message||'')) {
@@ -21101,7 +21106,8 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
           }
           if (r3.error) throw r3.error;
         }
-        await sb.from('billing_items').delete().eq('project_id', d.project.id);
+        var rd4 = await sb.from('billing_items').delete().eq('project_id', d.project.id);
+        if (rd4 && rd4.error) throw rd4.error;
         if (d.billingItems.length) {
           var r4 = await sb.from('billing_items').insert(d.billingItems);
           if (r4.error) throw r4.error;
@@ -21119,6 +21125,7 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
       try{ localStorage.removeItem('mm-dash-dirty'); }catch(e){}   // [H7] 업로드 성공 → dirty 해제
       return { ok:true, msg:'업로드 완료 — 프로젝트 ' + projects.length + '건' };
     } catch(e) { _dashPushFailed((e && e.message) || String(e)); return { ok:false, msg:'PUSH 실패: ' + (e.message||e) } }
+    finally { window.__mmPushBusy = false; window._mmSelfWriteAt = Date.now(); }   // [중복 폭주 차단] 실패 경로에서도 자기 write 의 realtime 반향을 무시하게 한다
   }
 
   // ── 자동 동기화 (저장 변경 감지 → 디바운스 push) ──
