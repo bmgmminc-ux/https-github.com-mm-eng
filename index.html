@@ -21138,10 +21138,10 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
 
   // [C1] Supabase 응답 기본 상한(1000행) 대응 — id 정렬 + range 페이지네이션으로 전량 수집.
   //      절단본이 로컬을 덮고 3초 워처가 delete-insert push로 클라우드에 역기록하던 소실 경로 차단.
-  async function fetchAllRows(sb, table) {
+  async function fetchAllRows(sb, table, orderCol) {   // [R2-hotfix] orderCol — project_finance 는 id 컬럼이 없다(PK = project_id)
     var PAGE = 1000, all = [], from = 0;
     for (;;) {
-      var r = await sb.from(table).select('*').order('id').range(from, from + PAGE - 1);
+      var r = await sb.from(table).select('*').order(orderCol || 'id').range(from, from + PAGE - 1);
       if (r.error) return r;                       // 에러는 호출측에서 기존과 동일하게 처리
       all = all.concat(r.data || []);
       if (!r.data || r.data.length < PAGE) break;  // 마지막 페이지
@@ -21163,7 +21163,7 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
       var mgr = _isMgr(), finMode = mgr ? 'rows' : 'none', finMap = {};
       var bRes = { data: [] }, oiData = [];
       if (mgr) {
-        var fRes = await fetchAllRows(sb, 'project_finance');
+        var fRes = await fetchAllRows(sb, 'project_finance', 'project_id');
         if (fRes.error) {
           if (!_noRelation(fRes.error)) throw fRes.error;
           finMode = 'legacy';   // 표 미도입(SQL 미실행) — 옛 컬럼으로 표시
@@ -21216,7 +21216,7 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
   var _finMode = 'rows';
   function _isMgr() { try { return !!(window.mmPerm && window.mmPerm.canManage && window.mmPerm.canManage()); } catch (e) { return false; } }
   function _setFin(state) { try { document.body.setAttribute('data-fin', state); } catch (e) { } }
-  function _noRelation(err) { var m = String((err && err.message) || ''); return /PGRST205|42P01/.test(String((err && err.code) || '')) || /schema cache|does not exist/i.test(m); }
+  function _noRelation(err) { var m = String((err && err.message) || ''); return /PGRST205|42P01/.test(String((err && err.code) || '')) || /could not find the table|relation "?[\w.]*project_finance"? does not exist/i.test(m); }
   // [2단계-2] 마지막 동기화 시점 사본 — push 는 이 사본과 비교해 바뀐 행·사라진 행만 보낸다(남이 넣은 행은 건드리지 않는다).
   //   사본이 없으면(첫 실행) 전량 덮어쓰기·삭제 없음 = 안전한 기본값. pull 성공·push 전체 성공 시 갱신.
   var SYNC_KEY = 'mm-dash-synced';
