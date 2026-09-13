@@ -21122,6 +21122,7 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
         });
       } catch(_ae) {}
       saveLocal(projects, true);   // [지혈3] 원격 유래 — dirty 미표시
+      _saveSynced(projects);       // [2단계-2] 내려받은 상태가 기준 사본
       try { lastHash = localStorage.getItem(DASH_KEY) || ''; } catch(_lh){}   // [지혈3] 방금 내려받은 내용을 '미전송 변경'으로 오인하지 않도록 기준선 갱신
       window.dispatchEvent(new StorageEvent('storage', { key: DASH_KEY }));
       return { ok:true, msg:'다운로드 완료 — 프로젝트 ' + projects.length + '건' };
@@ -21137,6 +21138,11 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
     }
     return err;
   }
+  // [2단계-2] 마지막 동기화 시점 사본 — push 는 이 사본과 비교해 바뀐 행·사라진 행만 보낸다(남이 넣은 행은 건드리지 않는다).
+  //   사본이 없으면(첫 실행) 전량 덮어쓰기·삭제 없음 = 안전한 기본값. pull 성공·push 전체 성공 시 갱신.
+  var SYNC_KEY = 'mm-dash-synced';
+  function _loadSynced() { try { var a = JSON.parse(localStorage.getItem(SYNC_KEY) || 'null'); return Array.isArray(a) ? a : null; } catch (e) { return null; } }
+  function _saveSynced(arr) { try { localStorage.setItem(SYNC_KEY, JSON.stringify(arr)); } catch (e) { } }
   // [2단계-1] 매입 행 고유 번호 백필 — 없거나 같은 현장 안에서 겹치면 새로 발급. 바뀐 게 있으면 true.
   function _ensureCostIds(projects) {
     var changed = false;
@@ -21169,45 +21175,59 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
       // [1단계] 한 현장의 실패가 나머지 현장 동기화를 막지 않게 격리한다.
       //   예전 기타수익 블록처럼 '삼키는' 것이 아니라, 실패를 모아 두었다가 루프가 끝난 뒤 반드시 실패로 보고한다
       //   (→ dirty 유지 + 토스트 + 재시도). 성공한 현장은 이미 원자적으로 치환됐고 재시도해도 멱등이다.
+      var _synced = _loadSynced();
+      var _syncedMap = {};
+      (_synced || []).forEach(function (sp) { try { var sd = disassembleProject(sp, ownerId); _syncedMap[sd.project.id] = sd; } catch (_e) { } });
       var _pjFailed = [];
       for (var i = 0; i < projects.length; i++) {
         var d = disassembleProject(projects[i], ownerId);
+        var s = _syncedMap[d.project.id] || null;
+        var same = function (x, y) { return !!s && JSON.stringify(x) === JSON.stringify(y); };
         try {
-        var r1 = await sb.from('projects').upsert(d.project);
-        if (r1.error && /\b(address|lat|lng)\b/i.test(r1.error.message||'')) {
-          // [영업 지도 ①] address/lat/lng 컬럼 미생성 환경 폴백 — 20260618_project_address.sql RUN 전에도 프로젝트 동기화 정상(로컬 주소는 보존)
-          delete d.project.address; delete d.project.lat; delete d.project.lng;
-          r1 = await sb.from('projects').upsert(d.project);
+        // 현장 기본 정보·원가 분류: 사본과 같으면 건드리지 않는다(남의 편집을 옛 값으로 덮지 않게)
+        if (!same(s && s.project, d.project)) {
+          var r1 = await sb.from('projects').upsert(d.project);
+          if (r1.error && /\b(address|lat|lng)\b/i.test(r1.error.message||'')) {
+            // [영업 지도 ①] address/lat/lng 컬럼 미생성 환경 폴백
+            delete d.project.address; delete d.project.lat; delete d.project.lng;
+            r1 = await sb.from('projects').upsert(d.project);
+          }
+          if (r1.error) throw r1.error;
         }
-        if (r1.error) throw r1.error;
-        var r2 = await sb.from('project_costs').upsert(d.costs, { onConflict: 'project_id,category' });
-        if (r2.error) throw r2.error;
-        // [1단계 · 원자적 치환] 지우기+넣기를 DB 함수 한 번(=한 트랜잭션)으로 보낸다.
-        //   같은 현장의 동시 호출은 함수 안 advisory lock 이 줄 세우므로, 창·기기가 몇이든 두 벌이 남을 수 없다.
-        //   client_id / attrib_cat 컬럼이 없는 환경도 함수가 알아서 무시하므로 예전의 폴백 재삽입이 필요 없다.
-        var r3 = await sb.rpc('mm_replace_cost_items', { p_project_id: d.project.id, p_rows: d.costItems });
-        if (r3.error) throw _rpcErr(r3.error, 'mm_replace_cost_items');
-        if (d.costItems.length && r3.data !== d.costItems.length) {   // [이상감지] 보낸 수와 저장된 수가 다르면 실패로 본다
-          throw new Error('매입 저장 수 불일치 — 보낸 ' + d.costItems.length + '건, 저장 ' + r3.data + '건');
+        if (!same(s && s.costs, d.costs)) {
+          var r2 = await sb.from('project_costs').upsert(d.costs, { onConflict: 'project_id,category' });
+          if (r2.error) throw r2.error;
         }
-        // 기성 청구는 unique(project_id, round_no) 가 중복을 막아 왔다 — 이번 단계 범위 밖(2단계에서 함께 정리)
-        var rd4 = await sb.from('billing_items').delete().eq('project_id', d.project.id);
-        if (rd4 && rd4.error) throw rd4.error;
-        if (d.billingItems.length) {
-          var r4 = await sb.from('billing_items').insert(d.billingItems);
-          if (r4.error) throw r4.error;
+        // [2단계-2] 매입: 사본과 비교해 바뀐 행만 덮어쓰고(고유 번호 기준), 사본에는 있는데 지금 없는 행만 지운다.
+        //   함수 안 advisory lock 이 같은 현장 동시 호출을 줄 세운다. 남이 넣은 행은 목록에 없으므로 그대로 남는다.
+        var sMap = {}; ((s && s.costItems) || []).forEach(function (r) { sMap[String(r.client_id || '')] = JSON.stringify(r); });
+        var ups = [], seenK = {};
+        d.costItems.forEach(function (r) { var k = String(r.client_id || ''); seenK[k] = 1; if (sMap[k] !== JSON.stringify(r)) ups.push(r); });
+        var dels = Object.keys(sMap).filter(function (k) { return k && !seenK[k]; });
+        if (ups.length || dels.length) {
+          var r3 = await sb.rpc('mm_upsert_cost_items', { p_project_id: d.project.id, p_rows: ups, p_delete_ids: dels });
+          if (r3.error) throw _rpcErr(r3.error, 'mm_upsert_cost_items');
+          var got = (r3.data && r3.data.upserted != null) ? r3.data.upserted : -1;
+          if (got !== ups.length) throw new Error('매입 저장 수 불일치 — 보낸 ' + ups.length + '건, 저장 ' + got + '건');   // [이상감지]
         }
-        // [1단계] 기타수익도 같은 함수 방식. 예전엔 삭제·삽입 실패를 통째로 삼켜 화면에 아무 흔적이 없었다.
-        var r5 = await sb.rpc('mm_replace_other_income_items', { p_project_id: d.project.id, p_rows: d.otherIncomeItems || [] });
-        if (r5.error) throw _rpcErr(r5.error, 'mm_replace_other_income_items');
-        if ((d.otherIncomeItems || []).length && r5.data !== d.otherIncomeItems.length) {   // [이상감지] 매입과 같은 검사
-          throw new Error('기타수익 저장 수 불일치 — 보낸 ' + d.otherIncomeItems.length + '건, 저장 ' + r5.data + '건');
+        // 기성 청구: 회차가 위치(순서)라 행 병합이 성립하지 않는다 → 바뀌었을 때만 현장 단위 원자적 치환
+        if (!same(s && s.billingItems, d.billingItems)) {
+          var r4 = await sb.rpc('mm_replace_billing_items', { p_project_id: d.project.id, p_rows: d.billingItems });
+          if (r4.error) throw _rpcErr(r4.error, 'mm_replace_billing_items');
+          if (d.billingItems.length && r4.data !== d.billingItems.length) throw new Error('기성 저장 수 불일치 — 보낸 ' + d.billingItems.length + '건, 저장 ' + r4.data + '건');
+        }
+        // 기타수익: 바뀌었을 때만 원자적 치환(1단계 함수)
+        if (!same(s && s.otherIncomeItems, d.otherIncomeItems)) {
+          var r5 = await sb.rpc('mm_replace_other_income_items', { p_project_id: d.project.id, p_rows: d.otherIncomeItems || [] });
+          if (r5.error) throw _rpcErr(r5.error, 'mm_replace_other_income_items');
+          if ((d.otherIncomeItems || []).length && r5.data !== d.otherIncomeItems.length) throw new Error('기타수익 저장 수 불일치 — 보낸 ' + d.otherIncomeItems.length + '건, 저장 ' + r5.data + '건');
         }
         } catch (pjErr) {
           _pjFailed.push(String((d.project && (d.project.name || d.project.id)) || '현장') + ': ' + ((pjErr && pjErr.message) || pjErr));
         }
       }
       if (_pjFailed.length) throw new Error(_pjFailed.length + '개 현장 저장 실패 — ' + _pjFailed.join(' / '));
+      _saveSynced(projects);   // [2단계-2] 전 현장 성공 → 지금 상태가 새 기준 사본
       window._mmSelfWriteAt = Date.now();  // [전수조사] push 완료 직후 도착하는 반향까지 커버
       try{ localStorage.removeItem('mm-dash-dirty'); }catch(e){}   // [H7] 업로드 성공 → dirty 해제
       return { ok:true, msg:'업로드 완료 — 프로젝트 ' + projects.length + '건' };
@@ -21345,6 +21365,7 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
       var c3 = await sb.from('project_costs').delete().eq('project_id', id); if (c3.error) throw c3.error;
       var pr = await sb.from('projects').delete().eq('id', id);             if (pr.error) throw pr.error;
       _tombAdd(id);   // pull/realtime 레이스 가드
+      try { var _sy = _loadSynced(); if (_sy) _saveSynced(_sy.filter(function (p) { return p && p.id !== id; })); } catch (_se) { }   // [2단계-2]
       return { ok:true, msg:'클라우드 영구 삭제 완료' };
     } catch(e) { return { ok:false, msg:'클라우드 삭제 실패: ' + (e.message||e) } }
   }
@@ -21505,7 +21526,7 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
   }
 
   window.mmData = {
-    pull: pull, push: push, syncOnLogin: syncOnLogin, deleteProject: deleteProject, _ensureCostIds: _ensureCostIds,
+    pull: pull, push: push, syncOnLogin: syncOnLogin, deleteProject: deleteProject, _ensureCostIds: _ensureCostIds, _loadSynced: _loadSynced,
     pushMasters: pushMasters, pullMasters: pullMasters,
     deleteVendorCloud: deleteVendorCloud, deleteWorkerCloud: deleteWorkerCloud, deleteAttendanceCloud: deleteAttendanceCloud,
     pushSettings: pushSettings, pullSettings: pullSettings,
