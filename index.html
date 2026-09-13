@@ -15567,6 +15567,7 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
     }
     state.project = found;
     state.items = JSON.parse(JSON.stringify(found.costItems || []));
+    state.items.forEach(function(it){ if (it && !it.id) it.id = _newCiId(); });   // [2단계-1] 번호 없는 옛 행 백필
     // pasteMap
     try {
       var pm = localStorage.getItem('mm-paste-map');
@@ -15666,6 +15667,7 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
         }
       }
     } catch(_pe) {}
+    if (!state.project || state.project.id === '명문-DEMO') { alert('등록된 현장이 없습니다. 현장을 먼저 등록한 뒤 매입을 입력하세요.'); return; }   // [데모 주입 금지] 대체 객체는 절대 저장하지 않는다
     var raw = localStorage.getItem('mm-dash-v4');
     var projects = raw ? JSON.parse(raw) : [];
     if (!Array.isArray(projects)) projects = [];
@@ -15687,6 +15689,7 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
         c._seedActual = seedVal;
       });
     })();
+    (state.project.costItems || []).forEach(function(it){ if (it && !it.id) it.id = _newCiId(); });   // [2단계-1]
     if (idx >= 0) projects[idx] = state.project; else projects.push(state.project);
     try { localStorage.setItem('mm-dash-v4', JSON.stringify(projects)); } catch(_qe) { if (window.globalToast) globalToast('⛔ 저장 실패 — 저장 공간 부족: ' + _qe.message, 'error', 8000); return false; }  // [전수조사] quota 가드
     // [감사 핫픽스] 저장 즉시 클라우드 push (5.5초 폴링 갭 제거)
@@ -15734,8 +15737,11 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
     }
   }
 
+  // [2단계-1] 매입 행 고유 번호 — 첨부 연결·행 단위 동기화의 키. 생성 즉시 부여한다.
+  function _newCiId() { try { if (window.crypto && crypto.randomUUID) return 'ci_' + crypto.randomUUID(); } catch (e) { } return 'ci_' + Date.now() + '_' + Math.floor(Math.random() * 1e6); }
   function addRow() {
     state.items.push({
+      id: _newCiId(),
       type: state.activeTab,
       vendor:'', workerName:'', desc:'',
       contractAmt:0, deduction:0,
@@ -15857,6 +15863,7 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
     });
     if (dupes.length) alert('⚠️ 중복 항목 ' + dupes.length + '건 제외:\n' + dupes.join('\n'));
     if (!newItems.length) { alert('모든 항목이 중복'); return 0; }
+    newItems.forEach(function(it){ if (!it.id) it.id = _newCiId(); });   // [2단계-1] 붙여넣기·CSV·OCR 행도 고유 번호
     // [선등록 정책 — 대표 기준] 자동 등록 폐기 — 미등록/사업자번호 누락 업체는 경고만(행은 추가, 최종 저장은 차단됨)
     var _allV = [];
     ['mm-vendors','mm-vendors-v2','mm-vendors-v23'].forEach(function(k){ try { var a = JSON.parse(localStorage.getItem(k)||'[]'); if (Array.isArray(a)) a.forEach(function(v){ _allV.push(v); }); } catch(e){} });
@@ -21130,6 +21137,19 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
     }
     return err;
   }
+  // [2단계-1] 매입 행 고유 번호 백필 — 없거나 같은 현장 안에서 겹치면 새로 발급. 바뀐 게 있으면 true.
+  function _ensureCostIds(projects) {
+    var changed = false;
+    (projects || []).forEach(function (p) {
+      var seen = {};
+      (p && p.costItems || []).forEach(function (it) {
+        if (!it || typeof it !== 'object') return;
+        if (!it.id || typeof it.id !== 'string' || seen[it.id]) { it.id = 'ci_' + _uuid(); changed = true; }
+        seen[it.id] = 1;
+      });
+    });
+    return changed;
+  }
   async function push() {
     var sb = sbClient();
     if (!sb) { _dashPushFailed('Supabase 미설정', true); return { ok:false, msg:'Supabase 미설정' }; }   // [H7] silent — 로컬 전용 모드(프리뷰 등)는 소음 없이 dirty만
@@ -21143,6 +21163,8 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
       if (!ownerId) { _dashPushFailed('로그인 필요'); return { ok:false, msg:'로그인 필요 (Supabase 세션 없음)' }; }
 
       var projects = loadLocal();
+      // [2단계-1] 번호 없는 행에 번호를 주고 로컬에도 같은 번호를 남긴다(원격 유래 저장 → dirty 미표시, 기준선 갱신)
+      if (_ensureCostIds(projects)) { saveLocal(projects, true); try { lastHash = localStorage.getItem(DASH_KEY) || ''; } catch (_lh) { } }
       window._mmSelfWriteAt = Date.now();  // [전수조사] realtime 셀프-에코 가드용 스탬프
       // [1단계] 한 현장의 실패가 나머지 현장 동기화를 막지 않게 격리한다.
       //   예전 기타수익 블록처럼 '삼키는' 것이 아니라, 실패를 모아 두었다가 루프가 끝난 뒤 반드시 실패로 보고한다
@@ -21483,7 +21505,7 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
   }
 
   window.mmData = {
-    pull: pull, push: push, syncOnLogin: syncOnLogin, deleteProject: deleteProject,
+    pull: pull, push: push, syncOnLogin: syncOnLogin, deleteProject: deleteProject, _ensureCostIds: _ensureCostIds,
     pushMasters: pushMasters, pullMasters: pullMasters,
     deleteVendorCloud: deleteVendorCloud, deleteWorkerCloud: deleteWorkerCloud, deleteAttendanceCloud: deleteAttendanceCloud,
     pushSettings: pushSettings, pullSettings: pullSettings,
