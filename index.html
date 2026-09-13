@@ -5224,6 +5224,17 @@ body.rn-has-banner .main-area > .topbar{top:40px}
 <!-- ═══════════════════════════════════════════════════════════════
      권한 시스템 [#123] — body[data-role] + perm-* 게이트
      ═══════════════════════════════════════════════════════════════ -->
+<style id="r2-fin-mask">
+  /* [R2] 재무 잠금 — 직원·읽기전용 역할에는 서버가 계약·이익·기성을 보내지 않는다. 그 자리는 0 이 아니라 '관리자 전용'. */
+  body[data-fin="locked"] [data-fin], body[data-fin="locked"] [data-fin] * { color:transparent !important; -webkit-text-fill-color:transparent !important; text-shadow:none !important; }
+  body[data-fin="locked"] [data-fin] { position:relative; }
+  body[data-fin="locked"] [data-fin]::after { content:'관리자 전용'; position:absolute; left:0; top:50%; transform:translateY(-50%); white-space:nowrap; z-index:1;
+    font-family:var(--hx-font); font-size:clamp(11px, .6em, 13px); font-weight:600; letter-spacing:0; line-height:1.3; padding:2px 7px; border-radius:6px;
+    color:var(--hx-ink-4) !important; -webkit-text-fill-color:var(--hx-ink-4) !important; background:var(--hx-surface-2, #F3F4F6); border:1px dashed var(--hx-ink-5, #C9CDD4); }
+  body[data-fin="locked"] .right[data-fin]::after { left:auto; right:10px; }
+  body[data-fin="locked"] .center[data-fin]::after { left:50%; transform:translate(-50%,-50%); }
+  body[data-fin="locked"] [data-fin] .progress-bar, body[data-fin="locked"] [data-fin] svg { visibility:hidden; }
+</style>
 <style id="perm-system-style">
   /* 권한별 요소 숨김 — body[data-role] 기준 */
   body[data-role="admin"] .perm-ceo { display:none !important; }
@@ -5558,12 +5569,12 @@ body.rn-has-banner .main-area > .topbar{top:40px}
             </div>
             <div class="hero-stat accent">
               <div class="hero-stat-label">총 계약금액</div>
-              <div class="hero-stat-value t-num"><span id="ov-hero-contract">0</span>억</div>
+              <div class="hero-stat-value t-num" data-fin="1"><span id="ov-hero-contract">0</span>억</div>
 
             </div>
             <div class="hero-stat success">
               <div class="hero-stat-label">총 이익</div>
-              <div class="hero-stat-value t-num"><span id="ov-hero-profit">+0</span>억</div>
+              <div class="hero-stat-value t-num" data-fin="1"><span id="ov-hero-profit">+0</span>억</div>
 
             </div>
           </div>
@@ -6813,10 +6824,10 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
             </svg>
           </div>
           <div class="kpi-label">총 계약금액</div>
-          <div class="kpi-value t-num"><span data-ov-kpi="contract">0</span><span style="font-size:14px;font-weight:500;color:var(--hx-ink-3);margin-left:3px">억</span></div>
+          <div class="kpi-value t-num" data-fin="1"><span data-ov-kpi="contract">0</span><span style="font-size:14px;font-weight:500;color:var(--hx-ink-3);margin-left:3px">억</span></div>
           <div class="kpi-meta">
             <span class="kpi-trend up" data-ov-trend="contract">프로젝트 0건</span>
-            <span data-ov-extra="contract">VAT포함 0억</span>
+            <span data-ov-extra="contract" data-fin="1">VAT포함 0억</span>
           </div>
         </div>
 
@@ -6843,7 +6854,7 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
             </svg>
           </div>
           <div class="kpi-label">총 이익</div>
-          <div class="kpi-value t-num success"><span data-ov-kpi="profit">+0</span><span style="font-size:14px;font-weight:500;color:var(--hx-ink-3);margin-left:3px">억</span></div>
+          <div class="kpi-value t-num success" data-fin="1"><span data-ov-kpi="profit">+0</span><span style="font-size:14px;font-weight:500;color:var(--hx-ink-3);margin-left:3px">억</span></div>
           <div class="kpi-meta">
             <span class="kpi-trend up" data-ov-trend="profit">▲ 이익률 0%</span>
           </div>
@@ -6981,7 +6992,7 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
                    기본 hidden, JS가 호버 이벤트를 받아 표시 + 내용 변경. -->
               <div class="multiring-center-v2" id="mr-detail" style="display:none">
                 <div class="multiring-eyebrow-v2" id="mrd-name"></div>
-                <div class="multiring-main-v2" id="mrd-value"></div>
+                <div class="multiring-main-v2" id="mrd-value" data-fin="1"></div>
                 <div class="multiring-sub-v2" id="mrd-desc"></div>
                 <span class="multiring-grade-v2" id="mrd-grade"></span>
               </div>
@@ -7945,18 +7956,18 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
           <div class="hero-stats">
             <div class="hero-stat">
               <div class="hero-stat-label">계약금액</div>
-              <div class="hero-stat-value t-num" id="pjd-hero-contract">—</div>
-              <div class="hero-stat-trend" id="pjd-hero-contract-vat">VAT포함 —</div>
+              <div class="hero-stat-value t-num" id="pjd-hero-contract" data-fin="1">—</div>
+              <div class="hero-stat-trend" id="pjd-hero-contract-vat" data-fin="1">VAT포함 —</div>
             </div>
             <div class="hero-stat accent">
               <div class="hero-stat-label">투입 원가</div>
               <div class="hero-stat-value t-num" id="pjd-hero-cost">—</div>
-              <div class="hero-stat-trend" id="pjd-hero-cost-rate">원가율 —</div>
+              <div class="hero-stat-trend" id="pjd-hero-cost-rate" data-fin="1">원가율 —</div>
             </div>
             <div class="hero-stat success">
               <div class="hero-stat-label">이익</div>
-              <div class="hero-stat-value t-num" id="pjd-hero-profit">—</div>
-              <div class="hero-stat-trend" id="pjd-hero-profit-trend">—</div>
+              <div class="hero-stat-value t-num" id="pjd-hero-profit" data-fin="1">—</div>
+              <div class="hero-stat-trend" id="pjd-hero-profit-trend" data-fin="1">—</div>
             </div>
           </div>
         </div>
@@ -8234,8 +8245,8 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
         <div class="pjd-profit-icon" id="pjd-profit-icon"></div>
         <div class="pjd-profit-main">
           <div class="pjd-profit-lbl">이익률 · Profit Margin</div>
-          <div class="pjd-profit-rate" id="pjd-profit-rate-mega">—</div>
-          <div class="pjd-profit-amt">이익 <strong id="pjd-profit-amt">—</strong> <small id="pjd-profit-amt-full">—</small></div>
+          <div class="pjd-profit-rate" id="pjd-profit-rate-mega" data-fin="1">—</div>
+          <div class="pjd-profit-amt" data-fin="1">이익 <strong id="pjd-profit-amt">—</strong> <small id="pjd-profit-amt-full">—</small></div>
         </div>
         <div class="pjd-profit-side">
           <!-- [상태 카드 — 대표 요청] 전체 현황·예산 분석의 상태 분류를 기성 신청률 칩과 같은 라인·크기로 노출 -->
@@ -8251,8 +8262,8 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
       <div class="pjd-kpi-grid">
         <div class="pjd-kpi" style="--kc:var(--hx-accent-deep);--kc2:var(--hx-accent-deep)">
           <div class="pjd-kpi-head"><span class="pjd-kpi-lbl">총 계약금액</span></div>
-          <div class="pjd-kpi-val" id="pjd-rev-contract">—</div>
-          <div class="pjd-kpi-sub">VAT포함 <b id="pjd-rev-contract-vat">—</b></div>
+          <div class="pjd-kpi-val" id="pjd-rev-contract" data-fin="1">—</div>
+          <div class="pjd-kpi-sub" data-fin="1">VAT포함 <b id="pjd-rev-contract-vat">—</b></div>
         </div>
         <div class="pjd-kpi" style="--kc:var(--hx-violet);--kc2:var(--hx-violet-s)">
           <div class="pjd-kpi-head"><span class="pjd-kpi-lbl">투입 원가 <small>(직불포함)</small></span></div>
@@ -8266,8 +8277,8 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
         </div>
         <div class="pjd-kpi" style="--kc:var(--hx-good);--kc2:var(--hx-good)">
           <div class="pjd-kpi-head"><span class="pjd-kpi-lbl">이익</span></div>
-          <div class="pjd-kpi-val" id="pjd-rev-profit">—</div>
-          <div class="pjd-kpi-sub">이익률 <b id="pjd-rev-profit-rate">—</b></div>
+          <div class="pjd-kpi-val" id="pjd-rev-profit" data-fin="1">—</div>
+          <div class="pjd-kpi-sub" data-fin="1">이익률 <b id="pjd-rev-profit-rate">—</b></div>
         </div>
       </div>
     </div>
@@ -8279,7 +8290,7 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
       <div class="pjd-quad" style="--qc:var(--hx-accent-deep);--qc2:var(--hx-accent-deep)">
         <div class="pjd-quad-ttl"><span class="num">A</span> 계약 / 투입</div>
         <div class="pjd-quad-rows">
-          <div class="pjd-quad-row"><span class="l">총 계약금액</span><span class="v" id="pjd-A-contract">—</span></div>
+          <div class="pjd-quad-row"><span class="l">총 계약금액</span><span class="v" id="pjd-A-contract" data-fin="1">—</span></div>
           <div class="pjd-quad-row"><span class="l">직불공제</span><span class="v neg" id="pjd-A-direct">—</span></div>
           <div class="pjd-quad-row"><span class="l">실수금 대상</span><span class="v" id="pjd-A-net">—</span></div>
           <div class="pjd-quad-row"><span class="l">현장 투입</span><span class="v" id="pjd-A-actual">—</span></div>
@@ -8294,7 +8305,7 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
             <div class="top"><span class="l">소진율</span><span class="v" id="pjd-B-rate">—</span></div>
             <div class="pjd-quad-bar"><div class="pjd-quad-bar-fill" id="pjd-B-bar" style="width:0%"></div></div>
           </div>
-          <div class="pjd-quad-row"><span class="l">이익 (계약-원가)</span><span class="v pos" id="pjd-B-profit">—</span></div>
+          <div class="pjd-quad-row"><span class="l">이익 (계약-원가)</span><span class="v pos" id="pjd-B-profit" data-fin="1">—</span></div>
         </div>
       </div>
       <div class="pjd-quad" style="--qc:var(--hx-teal);--qc2:var(--hx-accent)">
@@ -8312,7 +8323,7 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
       <div class="pjd-quad" style="--qc:var(--hx-good);--qc2:var(--hx-good)">
         <div class="pjd-quad-ttl"><span class="num">D</span> 성과 지표</div>
         <div class="pjd-quad-rows">
-          <div class="pjd-quad-row profit-mega" id="pjd-D-profit-row"><span class="l">이익률</span><span class="v" id="pjd-D-profit">—</span></div>
+          <div class="pjd-quad-row profit-mega" id="pjd-D-profit-row"><span class="l">이익률</span><span class="v" id="pjd-D-profit" data-fin="1">—</span></div>
           <div class="pjd-quad-row"><span class="l">원가율</span><span class="v warn" id="pjd-D-cost">—</span></div>
           <div class="pjd-quad-row"><span class="l">신청률</span><span class="v" id="pjd-D-bill">—</span></div>
           <div class="pjd-quad-row bar">
@@ -8366,7 +8377,7 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
         </div>
         <div class="pjd-flow-row">
           <div class="pjd-flow-stage info">
-            <div class="l">총 계약</div><div class="v" id="pjd-fl-contract">—</div><div class="m" id="pjd-fl-contract-vat">—</div>
+            <div class="l">총 계약</div><div class="v" id="pjd-fl-contract" data-fin="1">—</div><div class="m" id="pjd-fl-contract-vat" data-fin="1">—</div>
           </div>
           <div class="pjd-flow-arrow">−</div>
           <div class="pjd-flow-stage warn">
@@ -8382,7 +8393,7 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
           </div>
           <div class="pjd-flow-arrow">=</div>
           <div class="pjd-flow-stage ok mega" id="pjd-fl-profit-stage">
-            <div class="l">이익</div><div class="v" id="pjd-fl-profit">—</div><div class="m" id="pjd-fl-profit-rate">—</div>
+            <div class="l">이익</div><div class="v" id="pjd-fl-profit" data-fin="1">—</div><div class="m" id="pjd-fl-profit-rate" data-fin="1">—</div>
           </div>
         </div>
       </div>
@@ -8797,9 +8808,9 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
   </div>
 
   <div class="pjbx-hero-kpi">
-    <div class="pjbx-hero-stat c-contract"><div class="hd"><span class="l">총 계약</span></div><div class="v" id="pjbx-h-contract">—</div><div class="meta" id="pjbx-h-contract-full">—</div></div>
+    <div class="pjbx-hero-stat c-contract"><div class="hd"><span class="l">총 계약</span></div><div class="v" id="pjbx-h-contract" data-fin="1">—</div><div class="meta" id="pjbx-h-contract-full" data-fin="1">—</div></div>
     <div class="pjbx-hero-stat c-cost"><div class="hd"><span class="l">총 원가</span></div><div class="v" id="pjbx-h-cost">—</div><div class="meta" id="pjbx-h-cost-full">—</div></div>
-    <div class="pjbx-hero-stat c-profit"><div class="hd"><span class="l">예상 이윤</span></div><div class="v pos" id="pjbx-h-profit-stat"><span id="pjbx-h-profit">—</span></div><div class="meta" id="pjbx-h-profit-full">—</div></div>
+    <div class="pjbx-hero-stat c-profit"><div class="hd"><span class="l">예상 이윤</span></div><div class="v pos" id="pjbx-h-profit-stat" data-fin="1"><span id="pjbx-h-profit">—</span></div><div class="meta" id="pjbx-h-profit-full" data-fin="1">—</div></div>
     <div class="pjbx-hero-stat c-rate"><div class="hd"><span class="l">이익률</span></div><div class="v rate" id="pjbx-h-rate">—</div><div class="meta">목표 15% 이상</div></div>
   </div>
 
@@ -17247,11 +17258,11 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
         '<td><strong style="color:var(--primary-700)">' + esc(p.id||'—') + '</strong></td>' +
         '<td><strong>' + esc(p.name||'—') + '</strong></td>' +
         '<td>' + esc(p.client||'—') + '</td>' +
-        '<td class="right tnum"><strong>' + fmtBil(contract) + '</strong>' +
+        '<td class="right tnum" data-fin="1"><strong>' + fmtBil(contract) + '</strong>' +
           '<div class="t-xs">VAT ' + fmtBil(contract*1.1) + '</div></td>' +
         '<td class="right tnum">' + fmtBil(cost) + '</td>' +
-        '<td class="right tnum"><strong style="color:' + profitColor + '">' + profitSign + fmtBil(profit) + '</strong></td>' +
-        '<td class="center"><div class="row" style="justify-content:center;gap:8px">' +
+        '<td class="right tnum" data-fin="1"><strong style="color:' + profitColor + '">' + profitSign + fmtBil(profit) + '</strong></td>' +
+        '<td class="center" data-fin="1"><div class="row" style="justify-content:center;gap:8px">' +
           '<div class="progress-bar" style="width:60px"><div class="progress-fill ' + fillCls(rate) + '" style="width:' + Math.min(100, rate) + '%"></div></div>' +
           '<strong style="color:var(--' + fillCls(rate) + '-700)">' + Math.round(rate) + '%</strong>' +
         '</div></td>' +
@@ -17543,12 +17554,12 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
     function name(pid) { return pm[pid] ? pm[pid].name : pid; }
     // 프로젝트 등록·상태 전이
     (data.projects || []).forEach(function (p) {
-      if (p.createdAt) ev.push({ id: 'pj:' + p.id + ':new', ts: p.createdAt, pid: p.id, kind: '등록', pri: 1, text: name(p.id) + ' 신규 현장 등록 — 계약 ' + fmt(p.contract) + ' · ' + (p.client || '발주처 미기록') });
+      if (p.createdAt) ev.push({ id: 'pj:' + p.id + ':new', ts: p.createdAt, pid: p.id, kind: '등록', pri: 1, text: name(p.id) + ' 신규 현장 등록 — 계약 ' + fmtF(p.contract) + ' · ' + (p.client || '발주처 미기록') });
       if (p.status === '완료' && p.endDate) {
         var tt = p._t || {}; var cost = tt.cost || 0, rev = tt.revenue || p.contract || 0;
         ev.push({ id: 'pj:' + p.id + ':done', ts: p.endDate + 'T00:00:00', pid: p.id, kind: '완료', pri: 1, text: name(p.id) + ' 완료 — 최종 원가율 ' + pctS(cost, rev) + ', 이익 ' + fmt(rev - cost) });
       }
-      if (p.startDate && p.status !== '완료') ev.push({ id: 'pj:' + p.id + ':start', ts: p.startDate + 'T00:00:00', pid: p.id, kind: '계약', pri: 1, text: name(p.id) + ' 계약 — 계약 ' + fmt(p.contract) + ' · ' + (p.client || '') });
+      if (p.startDate && p.status !== '완료') ev.push({ id: 'pj:' + p.id + ':start', ts: p.startDate + 'T00:00:00', pid: p.id, kind: '계약', pri: 1, text: name(p.id) + ' 계약 — 계약 ' + fmtF(p.contract) + ' · ' + (p.client || '') });
     });
     // 매입: 현장·일자 묶음(같은 날 2건 이상은 병합), 단건 ≥ 계약 5% 는 P1
     var byDay = {};
@@ -17639,6 +17650,12 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
 
   // ═══ 렌더러 — 프로토타입 r4_app.js 이식본 ═══
   function pctf(a, b) { return b ? (a / b * 100).toFixed(1) + '%' : '—'; }
+  // [R2] 재무 잠금 — body[data-fin=locked](관리자 미만)이면 계약·이익·비율 자리는 '관리자 전용' / '—'
+  function FIN() { try { return document.body.getAttribute('data-fin') === 'locked'; } catch (e) { return false; } }
+  var FIN_LBL = '관리자 전용';
+  function fmtF(v) { return FIN() ? FIN_LBL : fmt(v); }
+  function sgnF(v) { return FIN() ? FIN_LBL : (v >= 0 ? '+' : '') + fmt(v); }
+  function pctF(v, d) { return FIN() ? '—' : (+v || 0).toFixed(d == null ? 1 : d) + '%'; }
   function pct(a, b) { return b ? a / b * 100 : 0; }
   function dstr(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
   function nowStr() { return dstr(S.now) + ' ' + pad2(S.now.getHours()) + ':' + pad2(S.now.getMinutes()); }
@@ -17662,11 +17679,11 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
     var F = feed(); var e = F.headline(pid); var T = totals(pid); var d = data();
     if (e && e.pri === 0 && e.active) {
       var p = d.projects.filter(function (x) { return x.id === e.pid; })[0] || {}; var t = totals(e.pid);
-      return { cls: 'p0', chip: '경보', chipCls: e.level === 'warn' ? 'w' : 'c', title: e.text, deck: '계약 ' + fmt(p.contract) + ' · 투입 ' + fmt(t.cost) + ' · 이익 ' + fmt(t.profit) + ' (' + t.profitRate.toFixed(1) + '%) · 기성 신청률 ' + t.billRate.toFixed(1) + '% · 수금률 ' + t.collectRate.toFixed(1) + '%', pid: e.pid, foot: (p.name || '') + ' · ' + (p.client || '') + ' · ' + (p.status || ''), when: e.ts ? F.rel(e.ts) : '기준 시각 없음' };
+      return { cls: 'p0', chip: '경보', chipCls: e.level === 'warn' ? 'w' : 'c', title: e.text, deck: '계약 ' + fmtF(p.contract) + ' · 투입 ' + fmt(t.cost) + ' · 이익 ' + fmtF(t.profit) + ' (' + pctF(t.profitRate, 1) + ') · 기성 신청률 ' + pctF(t.billRate, 1) + ' · 수금률 ' + pctF(t.collectRate, 1) + '', pid: e.pid, foot: (p.name || '') + ' · ' + (p.client || '') + ' · ' + (p.status || ''), when: e.ts ? F.rel(e.ts) : '기준 시각 없음' };
     }
     if (e && e.pri <= 1 && e.ts && (S.now - new Date(e.ts)) <= 24 * 3600000) {
       var p2 = d.projects.filter(function (x) { return x.id === e.pid; })[0] || {}; var t2 = totals(e.pid);
-      return { cls: 'p1', chip: e.kind, chipCls: 'a', title: e.text, deck: '계약 ' + fmt(p2.contract) + ' · 투입 ' + fmt(t2.cost) + ' · 원가율 ' + t2.costRate.toFixed(1) + '% · 기성 신청률 ' + t2.billRate.toFixed(1) + '%', pid: e.pid, foot: (p2.name || '') + ' · ' + (p2.client || '') + ' · ' + (p2.status || ''), when: F.rel(e.ts) };
+      return { cls: 'p1', chip: e.kind, chipCls: 'a', title: e.text, deck: '계약 ' + fmtF(p2.contract) + ' · 투입 ' + fmt(t2.cost) + ' · 원가율 ' + pctF(t2.costRate, 1) + ' · 기성 신청률 ' + pctF(t2.billRate, 1) + '', pid: e.pid, foot: (p2.name || '') + ' · ' + (p2.client || '') + ' · ' + (p2.status || ''), when: F.rel(e.ts) };
     }
     var last = lastRecordDate(pid); var n = d.projects.filter(function (x) { return !pid || x.id === pid; }).length;
     return { cls: 'p3', chip: '현황', chipCls: 'a', title: T.active ? '진행 ' + T.active + '곳 · 이번 달 투입 ' + fmt(monthSpend(pid)) : '기록된 현장 ' + n + '곳 · 마지막 기록 ' + (last || '없음') + (last ? ' (' + daysAgo(last) + '일 전)' : ''), deck: '계약 ' + fmt(T.contract) + ' · 투입 ' + fmt(T.cost) + ' · 이익 ' + fmt(T.profit), pid: pid || null, foot: '총액 기준 · 범위 무관', when: '' };
@@ -17708,7 +17725,7 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
     if (!e) return headlineOf(pid);
     var p = d.projects.filter(function (x) { return x.id === e.pid; })[0] || {}; var t = totals(e.pid);
     var isAl = e.kind === '경보'; var cls = isAl ? (e.level === 'warn' ? 'p1' : 'p0') : (e.pri <= 1 ? 'p1' : 'p2');
-    return { cls: cls, chip: isAl ? (e.level === 'warn' ? '주의' : '경보') : e.kind, chipCls: isAl ? (e.level === 'warn' ? 'w' : 'c') : 'a', title: e.text, deck: '계약 ' + fmt(p.contract) + ' · 투입 ' + fmt(t.cost) + ' · 이익 ' + fmt(t.profit) + ' (' + t.profitRate.toFixed(1) + '%) · 기성 신청률 ' + t.billRate.toFixed(1) + '% · 수금률 ' + t.collectRate.toFixed(1) + '%', pid: e.pid, foot: (p.name || '') + ' · ' + (p.client || '') + ' · ' + (p.status || ''), when: e.ts ? F.rel(e.ts) : '기준 시각 없음' };
+    return { cls: cls, chip: isAl ? (e.level === 'warn' ? '주의' : '경보') : e.kind, chipCls: isAl ? (e.level === 'warn' ? 'w' : 'c') : 'a', title: e.text, deck: '계약 ' + fmtF(p.contract) + ' · 투입 ' + fmt(t.cost) + ' · 이익 ' + fmtF(t.profit) + ' (' + pctF(t.profitRate, 1) + ') · 기성 신청률 ' + pctF(t.billRate, 1) + ' · 수금률 ' + pctF(t.collectRate, 1) + '', pid: e.pid, foot: (p.name || '') + ' · ' + (p.client || '') + ' · ' + (p.status || ''), when: e.ts ? F.rel(e.ts) : '기준 시각 없음' };
   }
   function livePid() { return S.view === 'overview' ? S.focus : S.pid; }
   function stageStep(n) { if (!S.stage) return; S.stage.idx += n; var root = S.view === 'overview' ? $('#lv-head') : $('#pj-head'); renderHead(root, livePid(), true); }
@@ -17719,7 +17736,7 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
     if (items.length) S.stage.idx = ((S.stage.idx % items.length) + items.length) % items.length; else S.stage.idx = 0;
     var e = items[S.stage.idx] || null; var h = headFrom(e, pid); var fp = h.pid || pid || null; var t = totals(fp);
     var nP = data().purchases.filter(function (x) { return !fp || x.pid === fp; }).length;
-    var facts = [['계약', fmt(t.contract), '', ''], ['투입 원가', fmt(t.cost), t.costRate.toFixed(1) + '% · 한계 ' + LIM() + '%', t.costRate >= LIM() ? 'crit' : ''], ['이익', (t.profit >= 0 ? '+' : '') + fmt(t.profit), t.profitRate.toFixed(1) + '%', t.profit < 0 ? 'crit' : ''], ['기성 신청', fmt(t.req), t.billRate.toFixed(1) + '%', ''], ['수금', fmt(t.rcv), t.collectRate.toFixed(1) + '%', ''], ['매입 건수', nP + '건', '', '']];
+    var facts = [['계약', fmtF(t.contract), '', ''], ['투입 원가', fmt(t.cost), pctF(t.costRate, 1) + ' · 한계 ' + LIM() + '%', t.costRate >= LIM() ? 'crit' : ''], ['이익', sgnF(t.profit), pctF(t.profitRate, 1) + '', t.profit < 0 ? 'crit' : ''], ['기성 신청', fmt(t.req), pctF(t.billRate, 1) + '', ''], ['수금', fmt(t.rcv), pctF(t.collectRate, 1) + '', ''], ['매입 건수', nP + '건', '', '']];
     var sw = Math.max(320, (root.clientWidth || 560) - 52);
     root.className = 'glass lv-head ' + h.cls;
     root.innerHTML = '<div class="lab"><span class="chip dk ' + h.chipCls + '">' + esc(h.chip) + '</span><span>지금 가장 중요한 한 건</span><span class="w">' + esc(h.when) + '</span></div>' +
@@ -17761,7 +17778,7 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
     list.sort(function (a, b) { var ra = isActive(a.p) ? 0 : 2, rb = isActive(b.p) ? 0 : 2; ra -= alertsOf(a.p.id).length ? 1 : 0; rb -= alertsOf(b.p.id).length ? 1 : 0; return ra - rb || b.costRate - a.costRate; });
     var tot = t.active + t.done;
     root.innerHTML = '<button class="story' + (S.focus ? '' : ' on') + '" ' + (S.focus ? 'data-focus="clear" title="전체 현장 보기"' : 'data-go="overview"') + '><div class="rg"><svg viewBox="0 0 56 56"><circle class="tr" cx="28" cy="28" r="25"/><circle class="fg" cx="28" cy="28" r="25" stroke-dasharray="157.1" stroke-dashoffset="157.1" data-off="' + (157.1 * (1 - (tot ? t.active / tot : 0))).toFixed(1) + '"/></svg><div class="av all">' + t.active + '</div></div><span class="n">전체 현황</span><span class="s">진행 <b>' + t.active + ' / ' + tot + '</b></span></button>' +
-      list.map(function (x) { var al = alertsOf(x.p.id); var act = isActive(x.p); var cls = !act ? 'd' : bandCls(x.costRate); return '<button class="story' + (S.focus === x.p.id ? ' focus' : '') + '" data-open="' + esc(x.p.id) + '" title="' + esc(x.p.name) + ' · 링 = 원가율 ' + x.costRate.toFixed(1) + '% (빨강 100% 초과 · 노랑 ' + LIM() + '% 이상) · 빨간 점 = 활성 경보"><div class="rg"><svg viewBox="0 0 56 56"><circle class="tr" cx="28" cy="28" r="25"/><circle class="fg ' + cls + '" cx="28" cy="28" r="25" stroke-dasharray="157.1" stroke-dashoffset="157.1" data-off="' + (157.1 * (1 - Math.min(100, x.costRate) / 100)).toFixed(1) + '"/></svg><div class="av">' + esc(x.p.name.slice(0, 1)) + '</div>' + (al.length ? '<i class="dot"></i>' : '') + '</div><span class="n">' + esc(x.p.name) + '</span><span class="s">원가 <b>' + x.costRate.toFixed(0) + '%</b>' + (act ? '' : ' · 완료') + '</span></button>'; }).join('');
+      list.map(function (x) { var al = alertsOf(x.p.id); var act = isActive(x.p); var cls = !act ? 'd' : bandCls(x.costRate); return '<button class="story' + (S.focus === x.p.id ? ' focus' : '') + '" data-open="' + esc(x.p.id) + '" title="' + esc(x.p.name) + ' · 링 = 원가율 ' + pctF(x.costRate, 1) + ' (빨강 100% 초과 · 노랑 ' + LIM() + '% 이상) · 빨간 점 = 활성 경보"><div class="rg"><svg viewBox="0 0 56 56"><circle class="tr" cx="28" cy="28" r="25"/><circle class="fg ' + cls + '" cx="28" cy="28" r="25" stroke-dasharray="157.1" stroke-dashoffset="157.1" data-off="' + (157.1 * (1 - Math.min(100, x.costRate) / 100)).toFixed(1) + '"/></svg><div class="av">' + esc(x.p.name.slice(0, 1)) + '</div>' + (al.length ? '<i class="dot"></i>' : '') + '</div><span class="n">' + esc(x.p.name) + '</span><span class="s">원가 <b>' + pctF(x.costRate, 0) + '</b>' + (act ? '' : ' · 완료') + '</span></button>'; }).join('');
     var lg = root.nextElementSibling; if (!lg || !lg.classList.contains('st-lg')) { lg = document.createElement('div'); lg.className = 'st-lg'; root.insertAdjacentElement('afterend', lg); }
     lg.innerHTML = '<span>링 = 원가율(투입 원가 ÷ 매출)</span><span><i class="b"></i>양호</span><span><i class="w"></i>' + LIM() + '% 이상(한계)</span><span><i class="c"></i>100% 초과</span><span><i class="d"></i>완료 현장</span><span><i class="dot"></i>활성 경보</span>';
     armRings(root);
@@ -17778,7 +17795,7 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
     root.innerHTML = list.map(function (x) {
       var al = alertsOf(x.p.id); var last = F.lastEvent(x.p.id); var act = isActive(x.p);
       var lamp = !act ? 'd' : al.some(function (a) { return a.level === 'crit'; }) ? 'c' : al.length ? 'w' : '';
-      return '<div class="tile' + (act ? '' : ' done') + '" data-open="' + esc(x.p.id) + '"><div class="r1"><i class="lamp ' + lamp + '"></i><span class="n">' + esc(x.p.name) + '</span><span class="code">' + esc(x.p.id) + '</span>' + (al.length ? '<span class="chip dk c">경보 ' + al.length + '</span>' : '') + '</div><div class="cl">' + esc(x.p.client) + ' · ' + esc(x.p.status) + ' · 계약 ' + fmt(x.contract) + '</div>' +
+      return '<div class="tile' + (act ? '' : ' done') + '" data-open="' + esc(x.p.id) + '"><div class="r1"><i class="lamp ' + lamp + '"></i><span class="n">' + esc(x.p.name) + '</span><span class="code">' + esc(x.p.id) + '</span>' + (al.length ? '<span class="chip dk c">경보 ' + al.length + '</span>' : '') + '</div><div class="cl">' + esc(x.p.client) + ' · ' + esc(x.p.status) + ' · 계약 ' + fmtF(x.contract) + '</div>' +
         '<div class="rings">' + ringSm(x.costRate, bandCls(x.costRate), LIM(), '원가율') + ringSm(x.billRate, '', 0, '신청률') + ringSm(x.collectRate, 'g', 0, '수금률') + '</div>' +
         '<div class="last">' + (last ? esc(F.rel(last.ts)) + ' · ' + esc(last.text.replace(x.p.name + ' ', '')) : '기록된 사건 없음') + '</div></div>';
     }).join('');
@@ -17793,6 +17810,7 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
     return { orders: byC, sales: sales, rcv: rcv, buy: buy, basisNote: basisNote };
   }
   function trendCard(key, label, map, color, opts) {
+    if (FIN() && key !== 'buy') return '<div class="glass tr-card fin-locked"><div class="th"><span class="k">' + label + '</span><span class="v"><span>' + FIN_LBL + '</span></span></div><div class="sub"><span>계약·기성 계열은 관리자 화면에서만 표시</span><span></span></div></div>';
     var y = S.trendGran === 'month' ? curYear() : S.now.getFullYear(), curM = S.now.getFullYear() + '-' + pad2(S.now.getMonth() + 1);
     var keys, labels, vals, main, sub;
     if (S.trendGran === 'month') {
@@ -17873,12 +17891,12 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
   function renderFocus() {
     var el = $('#lv-focus'); if (!el) return; var p = S.focus ? siteOf(S.focus) : null; if (S.focus && !p) S.focus = null;
     if (!p) el.innerHTML = '';
-    else { var t = totals(p.id); el.innerHTML = '<span class="fchip"><i></i><span class="nm">' + esc(p.name) + '</span><span class="lb">현장만 보는 중</span><small>' + esc(p.id) + ' · 원가율 <b>' + t.costRate.toFixed(1) + '%</b></small><button data-open="' + esc(p.id) + '">상세 열기</button><button data-focus="clear" aria-label="전체 현장 보기">전체 보기</button></span><span class="hint">이 현장 기준은 여기부터 ‘선택 기간’ 줄 위까지 · 그 아래는 전체 현장</span>'; }
+    else { var t = totals(p.id); el.innerHTML = '<span class="fchip"><i></i><span class="nm">' + esc(p.name) + '</span><span class="lb">현장만 보는 중</span><small>' + esc(p.id) + ' · 원가율 <b>' + pctF(t.costRate, 1) + '</b></small><button data-open="' + esc(p.id) + '">상세 열기</button><button data-focus="clear" aria-label="전체 현장 보기">전체 보기</button></span><span class="hint">이 현장 기준은 여기부터 ‘선택 기간’ 줄 위까지 · 그 아래는 전체 현장</span>'; }
     var b = $('#onair-badge'); if (b) b.innerHTML = '<i></i>ON AIR' + (p ? ' · ' + esc(p.id.replace(/^명문-/, '')) : '');
   }
   function qiRows(res, q, idx, withGo) {
     var F = feed();
-    return res.map(function (x, i) { var al = F.events.filter(function (e) { return e.kind === '경보' && e.active && e.pid === x.p.id; }).length; var act = isActive(x.p); return '<div class="qi' + (i === idx ? ' on' : '') + '" role="option" id="' + withGo.box + '-opt-' + i + '" aria-selected="' + (i === idx) + '" data-pick="' + esc(x.p.id) + '"><div class="av ' + (!act ? 'd' : al ? 'c' : '') + '">' + esc(x.p.name.slice(0, 1)) + '</div><div><div class="n">' + hl(x.p.name, q) + '</div><div class="c">' + hl(x.p.id, q) + ' · ' + hl(x.p.client || '', q) + ' · ' + esc(x.p.status) + (al ? ' · 경보 ' + al : '') + '</div></div><div class="r"><span>' + x.costRate.toFixed(1) + '%<small>원가율 · 계약 ' + fmt(x.contract) + '</small></span>' + (withGo.ov ? '<button class="go p" type="button" tabindex="-1" aria-hidden="true">이 현장만 보기</button><button class="go" type="button" tabindex="-1" aria-hidden="true" data-open="' + esc(x.p.id) + '">상세 열기</button>' : '<button class="go p" type="button" tabindex="-1" aria-hidden="true">이 현장으로 이동</button>') + '</div></div>'; }).join('');
+    return res.map(function (x, i) { var al = F.events.filter(function (e) { return e.kind === '경보' && e.active && e.pid === x.p.id; }).length; var act = isActive(x.p); return '<div class="qi' + (i === idx ? ' on' : '') + '" role="option" id="' + withGo.box + '-opt-' + i + '" aria-selected="' + (i === idx) + '" data-pick="' + esc(x.p.id) + '"><div class="av ' + (!act ? 'd' : al ? 'c' : '') + '">' + esc(x.p.name.slice(0, 1)) + '</div><div><div class="n">' + hl(x.p.name, q) + '</div><div class="c">' + hl(x.p.id, q) + ' · ' + hl(x.p.client || '', q) + ' · ' + esc(x.p.status) + (al ? ' · 경보 ' + al : '') + '</div></div><div class="r"><span>' + pctF(x.costRate, 1) + '<small>원가율 · 계약 ' + fmtF(x.contract) + '</small></span>' + (withGo.ov ? '<button class="go p" type="button" tabindex="-1" aria-hidden="true">이 현장만 보기</button><button class="go" type="button" tabindex="-1" aria-hidden="true" data-open="' + esc(x.p.id) + '">상세 열기</button>' : '<button class="go p" type="button" tabindex="-1" aria-hidden="true">이 현장으로 이동</button>') + '</div></div>'; }).join('');
   }
   function renderLiveList(boxId) {
     var box = $('#' + boxId); if (!box) return; var inp = $('input', box), list = $('.q-list', box); var q = inp.value.trim();
@@ -17896,7 +17914,7 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
   function resetLiveSearch() { closeLiveLists(); $$('.lvq input').forEach(function (i) { i.value = ''; }); S.lvqIdx = 0; }
   function pickLive(boxId, pid) {
     var p = siteOf(pid); if (!p) return; var box = $('#' + boxId); var inp = box && $('input', box); if (inp) { inp.value = ''; inp.blur(); } closeLiveLists(); S.lvqIdx = 0;
-    if (boxId === 'lvq') { S.focus = pid; renderLive(null); var st = $('#stories .story[data-open="' + pid + '"]'); if (st) st.scrollIntoView({ block: 'nearest', inline: 'center' }); say(p.name + ' 현장만 보는 중 · 원가율 ' + totals(p.id).costRate.toFixed(1) + '%'); toast(esc(p.name) + ' 현장만 보는 중 · 전체 보기를 누르면 되돌아갑니다'); }
+    if (boxId === 'lvq') { S.focus = pid; renderLive(null); var st = $('#stories .story[data-open="' + pid + '"]'); if (st) st.scrollIntoView({ block: 'nearest', inline: 'center' }); say(p.name + ' 현장만 보는 중 · 원가율 ' + pctF(totals(p.id).costRate, 1) + ''); toast(esc(p.name) + ' 현장만 보는 중 · 전체 보기를 누르면 되돌아갑니다'); }
     else { go('project', pid); }
   }
   function say(msg) { var el = $('#lv-say'); if (el) { el.textContent = ''; setTimeout(function () { el.textContent = msg; }, 30); } }
@@ -18312,6 +18330,12 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
   var VAR_DESC = { A: '유출 스택 막대 ↓ · 기성·수금 막대 ↑ · 순현금 선', B: '월별 누적 순현금 캔들 · 볼륨 = 유출', C: '누적 원가·누적 수금 마운틴 · 계약 누계', D: '계약 누계 · 누적 원가 · 누적 수금 · 한계선', E: '리본 막대(수금 ↑ · 유출 ↓) · 순현금 곡선 · 마커' };
 
   // ═══ 렌더러 — 프로토타입 r4_app.js 이식본 ═══
+  // [R2] 재무 잠금 — body[data-fin=locked](관리자 미만)이면 계약·이익·비율 자리는 '관리자 전용' / '—'
+  function FIN() { try { return document.body.getAttribute('data-fin') === 'locked'; } catch (e) { return false; } }
+  var FIN_LBL = '관리자 전용';
+  function fmtF(v) { return FIN() ? FIN_LBL : fmt(v); }
+  function sgnF(v) { return FIN() ? FIN_LBL : (v >= 0 ? '+' : '') + fmt(v); }
+  function pctF(v, d) { return FIN() ? '—' : (+v || 0).toFixed(d == null ? 1 : d) + '%'; }
   function pct(a, b) { return b ? a / b * 100 : 0; }
   function pctf(a, b) { return b ? (a / b * 100).toFixed(1) + '%' : '—'; }
   function dstr(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
@@ -18355,7 +18379,7 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
   }
   function projSpark(pid, n) { var ks = monthKeys(n || 6); var m = sumBy(data().purchases, function (x) { return x.date && x.date.slice(0, 7); }, function (x) { return x.amount; }, pid); return ks.map(function (k) { return m[k] || 0; }); }
   function cell(l, v, u, s, tint, k, rg) { return '<div class="cell ' + (tint || '') + '"><div class="l">' + l + (k ? '<span class="k">' + k + '</span>' : '') + '</div><div class="v"><span data-cu="900">' + v + '</span>' + (u ? '<span class="u">' + u + '</span>' : '') + '</div>' + (s ? '<div class="s">' + s + '</div>' : '') + (rg || '') + '</div>'; }
-  function pctTxt(v) { return (Math.abs(v) >= 10 ? v.toFixed(0) : v.toFixed(1)).replace('-', '−'); }
+  function pctTxt(v) { if (FIN()) return '—'; return (Math.abs(v) >= 10 ? v.toFixed(0) : v.toFixed(1)).replace('-', '−'); }
   function monthDelta(pid) {
     var d = data(); var cur = S.now.getFullYear() + '-' + pad2(S.now.getMonth() + 1); var inM = function (x) { return x && x.slice(0, 7) === cur; };
     var r = { contract: 0, cost: 0, req: 0, rcv: 0, started: 0 };
@@ -18369,8 +18393,8 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
   function renderBand(root, pid) {
     var t = totals(pid); var tot = t.active + t.done; var md = monthDelta(pid);
     if (!tot) { setHTML(root, '<div class="empty" style="grid-column:1/-1">등록된 현장이 없습니다 — 아래 현장 채널의 + 현장 등록으로 시작하십시오</div>'); return; }
-    var _bh; if (!pid) _bh = cell('진행 현장', t.active, '곳', '완료 ' + t.done + '곳 · 전체 ' + tot + '곳', 't-cyan', '지금', ring(tot ? t.active / tot * 100 : 0, 0, '', '진행 비율 %') + '<div class="d ' + (md.started ? 'up' : 'flat') + '">이번 달 착공 ' + md.started + '곳</div>') + cell('총 계약', fmt(t.contract), '', 'VAT 별도 · 실수금 대상 ' + fmt(t.net), 't-blue', '총액', ring(pct(t.net, t.contract), 0, '', '실수금 대상 비율 %') + dl(md.contract)) + cell('투입 원가', fmt(t.cost), '', '원가율 ' + t.costRate.toFixed(1) + '% · 한계 ' + LIM() + '%', t.costRate >= LIM() ? 't-red' : 't-violet', '총액', ring(t.costRate, LIM(), '', '원가율 % · 한계 ' + LIM(), pctTxt(t.costRate)) + dl(md.cost)) + cell('총 이익', (t.profit >= 0 ? '+' : '') + fmt(t.profit), '', '이익률 ' + t.profitRate.toFixed(1) + '% · 목표 ' + TGT() + '%', t.profit < 0 ? 't-red' : (t.profitRate < TGT() ? 't-amber' : 't-green'), '총액', ring(Math.max(0, t.profitRate), TGT(), '', '이익률 % · 목표 ' + TGT(), pctTxt(t.profitRate)) + dl(md.profit)) + cell('기성 신청', fmt(t.req), '', '신청률 ' + t.billRate.toFixed(1) + '% · 신청 ÷ 실수금대상', 't-cyan', '총액', ring(t.billRate, 0, '', '신청률 %', pctTxt(t.billRate)) + dl(md.req)) + cell('수금', fmt(t.rcv), '', '수금률 ' + t.collectRate.toFixed(1) + '% · 미수 ' + fmt(t.unpaid), t.unpaid > 0 ? 't-amber' : 't-green', '총액', ring(t.collectRate, 0, '', '수금률 %', pctTxt(t.collectRate)) + dl(md.rcv));
-    else _bh = cell('계약', fmt(t.contract), '', 'VAT 별도 · 실수금 대상 ' + fmt(t.net), 't-blue', '총액', ring(pct(t.net, t.contract), 0, '', '실수금 대상 비율 %') + dl(md.contract)) + cell('투입 원가', fmt(t.cost), '', '원가율 ' + t.costRate.toFixed(1) + '% · 한계 ' + LIM() + '%', t.costRate >= LIM() ? 't-red' : 't-violet', '총액', ring(t.costRate, LIM(), '', '원가율 % · 한계 ' + LIM(), pctTxt(t.costRate)) + dl(md.cost)) + cell('이익', (t.profit >= 0 ? '+' : '') + fmt(t.profit), '', '이익률 ' + t.profitRate.toFixed(1) + '% · 목표 ' + TGT() + '%', t.profit < 0 ? 't-red' : (t.profitRate < TGT() ? 't-amber' : 't-green'), '총액', ring(Math.max(0, t.profitRate), TGT(), '', '이익률 % · 목표 ' + TGT(), pctTxt(t.profitRate)) + dl(md.profit)) + cell('기성 신청', fmt(t.req), '', '신청률 ' + t.billRate.toFixed(1) + '% · 신청 ÷ 실수금대상', 't-cyan', '총액', ring(t.billRate, 0, '', '신청률 %', pctTxt(t.billRate)) + dl(md.req)) + cell('수금', fmt(t.rcv), '', '수금률 ' + t.collectRate.toFixed(1) + '% = 수금 ÷ 신청', 't-green', '총액', ring(t.collectRate, 0, '', '수금률 %', pctTxt(t.collectRate)) + dl(md.rcv)) + cell('미수', fmt(t.unpaid), '', t.unpaid ? '독촉 대상' : '미수 없음', t.unpaid > 0 ? 't-amber' : '', '총액', ring(t.req ? t.unpaid / t.req * 100 : 0, 0, '', '미수 ÷ 신청 %') + dl(md.req - md.rcv));
+    var _bh; if (!pid) _bh = cell('진행 현장', t.active, '곳', '완료 ' + t.done + '곳 · 전체 ' + tot + '곳', 't-cyan', '지금', ring(tot ? t.active / tot * 100 : 0, 0, '', '진행 비율 %') + '<div class="d ' + (md.started ? 'up' : 'flat') + '">이번 달 착공 ' + md.started + '곳</div>') + cell('총 계약', fmtF(t.contract), '', 'VAT 별도 · 실수금 대상 ' + fmtF(t.net), 't-blue', '총액', ring(pct(t.net, t.contract), 0, '', '실수금 대상 비율 %') + (FIN() ? '' : dl(md.contract))) + cell('투입 원가', fmt(t.cost), '', '원가율 ' + pctF(t.costRate, 1) + ' · 한계 ' + LIM() + '%', t.costRate >= LIM() ? 't-red' : 't-violet', '총액', ring(t.costRate, LIM(), '', '원가율 % · 한계 ' + LIM(), pctTxt(t.costRate)) + dl(md.cost)) + cell('총 이익', sgnF(t.profit), '', '이익률 ' + pctF(t.profitRate, 1) + ' · 목표 ' + TGT() + '%', t.profit < 0 ? 't-red' : (t.profitRate < TGT() ? 't-amber' : 't-green'), '총액', ring(Math.max(0, t.profitRate), TGT(), '', '이익률 % · 목표 ' + TGT(), pctTxt(t.profitRate)) + (FIN() ? '' : dl(md.profit))) + cell('기성 신청', fmt(t.req), '', '신청률 ' + pctF(t.billRate, 1) + ' · 신청 ÷ 실수금대상', 't-cyan', '총액', ring(t.billRate, 0, '', '신청률 %', pctTxt(t.billRate)) + dl(md.req)) + cell('수금', fmt(t.rcv), '', '수금률 ' + pctF(t.collectRate, 1) + ' · 미수 ' + fmt(t.unpaid), t.unpaid > 0 ? 't-amber' : 't-green', '총액', ring(t.collectRate, 0, '', '수금률 %', pctTxt(t.collectRate)) + dl(md.rcv));
+    else _bh = cell('계약', fmtF(t.contract), '', 'VAT 별도 · 실수금 대상 ' + fmtF(t.net), 't-blue', '총액', ring(pct(t.net, t.contract), 0, '', '실수금 대상 비율 %') + (FIN() ? '' : dl(md.contract))) + cell('투입 원가', fmt(t.cost), '', '원가율 ' + pctF(t.costRate, 1) + ' · 한계 ' + LIM() + '%', t.costRate >= LIM() ? 't-red' : 't-violet', '총액', ring(t.costRate, LIM(), '', '원가율 % · 한계 ' + LIM(), pctTxt(t.costRate)) + dl(md.cost)) + cell('이익', sgnF(t.profit), '', '이익률 ' + pctF(t.profitRate, 1) + ' · 목표 ' + TGT() + '%', t.profit < 0 ? 't-red' : (t.profitRate < TGT() ? 't-amber' : 't-green'), '총액', ring(Math.max(0, t.profitRate), TGT(), '', '이익률 % · 목표 ' + TGT(), pctTxt(t.profitRate)) + (FIN() ? '' : dl(md.profit))) + cell('기성 신청', fmt(t.req), '', '신청률 ' + pctF(t.billRate, 1) + ' · 신청 ÷ 실수금대상', 't-cyan', '총액', ring(t.billRate, 0, '', '신청률 %', pctTxt(t.billRate)) + dl(md.req)) + cell('수금', fmt(t.rcv), '', '수금률 ' + pctF(t.collectRate, 1) + ' = 수금 ÷ 신청', 't-green', '총액', ring(t.collectRate, 0, '', '수금률 %', pctTxt(t.collectRate)) + dl(md.rcv)) + cell('미수', fmt(t.unpaid), '', t.unpaid ? '독촉 대상' : '미수 없음', t.unpaid > 0 ? 't-amber' : '', '총액', ring(t.req ? t.unpaid / t.req * 100 : 0, 0, '', '미수 ÷ 신청 %') + dl(md.req - md.rcv));
     if (!setHTML(root, _bh)) return;
     countAll(root); armRings(root);
   }
@@ -18437,9 +18461,9 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
     var mixHtml = (function () { var tot = 0; Object.keys(t.byCat).forEach(function (k) { tot += t.byCat[k]; }); if (!tot) return '<div class="s">매입 기록 없음</div>'; var order = ['외주', '자재', '상품', '인건', '직불', '간접'].filter(function (b) { return t.byCat[b]; }); return '<div class="mix">' + order.map(function (b) { return '<i style="width:' + (t.byCat[b] / tot * 100).toFixed(1) + '%;background:' + BUCKET_COLOR[b] + '"></i>'; }).join('') + '</div><div class="mixl">' + order.map(function (b) { return '<span><i style="background:' + BUCKET_COLOR[b] + '"></i>' + b + ' <b>' + (t.byCat[b] / tot * 100).toFixed(1) + '%</b></span>'; }).join('') + '</div>'; })();
     root.innerHTML = '<div class="band ledger">' +
       lc('계약(범위 내 계약일)', fmt(contract), rows.some(function (r) { return r.markers.some(function (m) { return /미기록/.test(m.text); }); }) ? '계약일 미기록 → 첫 매입월 대체' : '계약 체결 시점 기준', sparkSvg(sub('contract'), 64, 16, '#0B63C7', false, rk, ledgerFmt)) +
-      lc('유출(매입)', fmt(out), (contract ? '범위 계약 대비 ' + pctf(out, contract) + ' · ' : '') + '총액 원가율 ' + t.costRate.toFixed(1) + '%' + (t.costRate >= LIM() ? ' · 한계 ' + LIM() + '% 초과' : ''), sparkSvg(sub('out'), 64, 16, '#8B5CF6', false, rk, ledgerFmt), t.costRate >= LIM() ? 'crit' : '') +
+      lc('유출(매입)', fmt(out), (contract ? '범위 계약 대비 ' + pctf(out, contract) + ' · ' : '') + '총액 원가율 ' + pctF(t.costRate, 1) + '' + (t.costRate >= LIM() ? ' · 한계 ' + LIM() + '% 초과' : ''), sparkSvg(sub('out'), 64, 16, '#8B5CF6', false, rk, ledgerFmt), t.costRate >= LIM() ? 'crit' : '') +
       lc('기성 신청', fmt(req), '수금(VAT 포함) ' + fmt(rcv) + ' · ' + (reqT ? '수금률 ' + pctf(rcv, reqT) : '신청 없음'), sparkSvg(sub('inReq'), 64, 16, '#22D3EE', false, rk, ledgerFmt)) +
-      lc('순현금(범위)', (net >= 0 ? '+' : '') + fmt(net), '현금 기준 = 수금 − 유출 · 총액 이익 ' + (t.profit >= 0 ? '+' : '') + fmt(t.profit), sparkSvg(sub('cum'), 64, 16, '#16A34A', false, rk, ledgerFmt, true), net < 0 ? 'crit' : 'good') +
+      lc('순현금(범위)', (net >= 0 ? '+' : '') + fmt(net), '현금 기준 = 수금 − 유출 · 총액 이익 ' + sgnF(t.profit), sparkSvg(sub('cum'), 64, 16, '#16A34A', false, rk, ledgerFmt, true), net < 0 ? 'crit' : 'good') +
       '<div class="cell mixcell"><div class="l">원가 구성<span class="k">총액</span></div>' + mixHtml + '</div></div>';
     countAll(root);
   }
@@ -18451,13 +18475,13 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
     if (S.watchFilter === 'alert') list = list.filter(function (x) { return alertsOf(x.p.id).length; });
     var c = $('#watch-c'); if (c) c.textContent = list.length + ' / ' + d.projects.length;
     if (!list.length) { setHTML(root, '<div class="empty">조건에 맞는 현장 없음 · 전체 ' + d.projects.length + '곳</div>'); return; }
-    if (S.watchTable) { setHTML(root, '<table class="tb"><thead><tr><th>PJ NO.</th><th>공사명</th><th>발주처</th><th class="r">계약금액</th><th class="r">투입원가</th><th class="r">이익</th><th class="r">원가율</th><th>상태</th></tr></thead><tbody>' + list.map(function (x) { return '<tr data-open="' + esc(x.p.id) + '" style="cursor:pointer"><td class="num dim">' + esc(x.p.id) + '</td><td><b>' + esc(x.p.name) + '</b></td><td>' + esc(x.p.client) + '</td><td class="r num">' + fmt(x.contract) + '</td><td class="r num">' + fmt(x.cost) + '</td><td class="r num" style="color:' + (x.profit < 0 ? 'var(--crit)' : 'var(--good)') + '">' + (x.profit >= 0 ? '+' : '') + fmt(x.profit) + '</td><td class="r num">' + x.costRate.toFixed(1) + '%</td><td><span class="chip ' + (isActive(x.p) ? 'a' : 'n') + '">' + esc(x.p.status) + '</span></td></tr>'; }).join('') + '</tbody></table>'); return; }
+    if (S.watchTable) { setHTML(root, '<table class="tb"><thead><tr><th>PJ NO.</th><th>공사명</th><th>발주처</th><th class="r">계약금액</th><th class="r">투입원가</th><th class="r">이익</th><th class="r">원가율</th><th>상태</th></tr></thead><tbody>' + list.map(function (x) { return '<tr data-open="' + esc(x.p.id) + '" style="cursor:pointer"><td class="num dim">' + esc(x.p.id) + '</td><td><b>' + esc(x.p.name) + '</b></td><td>' + esc(x.p.client) + '</td><td class="r num">' + fmtF(x.contract) + '</td><td class="r num">' + fmt(x.cost) + '</td><td class="r num" style="color:' + (x.profit < 0 ? 'var(--crit)' : 'var(--good)') + '">' + sgnF(x.profit) + '</td><td class="r num">' + pctF(x.costRate, 1) + '</td><td><span class="chip ' + (isActive(x.p) ? 'a' : 'n') + '">' + esc(x.p.status) + '</span></td></tr>'; }).join('') + '</tbody></table>'); return; }
     var _wh = '<div class="site colhd" aria-hidden="true"><div>현장 · 발주처 · 착공</div><div>최근 6개월 매입 · 합계</div><div class="r">원가율 · 이번 달 변동 · 기성 신청률</div><div>마지막 사건</div><div class="r w">시각</div></div>' + list.map(function (x) {
       var al = alertsOf(x.p.id); var last = F.lastEvent(x.p.id); var act = isActive(x.p);
       var lamp = !act ? 'd' : al.some(function (a) { return a.level === 'crit'; }) ? 'c' : al.length ? 'w' : ''; var rc = (bandCls(x.costRate) || 'g');
       var curStart = S.now.getFullYear() + '-' + pad2(S.now.getMonth() + 1) + '-01'; var prevCost = d.purchases.filter(function (q) { return q.pid === x.p.id && q.date && q.date < curStart; }).reduce(function (a, q) { return a + q.amount; }, 0); var dppBase = x.revenue || x.contract; var dpp = dppBase ? x.costRate - prevCost / dppBase * 100 : 0;
       var dHtml = Math.abs(dpp) >= 0.05 ? '<span class="dl ' + (dpp > 0 ? 'up' : 'dn') + '">' + (dpp > 0 ? '▲' : '▼') + Math.abs(dpp).toFixed(1) + '%p</span>' : '변동 없음';
-      return '<div class="site' + (act ? '' : ' done') + '" data-open="' + esc(x.p.id) + '"><div><div class="n"><i class="lamp ' + lamp + '"></i>' + esc(x.p.name) + '<span class="code">' + esc(x.p.id) + '</span>' + (al.length ? '<span class="chip c">경보 ' + al.length + '</span>' : '') + '</div><div class="c">' + esc(x.p.client) + ' · ' + esc(x.p.status) + (x.p.startDate ? ' · ' + x.p.startDate.slice(0, 7) + ' 착공' : ' · 착공일 미기록') + '</div></div>' + barChart(projSpark(x.p.id), monthKeys(6), { h: 24, color: '#0B63C7', small: true, labels: 'ends', title: '최근 6개월 매입(공급가) · 가운데 = 합계 · ' + x.p.name }) + '<div class="rate ' + rc + '" title="원가율 = 투입 원가 ÷ 매출 · ▲▼ = 이번 달 매입으로 움직인 원가율(%p) · 기성 = 기성 신청률">' + x.costRate.toFixed(1) + '%<small>' + dHtml + ' · 기성 ' + x.billRate.toFixed(0) + '%</small></div><div class="last">' + (last ? esc(last.text) : '기록된 사건 없음') + '</div><div class="w">' + (last ? esc(F.rel(last.ts)) : '') + '</div></div>';
+      return '<div class="site' + (act ? '' : ' done') + '" data-open="' + esc(x.p.id) + '"><div><div class="n"><i class="lamp ' + lamp + '"></i>' + esc(x.p.name) + '<span class="code">' + esc(x.p.id) + '</span>' + (al.length ? '<span class="chip c">경보 ' + al.length + '</span>' : '') + '</div><div class="c">' + esc(x.p.client) + ' · ' + esc(x.p.status) + (x.p.startDate ? ' · ' + x.p.startDate.slice(0, 7) + ' 착공' : ' · 착공일 미기록') + '</div></div>' + barChart(projSpark(x.p.id), monthKeys(6), { h: 24, color: '#0B63C7', small: true, labels: 'ends', title: '최근 6개월 매입(공급가) · 가운데 = 합계 · ' + x.p.name }) + '<div class="rate ' + rc + '" title="원가율 = 투입 원가 ÷ 매출 · ▲▼ = 이번 달 매입으로 움직인 원가율(%p) · 기성 = 기성 신청률">' + pctF(x.costRate, 1) + '<small>' + dHtml + ' · 기성 ' + pctF(x.billRate, 0) + '</small></div><div class="last">' + (last ? esc(last.text) : '기록된 사건 없음') + '</div><div class="w">' + (last ? esc(F.rel(last.ts)) : '') + '</div></div>';
     }).join(''); setHTML(root, _wh);
   }
   function briefLines(kind, pid) {
@@ -18493,8 +18517,8 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
     var t = totals(pid); var F = feed();
     if (!(t.active + t.done)) { [['.kpi-orig', '집계할 현장이 없습니다 — 현장을 등록하면 총액 지표가 나타납니다'], ['.health', '현장 등록 후 원가율·신청률·수금률이 계산됩니다'], ['.score', '종합 점수는 현장이 있어야 산출됩니다']].forEach(function (s) { var e = $(s[0], root); if (e) e.innerHTML = '<div class="empty">' + s[1] + '</div>'; }); }
     else {
-    $('.kpi-orig', root).innerHTML = [['총 계약금액', fmt(t.contract), '프로젝트 ' + (t.active + t.done) + '건'], ['총 투입원가', fmt(t.cost), '원가율 ' + t.costRate.toFixed(1) + '%'], ['총 이익', (t.profit >= 0 ? '+' : '') + fmt(t.profit), '이익률 ' + t.profitRate.toFixed(1) + '%'], ['기성 신청', fmt(t.req), '신청률 ' + t.billRate.toFixed(1) + '%']].map(function (k) { return '<div class="card"><div style="font-size:12px;color:var(--ink-3);font-weight:700">' + k[0] + '</div><div class="dsp" style="font-size:22px;font-weight:800;margin-top:4px">' + k[1] + '</div><div style="font-size:11.5px;color:var(--ink-3);margin-top:2px">' + k[2] + '</div></div>'; }).join('');
-    $('.health', root).innerHTML = '<div><div class="l">원가율</div><div class="v" style="color:' + (t.costRate >= LIM() ? 'var(--crit)' : 'inherit') + '">' + t.costRate.toFixed(1) + '%</div><div class="f">투입 원가 ÷ 매출 · 한계 ' + LIM() + '%</div></div><div><div class="l">기성 신청률</div><div class="v">' + t.billRate.toFixed(1) + '%</div><div class="f">신청 ÷ 실수금 대상(계약 − 직불)</div></div><div><div class="l">수금률</div><div class="v">' + t.collectRate.toFixed(1) + '%</div><div class="f">수금 ÷ 신청</div></div>';
+    $('.kpi-orig', root).innerHTML = [['총 계약금액', fmtF(t.contract), '프로젝트 ' + (t.active + t.done) + '건'], ['총 투입원가', fmt(t.cost), '원가율 ' + pctF(t.costRate, 1) + ''], ['총 이익', sgnF(t.profit), '이익률 ' + pctF(t.profitRate, 1) + ''], ['기성 신청', fmt(t.req), '신청률 ' + pctF(t.billRate, 1) + '']].map(function (k) { return '<div class="card"><div style="font-size:12px;color:var(--ink-3);font-weight:700">' + k[0] + '</div><div class="dsp" style="font-size:22px;font-weight:800;margin-top:4px">' + k[1] + '</div><div style="font-size:11.5px;color:var(--ink-3);margin-top:2px">' + k[2] + '</div></div>'; }).join('');
+    $('.health', root).innerHTML = '<div><div class="l">원가율</div><div class="v" style="color:' + (t.costRate >= LIM() ? 'var(--crit)' : 'inherit') + '">' + pctF(t.costRate, 1) + '</div><div class="f">투입 원가 ÷ 매출 · 한계 ' + LIM() + '%</div></div><div><div class="l">기성 신청률</div><div class="v">' + pctF(t.billRate, 1) + '</div><div class="f">신청 ÷ 실수금 대상(계약 − 직불)</div></div><div><div class="l">수금률</div><div class="v">' + pctF(t.collectRate, 1) + '</div><div class="f">수금 ÷ 신청</div></div>';
     $('.score', root).innerHTML = '종합 <b class="num">' + t.score + '</b>점 = (100 − 원가율) × 0.4 + 신청률 × 0.3 + 수금률 × 0.3 · 라이브 존과 같은 산식 · ' + (t.score < 50 ? '위험' : t.score < 70 ? '주의' : '양호') + ' 단계';
     }
     var au = F.events.filter(function (e) { return e.kind === '시스템' || e.kind === '출역' || e.kind === '매입'; }).slice(0, 5);
@@ -18646,6 +18670,12 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
 
   // ═══ 렌더러 — 프로토타입 r4_app.js 이식본 ═══
   function pctf(a, b) { return b ? (a / b * 100).toFixed(1) + '%' : '—'; }
+  // [R2] 재무 잠금 — body[data-fin=locked](관리자 미만)이면 계약·이익·비율 자리는 '관리자 전용' / '—'
+  function FIN() { try { return document.body.getAttribute('data-fin') === 'locked'; } catch (e) { return false; } }
+  var FIN_LBL = '관리자 전용';
+  function fmtF(v) { return FIN() ? FIN_LBL : fmt(v); }
+  function sgnF(v) { return FIN() ? FIN_LBL : (v >= 0 ? '+' : '') + fmt(v); }
+  function pctF(v, d) { return FIN() ? '—' : (+v || 0).toFixed(d == null ? 1 : d) + '%'; }
   function pct(a, b) { return b ? a / b * 100 : 0; }
   function dstr(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
   function nowStr() { return dstr(S.now) + ' ' + pad2(S.now.getHours()) + ':' + pad2(S.now.getMinutes()); }
@@ -18669,11 +18699,11 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
     var F = feed(); var e = F.headline(pid); var T = totals(pid); var d = data();
     if (e && e.pri === 0 && e.active) {
       var p = d.projects.filter(function (x) { return x.id === e.pid; })[0] || {}; var t = totals(e.pid);
-      return { cls: 'p0', chip: '경보', chipCls: e.level === 'warn' ? 'w' : 'c', title: e.text, deck: '계약 ' + fmt(p.contract) + ' · 투입 ' + fmt(t.cost) + ' · 이익 ' + fmt(t.profit) + ' (' + t.profitRate.toFixed(1) + '%) · 기성 신청률 ' + t.billRate.toFixed(1) + '% · 수금률 ' + t.collectRate.toFixed(1) + '%', pid: e.pid, foot: (p.name || '') + ' · ' + (p.client || '') + ' · ' + (p.status || ''), when: e.ts ? F.rel(e.ts) : '기준 시각 없음' };
+      return { cls: 'p0', chip: '경보', chipCls: e.level === 'warn' ? 'w' : 'c', title: e.text, deck: '계약 ' + fmtF(p.contract) + ' · 투입 ' + fmt(t.cost) + ' · 이익 ' + fmtF(t.profit) + ' (' + pctF(t.profitRate, 1) + ') · 기성 신청률 ' + pctF(t.billRate, 1) + ' · 수금률 ' + pctF(t.collectRate, 1) + '', pid: e.pid, foot: (p.name || '') + ' · ' + (p.client || '') + ' · ' + (p.status || ''), when: e.ts ? F.rel(e.ts) : '기준 시각 없음' };
     }
     if (e && e.pri <= 1 && e.ts && (S.now - new Date(e.ts)) <= 24 * 3600000) {
       var p2 = d.projects.filter(function (x) { return x.id === e.pid; })[0] || {}; var t2 = totals(e.pid);
-      return { cls: 'p1', chip: e.kind, chipCls: 'a', title: e.text, deck: '계약 ' + fmt(p2.contract) + ' · 투입 ' + fmt(t2.cost) + ' · 원가율 ' + t2.costRate.toFixed(1) + '% · 기성 신청률 ' + t2.billRate.toFixed(1) + '%', pid: e.pid, foot: (p2.name || '') + ' · ' + (p2.client || '') + ' · ' + (p2.status || ''), when: F.rel(e.ts) };
+      return { cls: 'p1', chip: e.kind, chipCls: 'a', title: e.text, deck: '계약 ' + fmtF(p2.contract) + ' · 투입 ' + fmt(t2.cost) + ' · 원가율 ' + pctF(t2.costRate, 1) + ' · 기성 신청률 ' + pctF(t2.billRate, 1) + '', pid: e.pid, foot: (p2.name || '') + ' · ' + (p2.client || '') + ' · ' + (p2.status || ''), when: F.rel(e.ts) };
     }
     var last = lastRecordDate(pid); var n = d.projects.filter(function (x) { return !pid || x.id === pid; }).length;
     return { cls: 'p3', chip: '현황', chipCls: 'a', title: T.active ? '진행 ' + T.active + '곳 · 이번 달 투입 ' + fmt(monthSpend(pid)) : '기록된 현장 ' + n + '곳 · 마지막 기록 ' + (last || '없음') + (last ? ' (' + daysAgo(last) + '일 전)' : ''), deck: '계약 ' + fmt(T.contract) + ' · 투입 ' + fmt(T.cost) + ' · 이익 ' + fmt(T.profit), pid: pid || null, foot: '총액 기준 · 범위 무관', when: '' };
@@ -18715,7 +18745,7 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
     if (!e) return headlineOf(pid);
     var p = d.projects.filter(function (x) { return x.id === e.pid; })[0] || {}; var t = totals(e.pid);
     var isAl = e.kind === '경보'; var cls = isAl ? (e.level === 'warn' ? 'p1' : 'p0') : (e.pri <= 1 ? 'p1' : 'p2');
-    return { cls: cls, chip: isAl ? (e.level === 'warn' ? '주의' : '경보') : e.kind, chipCls: isAl ? (e.level === 'warn' ? 'w' : 'c') : 'a', title: e.text, deck: '계약 ' + fmt(p.contract) + ' · 투입 ' + fmt(t.cost) + ' · 이익 ' + fmt(t.profit) + ' (' + t.profitRate.toFixed(1) + '%) · 기성 신청률 ' + t.billRate.toFixed(1) + '% · 수금률 ' + t.collectRate.toFixed(1) + '%', pid: e.pid, foot: (p.name || '') + ' · ' + (p.client || '') + ' · ' + (p.status || ''), when: e.ts ? F.rel(e.ts) : '기준 시각 없음' };
+    return { cls: cls, chip: isAl ? (e.level === 'warn' ? '주의' : '경보') : e.kind, chipCls: isAl ? (e.level === 'warn' ? 'w' : 'c') : 'a', title: e.text, deck: '계약 ' + fmtF(p.contract) + ' · 투입 ' + fmt(t.cost) + ' · 이익 ' + fmtF(t.profit) + ' (' + pctF(t.profitRate, 1) + ') · 기성 신청률 ' + pctF(t.billRate, 1) + ' · 수금률 ' + pctF(t.collectRate, 1) + '', pid: e.pid, foot: (p.name || '') + ' · ' + (p.client || '') + ' · ' + (p.status || ''), when: e.ts ? F.rel(e.ts) : '기준 시각 없음' };
   }
   function stageStep(n) { if (!S.stage) return; S.stage.idx += n; var root = $('#pj-head'); renderHead(root, livePid(), true); }
   function startStage() { stopStage(); if (reduced) return; S.stageT = setInterval(function () { var root = $('#pj-head'); if (!root || root.matches(':hover')) return; stageStep(1); }, 7000); }
@@ -18725,7 +18755,7 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
     if (items.length) S.stage.idx = ((S.stage.idx % items.length) + items.length) % items.length; else S.stage.idx = 0;
     var e = items[S.stage.idx] || null; var h = headFrom(e, pid); var fp = h.pid || pid || null; var t = totals(fp);
     var nP = data().purchases.filter(function (x) { return !fp || x.pid === fp; }).length;
-    var facts = [['계약', fmt(t.contract), '', ''], ['투입 원가', fmt(t.cost), t.costRate.toFixed(1) + '% · 한계 ' + LIM() + '%', t.costRate >= LIM() ? 'crit' : ''], ['이익', (t.profit >= 0 ? '+' : '') + fmt(t.profit), t.profitRate.toFixed(1) + '%', t.profit < 0 ? 'crit' : ''], ['기성 신청', fmt(t.req), t.billRate.toFixed(1) + '%', ''], ['수금', fmt(t.rcv), t.collectRate.toFixed(1) + '%', ''], ['매입 건수', nP + '건', '', '']];
+    var facts = [['계약', fmtF(t.contract), '', ''], ['투입 원가', fmt(t.cost), pctF(t.costRate, 1) + ' · 한계 ' + LIM() + '%', t.costRate >= LIM() ? 'crit' : ''], ['이익', sgnF(t.profit), pctF(t.profitRate, 1) + '', t.profit < 0 ? 'crit' : ''], ['기성 신청', fmt(t.req), pctF(t.billRate, 1) + '', ''], ['수금', fmt(t.rcv), pctF(t.collectRate, 1) + '', ''], ['매입 건수', nP + '건', '', '']];
     var sw = Math.max(320, (root.clientWidth || 560) - 52);
     root.className = 'glass lv-head ' + h.cls;
     root.innerHTML = '<div class="lab"><span class="chip dk ' + h.chipCls + '">' + esc(h.chip) + '</span><span>지금 가장 중요한 한 건</span><span class="w">' + esc(h.when) + '</span></div>' +
@@ -18764,19 +18794,19 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
   function renderGaugesPj(root, pid) {
     var t = totals(pid); var p = data().projects.filter(function (x) { return x.id === pid; })[0];
     root.innerHTML = [
-      { l: '원가율', v: t.costRate, cls: t.costRate >= 100 ? 'c' : t.costRate >= LIM() ? 'w' : '', mark: LIM(), f: fmt(t.cost) + ' ÷ 매출 ' + fmt(t.revenue) + ' · 한계 ' + LIM() + '%' },
-      { l: '기성 신청률', v: t.billRate, cls: '', mark: 0, f: fmt(t.req) + ' ÷ 실수금 대상 ' + fmt(t.net) },
+      { l: '원가율', v: t.costRate, cls: t.costRate >= 100 ? 'c' : t.costRate >= LIM() ? 'w' : '', mark: LIM(), f: fmt(t.cost) + ' ÷ 매출 ' + fmtF(t.revenue) + ' · 한계 ' + LIM() + '%' },
+      { l: '기성 신청률', v: t.billRate, cls: '', mark: 0, f: fmt(t.req) + ' ÷ 실수금 대상 ' + fmtF(t.net) },
       { l: '수금률', v: t.collectRate, cls: 'g', mark: 0, f: fmt(t.rcv) + ' ÷ 신청(VAT 포함) ' + fmt(t.reqTotal || t.req) + (t.unpaid ? ' · 미수 ' + fmt(t.unpaid) : '') },
-      { l: '이익률', v: Math.max(0, t.profitRate), cls: t.profitRate < 0 ? 'c' : t.profitRate < TGT() ? 'w' : 'g', mark: TGT(), f: '(' + fmt(t.revenue) + ' − ' + fmt(t.cost) + ') ÷ 매출 · 목표 ' + TGT() + '%' + (t.profitRate < 0 ? ' · 실제 ' + t.profitRate.toFixed(1) + '%' : '') }
+      { l: '이익률', v: Math.max(0, t.profitRate), cls: t.profitRate < 0 ? 'c' : t.profitRate < TGT() ? 'w' : 'g', mark: TGT(), f: '(' + fmtF(t.revenue) + ' − ' + fmt(t.cost) + ') ÷ 매출 · 목표 ' + TGT() + '%' + (t.profitRate < 0 ? ' · 실제 ' + pctF(t.profitRate, 1) + '' : '') }
     ].map(function (g) { return '<div class="gbig"><div class="l"><span>' + g.l + '</span><b class="' + g.cls + '"><span data-cu="900">' + g.v.toFixed(1) + '</span>%</b></div><div class="tr"><i class="' + g.cls + '" data-w="' + Math.min(100, g.v).toFixed(1) + '"></i>' + (g.mark ? '<em style="left:' + g.mark + '%"></em>' : '') + '</div><div class="f">' + esc(g.f) + '</div></div>'; }).join('');
     armGauges(root); countAll(root);
   }
   function renderAlertsPj(root, pid) {
     var F = feed(); var p = data().projects.filter(function (x) { return x.id === pid; })[0]; var t = totals(pid);
     var al = F.events.filter(function (e) { return e.kind === '경보' && e.active && e.pid === pid; });
-    if (!al.length) { root.innerHTML = '<div class="none">활성 경보 없음 · 원가율 ' + t.costRate.toFixed(1) + '% · 이익률 ' + t.profitRate.toFixed(1) + '% · 신청률 ' + t.billRate.toFixed(1) + '%</div>'; return; }
+    if (!al.length) { root.innerHTML = '<div class="none">활성 경보 없음 · 원가율 ' + pctF(t.costRate, 1) + ' · 이익률 ' + pctF(t.profitRate, 1) + ' · 신청률 ' + pctF(t.billRate, 1) + '</div>'; return; }
     root.innerHTML = al.map(function (a) {
-      var f = /원가/.test(a.text) ? '원가율 ' + t.costRate.toFixed(1) + '% = ' + fmt(t.cost) + ' ÷ ' + fmt(p.contract) + ' · 한계 ' + LIM() + '%(설정)' : /마진|이익/.test(a.text) ? '이익률 ' + t.profitRate.toFixed(1) + '% = (' + fmt(p.contract) + ' − ' + fmt(t.cost) + ') ÷ ' + fmt(p.contract) + ' · 목표 ' + (p.target || 5) + '%(설정)' : /미수/.test(a.text) ? '미수 ' + fmt(t.unpaid) + ' = 신청 ' + fmt(t.req) + ' − 수금 ' + fmt(t.rcv) : '신청률 ' + t.billRate.toFixed(1) + '% = ' + fmt(t.req) + ' ÷ 실수금 대상 ' + fmt(t.net);
+      var f = /원가/.test(a.text) ? '원가율 ' + pctF(t.costRate, 1) + ' = ' + fmt(t.cost) + ' ÷ ' + fmtF(p.contract) + ' · 한계 ' + LIM() + '%(설정)' : /마진|이익/.test(a.text) ? '이익률 ' + pctF(t.profitRate, 1) + ' = (' + fmtF(p.contract) + ' − ' + fmt(t.cost) + ') ÷ ' + fmtF(p.contract) + ' · 목표 ' + (p.target || 5) + '%(설정)' : /미수/.test(a.text) ? '미수 ' + fmt(t.unpaid) + ' = 신청 ' + fmt(t.req) + ' − 수금 ' + fmt(t.rcv) : '신청률 ' + pctF(t.billRate, 1) + ' = ' + fmt(t.req) + ' ÷ 실수금 대상 ' + fmtF(t.net);
       return '<div class="al ' + (a.level || 'crit') + '"><i></i><div><b>' + esc(a.text.replace(p.name + ' ', '')) + '</b><div class="f">' + esc(f) + ' · ' + (a.ts ? '감지 ' + esc(F.rel(a.ts)) : '기준 시각 없음') + '</div></div></div>';
     }).join('');
   }
@@ -18789,6 +18819,7 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
     return { orders: byC, sales: sales, rcv: rcv, buy: buy, basisNote: basisNote };
   }
   function trendCard(key, label, map, color, opts) {
+    if (FIN() && key !== 'buy') return '<div class="glass tr-card fin-locked"><div class="th"><span class="k">' + label + '</span><span class="v"><span>' + FIN_LBL + '</span></span></div><div class="sub"><span>계약·기성 계열은 관리자 화면에서만 표시</span><span></span></div></div>';
     var y = S.now.getFullYear(), curM = S.now.getFullYear() + '-' + pad2(S.now.getMonth() + 1);
     var keys, labels, vals, main, sub;
     if (S.trendGran === 'month') {
@@ -18837,7 +18868,7 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
   function siteOf(pid) { return data().projects.filter(function (x) { return x.id === pid; })[0] || null; }
   function qiRows(res, q, idx, withGo) {
     var F = feed();
-    return res.map(function (x, i) { var al = F.events.filter(function (e) { return e.kind === '경보' && e.active && e.pid === x.p.id; }).length; var act = isActive(x.p); return '<div class="qi' + (i === idx ? ' on' : '') + '" role="option" id="' + withGo.box + '-opt-' + i + '" aria-selected="' + (i === idx) + '" data-pick="' + esc(x.p.id) + '"><div class="av ' + (!act ? 'd' : al ? 'c' : '') + '">' + esc(x.p.name.slice(0, 1)) + '</div><div><div class="n">' + hl(x.p.name, q) + '</div><div class="c">' + hl(x.p.id, q) + ' · ' + hl(x.p.client || '', q) + ' · ' + esc(x.p.status) + (al ? ' · 경보 ' + al : '') + '</div></div><div class="r"><span>' + x.costRate.toFixed(1) + '%<small>원가율 · 계약 ' + fmt(x.contract) + '</small></span>' + (withGo.ov ? '<button class="go p" type="button" tabindex="-1" aria-hidden="true">이 현장만 보기</button><button class="go" type="button" tabindex="-1" aria-hidden="true" data-open="' + esc(x.p.id) + '">상세 열기</button>' : '<button class="go p" type="button" tabindex="-1" aria-hidden="true">이 현장으로 이동</button>') + '</div></div>'; }).join('');
+    return res.map(function (x, i) { var al = F.events.filter(function (e) { return e.kind === '경보' && e.active && e.pid === x.p.id; }).length; var act = isActive(x.p); return '<div class="qi' + (i === idx ? ' on' : '') + '" role="option" id="' + withGo.box + '-opt-' + i + '" aria-selected="' + (i === idx) + '" data-pick="' + esc(x.p.id) + '"><div class="av ' + (!act ? 'd' : al ? 'c' : '') + '">' + esc(x.p.name.slice(0, 1)) + '</div><div><div class="n">' + hl(x.p.name, q) + '</div><div class="c">' + hl(x.p.id, q) + ' · ' + hl(x.p.client || '', q) + ' · ' + esc(x.p.status) + (al ? ' · 경보 ' + al : '') + '</div></div><div class="r"><span>' + pctF(x.costRate, 1) + '<small>원가율 · 계약 ' + fmtF(x.contract) + '</small></span>' + (withGo.ov ? '<button class="go p" type="button" tabindex="-1" aria-hidden="true">이 현장만 보기</button><button class="go" type="button" tabindex="-1" aria-hidden="true" data-open="' + esc(x.p.id) + '">상세 열기</button>' : '<button class="go p" type="button" tabindex="-1" aria-hidden="true">이 현장으로 이동</button>') + '</div></div>'; }).join('');
   }
   function renderLiveList(boxId) {
     var box = $('#' + boxId); if (!box) return; var inp = $('input', box), list = $('.q-list', box); var q = inp.value.trim();
@@ -19732,6 +19763,7 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
   function applyRole() {
     var role = currentRole();
     document.body.setAttribute('data-role', role);
+    document.body.setAttribute('data-fin', ROLE_RANK[role] >= ROLE_RANK.admin ? 'open' : 'locked');   // [R2] 재무 표시 잠금 — 관리자 미만은 서버가 계약·이익·기성을 주지 않는다
     // 사이드바 사용자 칩
     var a = getAuth();
     var nameEl = document.getElementById('mm-user-name');
@@ -20947,7 +20979,7 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
     if (channel) stop();
     try {
       channel = sb.channel('mm-realtime-' + Date.now());
-      ['projects','project_costs','cost_items','billing_items'].forEach(function(tbl) {
+      ['projects','project_costs','cost_items','billing_items','project_finance'].forEach(function(tbl) {   // [R2] 재무 표 포함
         channel.on('postgres_changes',
           { event:'*', schema:'public', table:tbl },
           function(payload) { debouncedPull(); });
@@ -21007,16 +21039,21 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
   function saveLocal(arr, _fromRemote) { try { localStorage.setItem(DASH_KEY, JSON.stringify(arr)); if (!_fromRemote) { try{ localStorage.setItem('mm-dash-dirty','1'); }catch(_d){} } } catch(e) { if (window.globalToast) globalToast('⛔ 동기화 저장 실패 — 저장 공간 부족: ' + e.message, 'error', 8000); } }  // [전수조사] quota 가드 + [지혈3] 저장 즉시 dirty
 
   // ── Supabase rows → localStorage Project 형식 ──
-  function assembleProject(pr, costRows, ciRows, bRows, oiRows) {
+  // [R2] 재무(계약·추가계약·예산 항목)는 project_finance 표에서 온다.
+  //   finMode 'rows' = 표에서 받음(행이 없는 현장은 0) · 'none' = 권한 없음(잠금, 0) · 'legacy' = 표 미도입(옛 projects 컬럼)
+  function assembleProject(pr, costRows, ciRows, bRows, oiRows, finMode, finRow) {
+    var fz = { contract_orig: 0, contract_add: 0, budget_items: [] };
+    var fs = finMode === 'rows' ? (finRow || fz) : finMode === 'none' ? fz : pr;
     var p = {
       id: pr.id, name: pr.name, type: pr.type, client: pr.client,
       startDate: pr.start_date || '', endDate: pr.end_date || '',
-      contractOrig: num(pr.contract_orig), contractAdd: num(pr.contract_add),
+      contractOrig: num(fs.contract_orig), contractAdd: num(fs.contract_add),
       status: pr.status || '진행중', progress: num(pr.progress) || 0,
-      createdAt: pr.created_at || '', budgetItems: Array.isArray(pr.budget_items) ? pr.budget_items : [],
+      createdAt: pr.created_at || '', budgetItems: Array.isArray(fs.budget_items) ? fs.budget_items : [],
       address: pr.address || '', lat: (pr.lat == null ? null : Number(pr.lat)), lng: (pr.lng == null ? null : Number(pr.lng)),  // [영업 지도 ①] 현장 주소·좌표
       memo: pr.memo || '', costs: {}, costItems: [], billingItems: [], otherIncomeItems: []
     };
+    if (finMode === 'none') p.finLocked = true;   // [R2] 로컬 표식 — 올리기에서 재무를 보내지 않고, 화면은 '관리자 전용'
     (costRows||[]).forEach(function(r) {
       p.costs[r.category] = { contract: num(r.contract), actual: num(r.actual), _seedActual: (r.seed_actual === null || r.seed_actual === undefined) ? undefined : num(r.seed_actual) };  // [C1-fix] seed_actual 부활 — 매입 시드 미러(override 판별용, 멀티기기 정합)
     });
@@ -21065,11 +21102,13 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
     var proj = {
       id: p.id, owner_id: ownerId, name: p.name||'', type: p.type||'',
       client: p.client||'', start_date: p.startDate||null, end_date: p.endDate||null,
-      contract_orig: bint(p.contractOrig), contract_add: bint(p.contractAdd), memo: p.memo||'',
+      memo: p.memo||'',   // [R2] 계약·추가계약·예산은 아래 finance(project_finance 표)로 — projects 에는 보내지 않는다(서버 트리거도 0 으로 비운다)
       status: p.status||'진행중', progress: num(p.progress)||0,
-      address: p.address||null, lat: (p.lat == null ? null : Number(p.lat)), lng: (p.lng == null ? null : Number(p.lng)),  // [영업 지도 ①] 컬럼 미생성 시 아래 push 폴백이 자동 제거
-      budget_items: (p.budgetItems||[]).filter(function(b){ return b && b.src !== 'derived'; })
+      address: p.address||null, lat: (p.lat == null ? null : Number(p.lat)), lng: (p.lng == null ? null : Number(p.lng))  // [영업 지도 ①] 컬럼 미생성 시 아래 push 폴백이 자동 제거
     };
+    // [R2] 재무 행 — 잠긴 현장(권한 없이 내려받은 것)은 null: 올리기에서 건너뛰고, 보내더라도 서버 정책이 거부한다
+    var finance = p.finLocked ? null : { project_id: p.id, contract_orig: bint(p.contractOrig), contract_add: bint(p.contractAdd),
+      budget_items: (p.budgetItems||[]).filter(function(b){ return b && b.src !== 'derived'; }) };
     if (p.createdAt) proj.created_at = p.createdAt;  // 있을 때만 — projects.created_at DB default now() 보존
     var costs = CATS.map(function(c) {
       var k = (p.costs && p.costs[c]) || {};
@@ -21094,7 +21133,7 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
         supply_amt: bint(o.supplyAmt), tax: bint(o.tax), total: bint(o.total),
         received: bint(o.received), received_date: o.receivedDate||null, memo: o.memo||null };
     });
-    return { project: proj, costs: costs, costItems: costItems, billingItems: billingItems, otherIncomeItems: otherIncomeItems };
+    return { project: proj, finance: finance, costs: costs, costItems: costItems, billingItems: billingItems, otherIncomeItems: otherIncomeItems };
   }
 
   // [C1] Supabase 응답 기본 상한(1000행) 대응 — id 정렬 + range 페이지네이션으로 전량 수집.
@@ -21120,15 +21159,27 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
       if (pRes.error) throw pRes.error;
       var cRes  = await fetchAllRows(sb, 'project_costs');
       var ciRes = await fetchAllRows(sb, 'cost_items');
-      var bRes  = await fetchAllRows(sb, 'billing_items');
-      var oiData = []; try { var oiRes = await fetchAllRows(sb, 'other_income_items'); if (oiRes && !oiRes.error && oiRes.data) oiData = oiRes.data; } catch(e) {}
+      // [R2] 재무·기성·기타수익은 관리자만 요청한다 — 직원은 요청해도 정책이 빈 배열을 주므로 요청 자체를 하지 않는다
+      var mgr = _isMgr(), finMode = mgr ? 'rows' : 'none', finMap = {};
+      var bRes = { data: [] }, oiData = [];
+      if (mgr) {
+        var fRes = await fetchAllRows(sb, 'project_finance');
+        if (fRes.error) {
+          if (!_noRelation(fRes.error)) throw fRes.error;
+          finMode = 'legacy';   // 표 미도입(SQL 미실행) — 옛 컬럼으로 표시
+        } else (fRes.data||[]).forEach(function(r){ finMap[r.project_id] = r; });
+        bRes = await fetchAllRows(sb, 'billing_items');
+        try { var oiRes = await fetchAllRows(sb, 'other_income_items'); if (oiRes && !oiRes.error && oiRes.data) oiData = oiRes.data; } catch(e) {}
+      }
+      _finMode = finMode; _setFin(finMode === 'none' ? 'locked' : 'open');
 
       var projects = (pRes.data||[]).map(function(pr) {
         return assembleProject(pr,
           (cRes.data||[]).filter(function(r){return r.project_id===pr.id}),
           (ciRes.data||[]).filter(function(r){return r.project_id===pr.id}),
           (bRes.data||[]).filter(function(r){return r.project_id===pr.id}),
-          oiData.filter(function(r){return r.project_id===pr.id}));
+          oiData.filter(function(r){return r.project_id===pr.id}),
+          finMode, finMap[pr.id]);
       });
       var _tomb = _tombIds();   // 방금 삭제한 id가 클라우드에 잔존하더라도(레이스) 로컬 부활 차단 [감사 D4·D5]
       if (_tomb.length) projects = projects.filter(function(p){ return _tomb.indexOf(p.id) < 0; });
@@ -21156,10 +21207,16 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
   function _rpcErr(err, fn) {
     var m = String((err && err.message) || err || '');
     if (/could not find the function|PGRST202|does not exist/i.test(m)) {
-      return new Error('클라우드 함수 ' + fn + ' 가 없습니다 — supabase/migrations/20260912_atomic_replace.sql 을 먼저 실행하십시오');
+      var MIG = { mm_upsert_project_finance: '20260913_r2_project_finance.sql', mm_upsert_cost_items: '20260913_row_sync.sql', mm_replace_billing_items: '20260913_row_sync.sql' };
+      return new Error('클라우드 함수 ' + fn + ' 가 없습니다 — supabase/migrations/' + (MIG[fn] || '20260912_atomic_replace.sql') + ' 을 먼저 실행하십시오');
     }
     return err;
   }
+  // [R2] 역할·재무 표시 상태 — 관리자(ceo·admin)만 재무를 받는다. body[data-fin] 은 화면 잠금 표식(CSS r2-fin-mask · 존 FIN())
+  var _finMode = 'rows';
+  function _isMgr() { try { return !!(window.mmPerm && window.mmPerm.canManage && window.mmPerm.canManage()); } catch (e) { return false; } }
+  function _setFin(state) { try { document.body.setAttribute('data-fin', state); } catch (e) { } }
+  function _noRelation(err) { var m = String((err && err.message) || ''); return /PGRST205|42P01/.test(String((err && err.code) || '')) || /schema cache|does not exist/i.test(m); }
   // [2단계-2] 마지막 동기화 시점 사본 — push 는 이 사본과 비교해 바뀐 행·사라진 행만 보낸다(남이 넣은 행은 건드리지 않는다).
   //   사본이 없으면(첫 실행) 전량 덮어쓰기·삭제 없음 = 안전한 기본값. pull 성공·push 전체 성공 시 갱신.
   var SYNC_KEY = 'mm-dash-synced';
@@ -21215,6 +21272,12 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
             r1 = await sb.from('projects').upsert(d.project);
           }
           if (r1.error) throw r1.error;
+        }
+        // [R2] 재무: 관리자 기기에서, 바뀌었을 때만 project_finance 로. 직원 기기에는 재무가 없고(finLocked → null) 서버 정책도 거부한다.
+        if (d.finance && _isMgr() && !same(s && s.finance, d.finance)) {
+          var rf = await sb.rpc('mm_upsert_project_finance', { p_rows: [d.finance] });
+          if (rf.error) throw _rpcErr(rf.error, 'mm_upsert_project_finance');
+          if (rf.data !== 1) throw new Error('재무 저장 수 불일치 — 보낸 1건, 저장 ' + rf.data + '건');
         }
         if (!same(s && s.costs, d.costs)) {
           var r2 = await sb.from('project_costs').upsert(d.costs, { onConflict: 'project_id,category' });
@@ -21403,6 +21466,7 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
       var c2 = await sb.from('billing_items').delete().eq('project_id', id); if (c2.error) throw c2.error;
       try { await sb.from('other_income_items').delete().eq('project_id', id); } catch(oe) {}
       var c3 = await sb.from('project_costs').delete().eq('project_id', id); if (c3.error) throw c3.error;
+      try { await sb.from('project_finance').delete().eq('project_id', id); } catch(fe) {}   // [R2] FK cascade 로도 지워지지만 명시
       var pr = await sb.from('projects').delete().eq('id', id);             if (pr.error) throw pr.error;
       _tombAdd(id);   // pull/realtime 레이스 가드
       try { var _sy = _loadSynced(); if (_sy) _saveSynced(_sy.filter(function (p) { return p && p.id !== id; })); } catch (_se) { }   // [2단계-2]
