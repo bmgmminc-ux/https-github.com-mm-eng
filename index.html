@@ -21307,8 +21307,26 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
   try { autoSync = localStorage.getItem('mm-autosync') === '1'; } catch(e) {}
 
   // ── 로그인 후 자동 PULL + Realtime 시작 ──
+  // [R1] 역할 출처 = 서버(user_profiles.role). 브라우저가 이메일로 고른 역할(mmRoleFor)은 최초 폴백일 뿐이며,
+  //   서버 값과 다르면 서버 값으로 바꾼다(대표가 설정 화면에서 바꾼 역할이 다음 접속부터 적용). company_id 도 함께 보관.
+  async function refreshRole() {
+    var sb = sbClient(); if (!sb) return null;
+    try {
+      var sess = await sb.auth.getSession(); var u = sess.data.session && sess.data.session.user; if (!u || !u.id) return null;
+      var r = await sb.from('user_profiles').select('role,company_id').eq('id', u.id).maybeSingle();
+      if (r.error || !r.data || !r.data.role) return null;
+      var a = window.mmAuth && window.mmAuth.get && window.mmAuth.get();
+      if (a && a.id === u.id && (a.role !== r.data.role || a.companyId !== (r.data.company_id || null))) {
+        a.role = r.data.role; a.companyId = r.data.company_id || null; window.mmAuth.set(a);
+        try { window.mmAuth.applyRole(); } catch (_e) { }
+        if (window.globalToast && a.role === 'demo') window.globalToast('읽기 전용 계정입니다 — 변경은 저장되지 않습니다', 'warning', 6000);
+      }
+      return r.data;
+    } catch (e) { return null; }
+  }
   async function syncOnLogin() {
     if (!sbReady()) return;
+    try { await refreshRole(); } catch (_re) { }   // [R1] 동기화 전에 서버 역할부터
     // [rn3 C-3] 최초 클라우드 전환 가드 — 관리자 이메일 + 이 브라우저에서 로컬 관리자(bmg)로 일한 이력 + 로컬 프로젝트 존재 → 로컬이 진실이므로 dirty 로 표시해 선push. 그 외 브라우저는 종전대로 클라우드 우선.
     var _rnMig = false, _rIsAdmin = false;
     try {
@@ -21548,7 +21566,7 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
   }
 
   window.mmData = {
-    pull: pull, push: push, syncOnLogin: syncOnLogin, deleteProject: deleteProject, _ensureCostIds: _ensureCostIds, _loadSynced: _loadSynced,
+    pull: pull, push: push, syncOnLogin: syncOnLogin, deleteProject: deleteProject, _ensureCostIds: _ensureCostIds, _loadSynced: _loadSynced, refreshRole: refreshRole,
     pushMasters: pushMasters, pullMasters: pullMasters,
     deleteVendorCloud: deleteVendorCloud, deleteWorkerCloud: deleteWorkerCloud, deleteAttendanceCloud: deleteAttendanceCloud,
     pushSettings: pushSettings, pullSettings: pullSettings,
