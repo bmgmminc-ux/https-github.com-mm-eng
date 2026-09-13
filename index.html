@@ -21122,6 +21122,14 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
   }
 
   // ── PUSH: localStorage → Supabase (전체) ──
+  // [1단계] 클라우드 함수가 아직 없을 때(= SQL 미실행) 무슨 일인지 바로 알 수 있게 문구를 바꿔준다.
+  function _rpcErr(err, fn) {
+    var m = String((err && err.message) || err || '');
+    if (/could not find the function|PGRST202|does not exist/i.test(m)) {
+      return new Error('클라우드 함수 ' + fn + ' 가 없습니다 — supabase/migrations/20260912_atomic_replace.sql 을 먼저 실행하십시오');
+    }
+    return err;
+  }
   async function push() {
     var sb = sbClient();
     if (!sb) { _dashPushFailed('Supabase 미설정', true); return { ok:false, msg:'Supabase 미설정' }; }   // [H7] silent — 로컬 전용 모드(프리뷰 등)는 소음 없이 dirty만
@@ -21136,8 +21144,13 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
 
       var projects = loadLocal();
       window._mmSelfWriteAt = Date.now();  // [전수조사] realtime 셀프-에코 가드용 스탬프
+      // [1단계] 한 현장의 실패가 나머지 현장 동기화를 막지 않게 격리한다.
+      //   예전 기타수익 블록처럼 '삼키는' 것이 아니라, 실패를 모아 두었다가 루프가 끝난 뒤 반드시 실패로 보고한다
+      //   (→ dirty 유지 + 토스트 + 재시도). 성공한 현장은 이미 원자적으로 치환됐고 재시도해도 멱등이다.
+      var _pjFailed = [];
       for (var i = 0; i < projects.length; i++) {
         var d = disassembleProject(projects[i], ownerId);
+        try {
         var r1 = await sb.from('projects').upsert(d.project);
         if (r1.error && /\b(address|lat|lng)\b/i.test(r1.error.message||'')) {
           // [영업 지도 ①] address/lat/lng 컬럼 미생성 환경 폴백 — 20260618_project_address.sql RUN 전에도 프로젝트 동기화 정상(로컬 주소는 보존)
@@ -21147,38 +21160,32 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
         if (r1.error) throw r1.error;
         var r2 = await sb.from('project_costs').upsert(d.costs, { onConflict: 'project_id,category' });
         if (r2.error) throw r2.error;
-        // costItems / billingItems: 기존 삭제 후 재삽입
-        var rd3 = await sb.from('cost_items').delete().eq('project_id', d.project.id);
-        if (rd3 && rd3.error) throw rd3.error;   // [중복 폭주 차단] 지우지 못했으면 넣지 않는다 — cost_items 에는 UNIQUE 가 없어 그대로 누적된다
-        if (d.costItems.length) {
-          var r3 = await sb.from('cost_items').insert(d.costItems);
-          if (r3.error && /client_id/i.test(r3.error.message||'')) {
-            // [지혈4] client_id 컬럼 미생성 환경 폴백 — SQL 실행 전에도 동기화는 정상 동작(첨부 링크만 미보존)
-            d.costItems.forEach(function(x){ delete x.client_id; });
-            r3 = await sb.from('cost_items').insert(d.costItems);
-          }
-          if (r3.error && /attrib_cat/i.test(r3.error.message||'')) {
-            // [귀속 공종 — B안] attrib_cat 컬럼 미생성 환경 폴백 — delete 후 insert 실패로 클라우드가 비는 사고 방지(로컬 attribCat은 유지)
-            d.costItems.forEach(function(x){ delete x.attrib_cat; });
-            r3 = await sb.from('cost_items').insert(d.costItems);
-          }
-          if (r3.error) throw r3.error;
+        // [1단계 · 원자적 치환] 지우기+넣기를 DB 함수 한 번(=한 트랜잭션)으로 보낸다.
+        //   같은 현장의 동시 호출은 함수 안 advisory lock 이 줄 세우므로, 창·기기가 몇이든 두 벌이 남을 수 없다.
+        //   client_id / attrib_cat 컬럼이 없는 환경도 함수가 알아서 무시하므로 예전의 폴백 재삽입이 필요 없다.
+        var r3 = await sb.rpc('mm_replace_cost_items', { p_project_id: d.project.id, p_rows: d.costItems });
+        if (r3.error) throw _rpcErr(r3.error, 'mm_replace_cost_items');
+        if (d.costItems.length && r3.data !== d.costItems.length) {   // [이상감지] 보낸 수와 저장된 수가 다르면 실패로 본다
+          throw new Error('매입 저장 수 불일치 — 보낸 ' + d.costItems.length + '건, 저장 ' + r3.data + '건');
         }
+        // 기성 청구는 unique(project_id, round_no) 가 중복을 막아 왔다 — 이번 단계 범위 밖(2단계에서 함께 정리)
         var rd4 = await sb.from('billing_items').delete().eq('project_id', d.project.id);
         if (rd4 && rd4.error) throw rd4.error;
         if (d.billingItems.length) {
           var r4 = await sb.from('billing_items').insert(d.billingItems);
           if (r4.error) throw r4.error;
         }
-        // 기타수익 — 비치명적(테이블/RLS 미비 시에도 핵심 동기화 보존)
-        try {
-          await sb.from('other_income_items').delete().eq('project_id', d.project.id);
-          if (d.otherIncomeItems && d.otherIncomeItems.length) {
-            var r5 = await sb.from('other_income_items').insert(d.otherIncomeItems);
-            if (r5.error) throw r5.error;
-          }
-        } catch(oiErr) { if (window.console) console.warn('[기타수익 sync 건너뜀]', (oiErr && oiErr.message) || oiErr); }
+        // [1단계] 기타수익도 같은 함수 방식. 예전엔 삭제·삽입 실패를 통째로 삼켜 화면에 아무 흔적이 없었다.
+        var r5 = await sb.rpc('mm_replace_other_income_items', { p_project_id: d.project.id, p_rows: d.otherIncomeItems || [] });
+        if (r5.error) throw _rpcErr(r5.error, 'mm_replace_other_income_items');
+        if ((d.otherIncomeItems || []).length && r5.data !== d.otherIncomeItems.length) {   // [이상감지] 매입과 같은 검사
+          throw new Error('기타수익 저장 수 불일치 — 보낸 ' + d.otherIncomeItems.length + '건, 저장 ' + r5.data + '건');
+        }
+        } catch (pjErr) {
+          _pjFailed.push(String((d.project && (d.project.name || d.project.id)) || '현장') + ': ' + ((pjErr && pjErr.message) || pjErr));
+        }
       }
+      if (_pjFailed.length) throw new Error(_pjFailed.length + '개 현장 저장 실패 — ' + _pjFailed.join(' / '));
       window._mmSelfWriteAt = Date.now();  // [전수조사] push 완료 직후 도착하는 반향까지 커버
       try{ localStorage.removeItem('mm-dash-dirty'); }catch(e){}   // [H7] 업로드 성공 → dirty 해제
       return { ok:true, msg:'업로드 완료 — 프로젝트 ' + projects.length + '건' };
