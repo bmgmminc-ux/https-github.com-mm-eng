@@ -6260,23 +6260,86 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
 .tr-card.staff .sub .warn{color:#B45309}
 .rings .rs.band{display:flex;flex-direction:column;align-items:center;justify-content:center;width:46px;height:46px;border-radius:50%;border:3px solid #94A3B8;font-size:11px;font-weight:800;line-height:1.1}
 .rings .rs.band small{font-size:8px;font-weight:600;opacity:.7}.rings .rs.band.g{border-color:#16A34A}.rings .rs.band.w{border-color:#F59E0B}.rings .rs.band.c{border-color:#EF4444}
+/* ── 2026-09-24 차분한 배치: 헤드라인 → 총액 정보띠 → 현장 보드(격자) → 사건 스트림 (링 줄·3열 격자 제거) ── */
+.band{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-top:18px}
+.band .cell{padding:14px 14px 12px;border-radius:var(--r);color:#fff;background:var(--g-ink);box-shadow:var(--e1);min-width:0;position:relative;overflow:hidden}
+.band .cell .ring{position:absolute;right:12px;top:12px;width:44px;height:44px}
+.band .cell .ring circle.tr{fill:none;stroke:rgba(255,255,255,.2);stroke-width:5}
+.band .cell .ring circle.fg{fill:none;stroke:#fff;stroke-width:5;stroke-linecap:round;transform:rotate(-90deg);transform-origin:50% 50%;transition:stroke-dashoffset .9s cubic-bezier(.2,.8,.2,1)}
+.band .cell .ring text{font-family:var(--d);font-size:11px;font-weight:800;fill:#fff}
+.band .cell .ring .mk{stroke:#fff;stroke-width:2;opacity:.9}
+.band .cell.t-blue{background:var(--g-blue)}
+.band .cell.t-violet{background:var(--g-violet)}
+.band .cell.t-green{background:var(--g-green)}
+.band .cell.t-amber{background:var(--g-amber)}
+.band .cell.t-red{background:var(--g-red)}
+.band .cell.t-cyan{background:linear-gradient(135deg,#0E7490,#0891B2)}
+.band .l{font-size:11.5px;opacity:1;display:flex;gap:6px;align-items:center;white-space:nowrap;font-weight:700}
+.band .l .k{font-family:var(--f);font-size:10.5px;opacity:.9;font-weight:600;letter-spacing:.02em}
+.band .v{font-family:var(--d);font-size:26px;font-weight:800;letter-spacing:-.03em;line-height:1.05;margin-top:8px;font-variant-numeric:tabular-nums;display:flex;align-items:baseline;gap:3px;white-space:nowrap;position:relative}
+.band .v .u{font-family:var(--f);font-size:12px;font-weight:700;opacity:.85;letter-spacing:0}
+.band .s{font-size:11px;opacity:1;margin-top:5px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.7em;position:relative;padding-right:50px}
+.band .v.tick{animation:tick 400ms ease-out}
+.band{grid-template-columns:repeat(3,1fr)}
+.band{grid-template-columns:repeat(2,1fr);gap:10px}
+.band .v{font-size:21px}
+.band .s{padding-right:0;min-height:0}
+.band .cell .ring{display:none}
+.band .d{font-size:11px;font-weight:800;margin-top:6px;display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.2);padding:2px 8px;border-radius:99px;position:relative}
+.band .d.up::before{content:"\25B2"}
+.band .d.dn::before{content:"\25BC"}
+.band .d.flat::before{content:"\2013"}
+.band .cell .rgl{position:absolute;right:6px;top:58px;width:58px;text-align:center;font-size:10px;font-weight:700;line-height:1.15;color:rgba(255,255,255,.95);font-family:var(--f)}
+.band .cell .rgl{display:none}
+/* 단위(억·만)가 붙는 금액 노드는 본문 서체 — 모노는 순수 숫자만 */
+.band .v,.band .s b,.band .d,.readout b,.readout .bk b,.legend span,.mbc-h b,.mbc-v b,.mbc-avg b,.mbc-x .sum b,.site .rate small,.site .last,.kpi-orig .v,.health .v,.health .f,.score,.st-r .t,.bl .v,.hm .c,.hm .rl,.hm .tt,.mixl span,.tl-xl,.tl-mkl{font-family:var(--f)}
+.band .cell .v span,.band .cell .v,.tl-ax,.tl-last text,.mbc.sm .mbc-x .sum b,.tl-mkn,.tl-lead,.tb td.num,.tb .num{font-family:var(--f)}
+/* 작고 굵은 한글은 획이 붙어 뭉갠다 — 한글이 들어가는 <=11px 슬롯은 굵기 700 상한(숫자·기호 전용은 유지) */
+.chip,.lbl .tag,.bl .k,.site.colhd,.band .d{font-weight:700}
+.panel,.band .cell,.lbl{border-radius:14px}
+.live.calm .onair{min-height:36px;height:auto;gap:10px;row-gap:6px}
+.live.calm .onair .badge{height:26px;font-size:11px;padding:0 10px 0 8px}
+.live.calm .onair .clock{font-size:16px}
+.live.calm .onair .pill{height:24px;font-size:11px;padding:0 9px}
+.live.calm .lv-head{margin-top:12px;height:auto;min-height:0;padding:16px 20px 14px}
+.live.calm .lv-head h2{font-size:24px;line-height:1.25;-webkit-line-clamp:2;margin-top:8px}
+.live.calm .lv-head .deck{font-size:13px;margin-top:6px}
+.live.calm .lv-head .facts{grid-template-columns:repeat(6,1fr);margin-top:12px;padding-top:10px;gap:8px 12px}
+.live.calm .lv-head .facts .v{font-size:18px}
+.live.calm .lv-head .mini{display:none}
+.live.calm .lv-head .foot{margin-top:10px;padding-top:8px}
+.live.calm .lv-head .stage{margin-top:6px}
+.live.calm .lv-head .stage .bar{display:none}
+.live.calm .band{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:12px}
+.live.calm .band .cell{padding:12px 12px 10px}
+.live.calm .band .v{font-size:21px}
+.live.calm .band .s{padding-right:0;min-height:0}
+.live.calm .band .cell .ring{display:none}
+.live.calm .band .empty{grid-column:1/-1;padding:18px;text-align:center;color:var(--ink-3);font-size:12.5px}
+.live.calm .lv-board,.live.calm .lv-stream{margin-top:12px;height:auto;min-height:0}
+.live.calm .tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;max-height:none;height:auto;overflow:visible;padding:10px}
+.live.calm .tiles .tile{margin:0}
+.live.calm .stream{max-height:none}
+.live.calm .lv-stream .flow{max-height:420px;overflow:auto}
+.live.calm .lv-stream .track{animation:none}
+.live.calm .livehd .c{display:none}
+@media (max-width:1100px){.live.calm .band{grid-template-columns:repeat(3,1fr)}.live.calm .lv-head .facts{grid-template-columns:repeat(3,1fr)}.live.calm .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){.live.calm .band{grid-template-columns:repeat(2,1fr)}.live.calm .tiles{grid-template-columns:1fr}.live.calm .lv-head .facts{grid-template-columns:repeat(2,1fr)}}
 </style>
 <svg style="display:none" aria-hidden="true"><symbol id="i-srch" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></symbol><symbol id="i-l" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol><symbol id="i-r" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol><symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol></svg>
     <section class="yearbar" id="yearbar"></section>
     <!-- 라이브 스튜디오 -->
-    <section class="live" id="live-main">
+    <section class="live calm" id="live-main">
       <div class="onair">
         <span class="badge" id="onair-badge"><i></i>ON AIR</span>
         <span class="clock"><span id="lv-clock">--:--:--</span><small id="lv-date">항상 지금 · 기간 선택 무관</small></span>
         <span id="lv-pills" style="display:flex;gap:8px;flex-wrap:wrap"></span>
         <span class="sr" id="lv-say" role="status" aria-live="polite"></span><span class="focus" id="lv-focus"></span><div class="lvq" id="lvq"><svg class="i"><use href="#i-srch"/></svg><input id="lvq-in" type="search" placeholder="한 현장만 보기 — 현장명·코드·발주처" autocomplete="off" aria-label="라이브 존 현장 검색" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="lvq-list" aria-describedby="lvq-desc"><kbd aria-hidden="true">Enter</kbd><div class="q-list lvq-list" id="lvq-list" role="listbox" aria-label="현장 목록" hidden></div><span class="sr" id="lvq-desc">방향키로 고르고 Enter를 누르면 그 현장만 봅니다. Shift와 Enter를 함께 누르면 상세 화면을 엽니다.</span></div>
       </div>
-      <div class="stories" id="stories"></div>
-      <div class="lvgrid">
-        <div class="glass lv-head" id="lv-head"></div>
-        <div class="glass lv-stream"><div class="gh">사건 스트림<span class="c" id="stream-c"></span><div class="a"><span class="c">최신순 · 자동 갱신</span></div></div><div class="stream" id="stream"></div></div>
-        <div class="glass lv-board"><div class="gh">현장 상태 보드<span class="c" id="tiles-c"></span><div class="a"><div class="seg dk"><button data-tf="all" class="on">전체</button><button data-tf="active">진행</button><button data-tf="alert">경보</button></div></div></div><div class="tiles" id="tiles"></div></div>
-      </div>
+      <div class="glass lv-head" id="lv-head"></div>
+      <div class="band" id="lv-band" aria-label="총액 정보띠"></div>
+      <div class="glass lv-board"><div class="gh">현장 상태 보드<span class="c" id="tiles-c"></span><div class="a"><div class="seg dk"><button data-tf="all" class="on">전체</button><button data-tf="active">진행</button><button data-tf="alert">경보</button></div></div></div><div class="tiles" id="tiles"></div></div>
+      <div class="glass lv-stream"><div class="gh">사건 스트림<span class="c" id="stream-c"></span><div class="a"><span class="c">최신순 · 자동 갱신</span></div></div><div class="stream" id="stream"></div></div>
       <div class="tape" id="tape"><div class="tlive"><i></i><span>24H</span></div><div class="track"></div><div class="tape-r"></div></div>
     </section>
 </template>
@@ -6686,12 +6749,11 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
 :host-context(body[data-fin="locked"]) [data-brief="copy"]{display:none !important}
 </style>
 <svg style="display:none" aria-hidden="true"><symbol id="i-l" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol><symbol id="i-r" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol><symbol id="i-dn" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol><symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol><symbol id="i-save" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></symbol><symbol id="i-doc" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></symbol></svg>
-    <div class="band" id="band"></div>
 
     <!-- 선택 기간 띠 -->
     <div class="lbl">
       <span class="tag">선택 기간</span>
-      <span class="desc">아래 타임라인·분류×월 레인·레저·보고(선택 기간 탭)에만 적용 · 정보띠·현장 채널은 계약 전기간 총액 · 라이브 존은 항상 지금</span>
+      <span class="desc">아래 타임라인·분류×월 레인·레저·보고(선택 기간 탭)에만 적용 · 총액 정보띠(위 라이브 존)·현장 채널은 계약 전기간 총액 · 라이브 존은 항상 지금</span>
       <div class="a">
         <div class="seg" data-range><button data-scale="all">전체</button><button data-scale="year" class="on">올해</button><button data-scale="quarter">분기</button><button data-scale="month">이번 달</button><button data-scale="custom">사용자 지정</button></div>
         <div class="stepper"><button data-n="-1" aria-label="이전"><svg class="i"><use href="#i-l"/></svg></button><span></span><button data-n="1" aria-label="다음"><svg class="i"><use href="#i-r"/></svg></button></div><div class="cust" hidden><input type="month" data-rfrom aria-label="시작 월"><em>~</em><input type="month" data-rto aria-label="종료 월"><button class="btn s" data-rgo>적용</button></div>
@@ -17725,6 +17787,28 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
   function contractDateOf(p) { var cd = p.contractDate || p.startDate; if (cd) return { d: cd, basis: '' }; var fp = data().purchases.filter(function (x) { return x.pid === p.id && x.date; }).map(function (x) { return x.date; }).sort()[0]; return { d: fp || null, basis: fp ? '계약일 미기록 · 첫 매입월 기준' : '' }; }
   function ring(pctv, mark, cls, label, txt) { var r = 17, C = 2 * Math.PI * r, p = Math.max(0, Math.min(100, pctv)); var off = C * (1 - p / 100); var mk = ''; if (mark) { var a = (mark / 100) * 2 * Math.PI - Math.PI / 2; mk = '<line class="mk" x1="' + (22 + Math.cos(a) * 12).toFixed(1) + '" y1="' + (22 + Math.sin(a) * 12).toFixed(1) + '" x2="' + (22 + Math.cos(a) * 22).toFixed(1) + '" y2="' + (22 + Math.sin(a) * 22).toFixed(1) + '"/>'; } return '<svg class="ring ' + (cls || '') + '" viewBox="0 0 44 44"><circle class="tr" cx="22" cy="22" r="' + r + '"/><circle class="fg" cx="22" cy="22" r="' + r + '" stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="' + C.toFixed(1) + '" data-off="' + off.toFixed(1) + '"/>' + mk + '<text x="22" y="26" text-anchor="middle">' + (txt !== undefined ? txt : Math.round(p)) + '</text></svg>' + (label ? '<div class="rgl">' + label + '</div>' : ''); }
   function armRings(root) { setTimeout(function () { $$('circle.fg[data-off]', root).forEach(function (c) { c.setAttribute('stroke-dashoffset', c.getAttribute('data-off')); }); }, 40); }
+  // ── 총액 정보띠(선택 기간 존 완성본 이식 — 2026-09-24 차분한 배치) ──
+  function setHTML(el, html) { if (!el) return false; if (el.__h === html) return false; el.__h = html; el.innerHTML = html; return true; }
+  function cell(l, v, u, s, tint, k, rg) { return '<div class="cell ' + (tint || '') + '"><div class="l">' + l + (k ? '<span class="k">' + k + '</span>' : '') + '</div><div class="v"><span data-cu="900">' + v + '</span>' + (u ? '<span class="u">' + u + '</span>' : '') + '</div>' + (s ? '<div class="s">' + s + '</div>' : '') + (rg || '') + '</div>'; }
+  function pctTxt(v) { if (FIN()) return '—'; return (Math.abs(v) >= 10 ? v.toFixed(0) : v.toFixed(1)).replace('-', '−'); }
+  function monthDelta(pid) {
+    var d = data(); var cur = S.now.getFullYear() + '-' + pad2(S.now.getMonth() + 1); var inM = function (x) { return x && x.slice(0, 7) === cur; };
+    var r = { contract: 0, cost: 0, req: 0, rcv: 0, started: 0 };
+    d.projects.forEach(function (p) { if (pid && p.id !== pid) return; var c = contractDateOf(p); if (inM(c.d)) { r.contract += p.contract; r.started++; } });
+    d.purchases.forEach(function (x) { if ((!pid || x.pid === pid) && inM(x.date)) r.cost += x.amount; });
+    d.billings.forEach(function (b) { if (pid && b.pid !== pid) return; if (inM(b.date)) r.req += b.amount; if (inM(b.receivedDate)) r.rcv += (b.received != null ? b.received : b.amount); });
+    r.profit = r.contract - r.cost; return r;
+  }
+  function dl(v, label) { var cls = v > 0 ? 'up' : v < 0 ? 'dn' : 'flat'; return '<div class="d ' + cls + '">' + (label || '이번 달') + ' ' + (v ? (v > 0 ? '+' : '') + fmt(v) : '변동 없음') + '</div>'; }
+  function renderBand(root, pid) {
+    var t = totals(pid); var tot = t.active + t.done; var md = monthDelta(pid);
+    if (!tot) { setHTML(root, '<div class="empty" style="grid-column:1/-1">등록된 현장이 없습니다 — 아래 현장 채널의 + 현장 등록으로 시작하십시오</div>'); return; }
+    var _bh; if (!pid) _bh = cell('진행 현장', t.active, '곳', '완료 ' + t.done + '곳 · 전체 ' + tot + '곳', 't-cyan', '지금', ring(tot ? t.active / tot * 100 : 0, 0, '', '진행 비율 %') + '<div class="d ' + (md.started ? 'up' : 'flat') + '">이번 달 착공 ' + md.started + '곳</div>') + cell('총 계약', fmtF(t.contract), '', 'VAT 별도 · 실수금 대상 ' + fmtF(t.net), 't-blue', '총액', ring(pct(t.net, t.contract), 0, '', '실수금 대상 비율 %') + (FIN() ? '' : dl(md.contract))) + cell('투입 원가', fmt(t.cost), '', '원가율 ' + pctF(t.costRate, 1) + ' · 한계 ' + LIM() + '%', t.costRate >= LIM() ? 't-red' : 't-violet', '총액', ring(t.costRate, LIM(), '', '원가율 % · 한계 ' + LIM(), pctTxt(t.costRate)) + dl(md.cost)) + cell('총 이익', sgnF(t.profit), '', '이익률 ' + pctF(t.profitRate, 1) + ' · 목표 ' + TGT() + '%', t.profit < 0 ? 't-red' : (t.profitRate < TGT() ? 't-amber' : 't-green'), '총액', ring(Math.max(0, t.profitRate), TGT(), '', '이익률 % · 목표 ' + TGT(), pctTxt(t.profitRate)) + (FIN() ? '' : dl(md.profit))) + cell('기성 신청', fmt(t.req), '', '신청률 ' + pctF(t.billRate, 1) + ' · 신청 ÷ 실수금대상', 't-cyan', '총액', ring(t.billRate, 0, '', '신청률 %', pctTxt(t.billRate)) + dl(md.req)) + cell('수금', fmt(t.rcv), '', '수금률 ' + pctF(t.collectRate, 1) + ' · 미수 ' + fmt(t.unpaid), t.unpaid > 0 ? 't-amber' : 't-green', '총액', ring(t.collectRate, 0, '', '수금률 %', pctTxt(t.collectRate)) + dl(md.rcv));
+    else _bh = cell('계약', fmtF(t.contract), '', 'VAT 별도 · 실수금 대상 ' + fmtF(t.net), 't-blue', '총액', ring(pct(t.net, t.contract), 0, '', '실수금 대상 비율 %') + (FIN() ? '' : dl(md.contract))) + cell('투입 원가', fmt(t.cost), '', '원가율 ' + pctF(t.costRate, 1) + ' · 한계 ' + LIM() + '%', t.costRate >= LIM() ? 't-red' : 't-violet', '총액', ring(t.costRate, LIM(), '', '원가율 % · 한계 ' + LIM(), pctTxt(t.costRate)) + dl(md.cost)) + cell('이익', sgnF(t.profit), '', '이익률 ' + pctF(t.profitRate, 1) + ' · 목표 ' + TGT() + '%', t.profit < 0 ? 't-red' : (t.profitRate < TGT() ? 't-amber' : 't-green'), '총액', ring(Math.max(0, t.profitRate), TGT(), '', '이익률 % · 목표 ' + TGT(), pctTxt(t.profitRate)) + (FIN() ? '' : dl(md.profit))) + cell('기성 신청', fmt(t.req), '', '신청률 ' + pctF(t.billRate, 1) + ' · 신청 ÷ 실수금대상', 't-cyan', '총액', ring(t.billRate, 0, '', '신청률 %', pctTxt(t.billRate)) + dl(md.req)) + cell('수금', fmt(t.rcv), '', '수금률 ' + pctF(t.collectRate, 1) + ' = 수금 ÷ 신청', 't-green', '총액', ring(t.collectRate, 0, '', '수금률 %', pctTxt(t.collectRate)) + dl(md.rcv)) + cell('미수', fmt(t.unpaid), '', t.unpaid ? '독촉 대상' : '미수 없음', t.unpaid > 0 ? 't-amber' : '', '총액', ring(t.req ? t.unpaid / t.req * 100 : 0, 0, '', '미수 ÷ 신청 %') + dl(md.req - md.rcv));
+    if (!setHTML(root, _bh)) return;
+    countAll(root); armRings(root);
+  }
+  function TGT() { return num(thresholds().profitMin) || 5; }
   function renderPills(root, pid) {
     var F = feed(); var alerts = F.events.filter(function (e) { return e.kind === '경보' && e.active && (!pid || e.pid === pid); }).length;
     var dun = (data().dunning || []).filter(function (x) { return !pid || x.pid === pid; }).length;
@@ -17786,7 +17870,7 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
   }
   function livePid() { return S.view === 'overview' ? S.focus : S.pid; }
   function stageStep(n) { if (!S.stage) return; S.stage.idx += n; var root = S.view === 'overview' ? $('#lv-head') : $('#pj-head'); renderHead(root, livePid(), true); }
-  function startStage() { stopStage(); if (reduced) return; S.stageT = setInterval(function () { var root = S.view === 'overview' ? $('#lv-head') : $('#pj-head'); if (!root || root.matches(':hover') || document.visibilityState === 'hidden' || !isOverview()) return; stageStep(1); }, 7000); }
+  function startStage() { stopStage(); }   // [차분한 배치] 헤드라인 자동 회전 정지 — 이전·다음 버튼으로만
   function stopStage() { clearInterval(S.stageT); S.stageT = null; }
   function renderHead(root, pid, flash) {
     var items = stageItems(pid); if (!S.stage || S.stage.pid !== (pid || null)) S.stage = { idx: 0, pid: pid || null };
@@ -17798,9 +17882,9 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
     root.className = 'glass lv-head ' + h.cls;
     root.innerHTML = '<div class="lab"><span class="chip dk ' + h.chipCls + '">' + esc(h.chip) + '</span><span>지금 가장 중요한 한 건</span><span class="w">' + esc(h.when) + '</span></div>' +
       '<h2>' + esc(h.title) + '</h2><div class="deck">' + esc(h.deck) + '</div>' +
-      (items.length > 1 ? '<div class="stage"><button data-stage="-1" aria-label="이전"><svg class="i"><use href="#i-l"/></svg></button><div class="bar"><i class="run"></i></div><button data-stage="1" aria-label="다음"><svg class="i"><use href="#i-r"/></svg></button><span class="pos">' + (S.stage.idx + 1) + ' / ' + items.length + '</span><span class="st">' + (reduced ? '자동 회전 꺼짐(동작 축소 설정)' : '7초 자동 회전 · 올리면 정지') + '</span></div>' : '') +
+      (items.length > 1 ? '<div class="stage"><button data-stage="-1" aria-label="이전"><svg class="i"><use href="#i-l"/></svg></button><div class="bar"><i class="run"></i></div><button data-stage="1" aria-label="다음"><svg class="i"><use href="#i-r"/></svg></button><span class="pos">' + (S.stage.idx + 1) + ' / ' + items.length + '</span><span class="st">' + (reduced ? '자동 회전 꺼짐(동작 축소 설정)' : '이전·다음으로 넘김') + '</span></div>' : '') +
       '<div class="facts">' + facts.map(function (f) { return '<div><div class="k">' + f[0] + '</div><div class="v ' + f[3] + '"><span data-cu="900">' + f[1] + '</span>' + (f[2] ? '<small>' + f[2] + '</small>' : '') + '</div></div>'; }).join('') + '</div>' +
-      '<div class="mini">' + barChart(fp ? projSpark(fp, 12) : projSpark(null, 12), monthKeys(12), { h: 64, color: '#22D3EE', title: '12개월 매입(공급가) · ' + (fp ? esc(fp) : '전체 현장'), labels: 'all' }) + '</div>' +
+      '' +   // [차분한 배치] 헤드라인의 12개월 미니 차트 제거(매입 추이는 상단 실적 추이 카드에 있다)
       '<div class="foot"><span>' + esc(h.foot) + '</span>' + (h.pid ? '<button class="btn s dk" data-open="' + esc(h.pid) + '">상세 열기<svg class="i"><use href="#i-r"/></svg></button>' : '') + '</div>';
     countAll(root);
     if (flash) { root.classList.remove('flash'); void root.offsetWidth; root.classList.add('flash'); }
@@ -17810,7 +17894,7 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
     return '<div class="ev p' + e.pri + ' k-' + esc(e.kind) + (e.kind === '경보' && e.active ? ' pin' : '') + (isNew ? ' in' : '') + '" data-open="' + esc(e.pid || '') + '"><div class="t">' + (e.ts ? (dayOnly(e.ts) ? esc(e.ts.slice(5, 10)) + '<br><span class="ko">날짜만</span>' : esc(e.ts.slice(11, 16)) + '<br>' + esc(e.ts.slice(5, 10))) : '<span class="ko">시각<br>없음</span>') + '</div><div class="b"><span class="tag">' + esc(tag) + '</span>' + hlAmt(e.text) + '</div></div>';
   }
   function flowPhase(root) { var tr = root.querySelector('.track.anim'); if (!tr) return 0; try { var m = new DOMMatrix(getComputedStyle(tr).transform); var half = tr.scrollHeight / 2; return half ? Math.min(0.999, Math.max(0, -m.m42 / half)) : 0; } catch (e) { return 0; } }
-  function armFlow(root, frac) {
+  function armFlow(root, frac) { return;   // [차분한 배치] 스트림 자동 흐름 정지 — 정적 목록(스크롤)
     var flow = root.querySelector('.flow'), tr = root.querySelector('.track'); if (!flow || !tr || reduced) return;
     // (백그라운드 탭에서는 rAF 가 멈추므로 setTimeout 으로 무장)
     setTimeout(function () { if (!tr.isConnected) return; var h = tr.scrollHeight, vh = flow.clientHeight; if (h <= vh + 24) return; tr.innerHTML += tr.innerHTML; var dur = Math.max(24, h / 26); tr.style.setProperty('--dur', dur + 's'); tr.style.animationDelay = (-(frac || 0) * dur) + 's'; tr.classList.add('anim'); }, 30);
@@ -18014,7 +18098,7 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
 
   function renderLive() {
     var f = S.focus;
-    renderPills($('#lv-pills'), f); renderStories($('#stories')); renderHead($('#lv-head'), f); renderStream($('#stream'), f, 20); renderTiles($('#tiles')); renderYearbar(); renderTape($('#tape'), f); renderFocus();
+    renderPills($('#lv-pills'), f); var _st = $('#stories'); if (_st) renderStories(_st); renderHead($('#lv-head'), f); var _bd = $('#lv-band'); if (_bd) { try { renderBand(_bd, f); } catch (e) { } } renderStream($('#stream'), f, 20); renderTiles($('#tiles')); renderYearbar(); renderTape($('#tape'), f); renderFocus();
     startStage();
   }
   function renderAll() {
@@ -18635,7 +18719,7 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
     if (!mounted) return;
     S.now = new Date();
     if (!api()) { var w = $('#tl-main'); if (w) $('.tl-canvas', w).innerHTML = '<div class="tl-empty">라이브 존이 아직 준비되지 않았습니다</div>'; return; }
-    try { renderBand($('#band'), focus()); } catch (e) { ERR('band', e); }
+    var _bd = $('#band'); if (_bd) { try { renderBand(_bd, focus()); } catch (e) { ERR('band', e); } }   // [차분한 배치] 정보띠는 라이브 존 상단으로 이동(여기서는 없음)
     try {
       // 타임라인은 데이터가 실제로 바뀌었을 때만 다시 만든다(60초 주기 재마운트로 선택 열·차트 선택이 사라지지 않게)
       var sig = dataSig(); var th = LIM() + '/' + TGT();
